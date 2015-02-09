@@ -1,0 +1,157 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'client.ui'
+#
+# Created: Mon Feb 09 16:41:11 2015
+#      by: PyQt4 UI code generator 4.11.3
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt4 import QtCore, QtGui
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+
+class Ui_XSTAFClient(object):
+    def setupUi(self, XSTAFClient):
+        XSTAFClient.setObjectName(_fromUtf8("XSTAFClient"))
+        XSTAFClient.resize(607, 563)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(XSTAFClient.sizePolicy().hasHeightForWidth())
+        XSTAFClient.setSizePolicy(sizePolicy)
+        self.centralwidget = QtGui.QWidget(XSTAFClient)
+        self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.gridLayout_2 = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.messageViewer = QtGui.QTableView(self.centralwidget)
+        self.messageViewer.setObjectName(_fromUtf8("messageViewer"))
+        self.gridLayout_2.addWidget(self.messageViewer, 0, 0, 1, 1)
+        XSTAFClient.setCentralWidget(self.centralwidget)
+        self.menubar = QtGui.QMenuBar(XSTAFClient)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 607, 21))
+        self.menubar.setObjectName(_fromUtf8("menubar"))
+        self.menuFile = QtGui.QMenu(self.menubar)
+        self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        self.menuView = QtGui.QMenu(self.menubar)
+        self.menuView.setObjectName(_fromUtf8("menuView"))
+        self.menuAction = QtGui.QMenu(self.menubar)
+        self.menuAction.setObjectName(_fromUtf8("menuAction"))
+        XSTAFClient.setMenuBar(self.menubar)
+        self.statusbar = QtGui.QStatusBar(XSTAFClient)
+        self.statusbar.setObjectName(_fromUtf8("statusbar"))
+        XSTAFClient.setStatusBar(self.statusbar)
+        self.Console = QtGui.QDockWidget(XSTAFClient)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.Console.sizePolicy().hasHeightForWidth())
+        self.Console.setSizePolicy(sizePolicy)
+        self.Console.setObjectName(_fromUtf8("Console"))
+        self.dockWidgetContents_2 = QtGui.QWidget()
+        self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
+        self.gridLayout = QtGui.QGridLayout(self.dockWidgetContents_2)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.textBrowser_2 = QtGui.QTextBrowser(self.dockWidgetContents_2)
+        self.textBrowser_2.setObjectName(_fromUtf8("textBrowser_2"))
+        self.gridLayout.addWidget(self.textBrowser_2, 0, 0, 1, 1)
+        self.Console.setWidget(self.dockWidgetContents_2)
+        XSTAFClient.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.Console)
+        self.toolBar = QtGui.QToolBar(XSTAFClient)
+        self.toolBar.setObjectName(_fromUtf8("toolBar"))
+        XSTAFClient.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.Info = QtGui.QDockWidget(XSTAFClient)
+        self.Info.setObjectName(_fromUtf8("Info"))
+        self.dockWidgetContents_3 = QtGui.QWidget()
+        self.dockWidgetContents_3.setObjectName(_fromUtf8("dockWidgetContents_3"))
+        self.gridLayout_3 = QtGui.QGridLayout(self.dockWidgetContents_3)
+        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        self.listWidget = QtGui.QListWidget(self.dockWidgetContents_3)
+        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.gridLayout_3.addWidget(self.listWidget, 0, 0, 1, 1)
+        self.Info.setWidget(self.dockWidgetContents_3)
+        XSTAFClient.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.Info)
+        self.actionRefresh = QtGui.QAction(XSTAFClient)
+        self.actionRefresh.setCheckable(True)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/newPrefix/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRefresh.setIcon(icon)
+        self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
+        self.actionStartProcess = QtGui.QAction(XSTAFClient)
+        self.actionStartProcess.setCheckable(True)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/newPrefix/startProcess.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionStartProcess.setIcon(icon1)
+        self.actionStartProcess.setObjectName(_fromUtf8("actionStartProcess"))
+        self.actionPauseProcess = QtGui.QAction(XSTAFClient)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/newPrefix/pauseProcess.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionPauseProcess.setIcon(icon2)
+        self.actionPauseProcess.setObjectName(_fromUtf8("actionPauseProcess"))
+        self.actionSettings = QtGui.QAction(XSTAFClient)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/newPrefix/settings.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionSettings.setIcon(icon3)
+        self.actionSettings.setObjectName(_fromUtf8("actionSettings"))
+        self.actionConsole = QtGui.QAction(XSTAFClient)
+        self.actionConsole.setCheckable(True)
+        self.actionConsole.setChecked(True)
+        self.actionConsole.setObjectName(_fromUtf8("actionConsole"))
+        self.actionInfo = QtGui.QAction(XSTAFClient)
+        self.actionInfo.setCheckable(True)
+        self.actionInfo.setChecked(True)
+        self.actionInfo.setObjectName(_fromUtf8("actionInfo"))
+        self.menuFile.addAction(self.actionSettings)
+        self.menuView.addAction(self.actionConsole)
+        self.menuView.addAction(self.actionInfo)
+        self.menuAction.addAction(self.actionRefresh)
+        self.menuAction.addSeparator()
+        self.menuAction.addAction(self.actionStartProcess)
+        self.menuAction.addAction(self.actionPauseProcess)
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
+        self.menubar.addAction(self.menuAction.menuAction())
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionSettings)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionRefresh)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionStartProcess)
+        self.toolBar.addAction(self.actionPauseProcess)
+        self.toolBar.addSeparator()
+
+        self.retranslateUi(XSTAFClient)
+        QtCore.QObject.connect(self.actionConsole, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.Console.setVisible)
+        QtCore.QObject.connect(self.Console, QtCore.SIGNAL(_fromUtf8("visibilityChanged(bool)")), self.actionConsole.setChecked)
+        QtCore.QObject.connect(self.actionInfo, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.Info.setVisible)
+        QtCore.QObject.connect(self.Info, QtCore.SIGNAL(_fromUtf8("visibilityChanged(bool)")), self.actionInfo.setChecked)
+        QtCore.QMetaObject.connectSlotsByName(XSTAFClient)
+
+    def retranslateUi(self, XSTAFClient):
+        XSTAFClient.setWindowTitle(_translate("XSTAFClient", "XSTAF Client", None))
+        self.menuFile.setTitle(_translate("XSTAFClient", "File", None))
+        self.menuView.setTitle(_translate("XSTAFClient", "View", None))
+        self.menuAction.setTitle(_translate("XSTAFClient", "Action", None))
+        self.Console.setWindowTitle(_translate("XSTAFClient", "Console", None))
+        self.toolBar.setWindowTitle(_translate("XSTAFClient", "toolBar", None))
+        self.Info.setWindowTitle(_translate("XSTAFClient", "Info", None))
+        self.actionRefresh.setText(_translate("XSTAFClient", "refresh", None))
+        self.actionStartProcess.setText(_translate("XSTAFClient", "startProcess", None))
+        self.actionPauseProcess.setText(_translate("XSTAFClient", "pauseProcess", None))
+        self.actionSettings.setText(_translate("XSTAFClient", "settings", None))
+        self.actionConsole.setText(_translate("XSTAFClient", "Console", None))
+        self.actionInfo.setText(_translate("XSTAFClient", "Info", None))
+
+import resources_rc

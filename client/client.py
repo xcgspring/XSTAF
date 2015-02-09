@@ -7,24 +7,38 @@ if os.path.isdir(python_staf_lib_path):
     
 sys.path.append(python_staf_lib_path)
 import PySTAF
-STAFHandleName = "XSTAFClient"
+
 
 class Client(object):
     '''
+    staf client, used to process staf message
     '''
+    #staf hanle name, client will use this handle to interact with staf process
+    STAFHandleName = "XSTAFClient"
+    
     def __init__(self):
-        self.staf_handle = PySTAF.STAFHandle(STAFHandleName)
+
+    
+    def _get_staf_handle(self):
+    
+    
+    def check_staf(self, staf_path):
+        '''
+        check if staf exist
+        '''
         
-    def startProcessMessage(self):
+    
+    def register_self(self):
         '''
-        1. Get message from staf handle message queue every 5s
-        2. Do action follow the message
-        3. Wait action complete
-        4. Reply message to server
+        register self to staf lifecycle service, then client will start when staf process start
+        '''
+
+    def start_message_process_thread(self):
+        '''
+        start message process thread, staf message will be processed
         '''
         
-    def pauseProcessMessage(self):
+    def stop_message_process_thread(self):
         '''
-        1. Kill running action
-        2. pause message processing
+        stop message process thread
         '''
