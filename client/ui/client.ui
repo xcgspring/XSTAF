@@ -96,6 +96,8 @@
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
+   <addaction name="actionConnect"/>
+   <addaction name="separator"/>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
    <addaction name="actionStartProcess"/>
@@ -179,6 +181,15 @@
    </property>
    <property name="text">
     <string>Info</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/newPrefix/connect.png</normaloff>:/newPrefix/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect</string>
    </property>
   </action>
  </widget>

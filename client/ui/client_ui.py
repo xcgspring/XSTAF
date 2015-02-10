@@ -154,4 +154,4 @@ class Ui_XSTAFClient(object):
         self.actionConsole.setText(_translate("XSTAFClient", "Console", None))
         self.actionInfo.setText(_translate("XSTAFClient", "Info", None))
 
-import resources_rc
+import resources.resources_rc

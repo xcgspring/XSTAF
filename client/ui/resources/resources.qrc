@@ -1,8 +1,9 @@
 <RCC>
   <qresource prefix="newPrefix">
-    <file>settings.png</file>
-    <file>startProcess.png</file>
+    <file>connect.png</file>
     <file>pauseProcess.png</file>
     <file>refresh.png</file>
+    <file>settings.png</file>
+    <file>startProcess.png</file>
   </qresource>
 </RCC>
