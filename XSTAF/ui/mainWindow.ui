@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>XSTAFMainWindow</class>
+ <widget class="QMainWindow" name="XSTAFMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>XSTAF</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/icons/icons/X.png</normaloff>:/icons/icons/X.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QTableView" name="DUTView"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuDUTs">
+    <property name="title">
+     <string>DUTs</string>
+    </property>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionAddDUT"/>
+    <addaction name="actionRemoveDUT"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuDUTs"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="Info">
+   <property name="windowTitle">
+    <string>Info</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit_2"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="console">
+   <property name="windowTitle">
+    <string>Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionAddDUT"/>
+   <addaction name="actionRemoveDUT"/>
+  </widget>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icons/icons/settings.png</normaloff>:/icons/icons/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>settings</string>
+   </property>
+  </action>
+  <action name="actionAddDUT">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>addDUT</string>
+   </property>
+  </action>
+  <action name="actionRemoveDUT">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icons/icons/minus.png</normaloff>:/icons/icons/minus.png</iconset>
+   </property>
+   <property name="text">
+    <string>removeDUT</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>refresh</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
