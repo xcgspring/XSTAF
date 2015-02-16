@@ -1,6 +1,7 @@
 
 import os
 import sys
+import socket
 #import custom logger
 
 class STAF(object):
@@ -18,6 +19,9 @@ class STAF(object):
         
         #staf monitor name
         self.monitor_name = "DUTSTATUS"
+        
+        #server name
+        self.server_name = socket.getfqdn()
 
     def check_staf(self):
         '''
@@ -170,45 +174,76 @@ class STAF(object):
         
     ########################################
     #
-    # monitor and trust service
-    #     Used to record client status, 
-    #     and simulate a lock function to prevent client controlled by others
+    # monitor service
+    #     Used to record client status
     #
     ########################################
     
-    def set_DUT_status(self, DUT, status):
+    def set_monitor_message(self, DUT, message):
         '''
         '''
         location = '%s' % DUT
         service = 'MONITOR'
-        request = 'LOG MESSAGE %s NAME %s' % (status, self.monitor_name)
+        request = 'LOG MESSAGE %s NAME %s' % (message, self.monitor_name)
         
         return self._staf_handle_submit(location, service, request)
         
-    def get_DUT_status(self, DUT):
+    def get_monitor_machine_name(self, DUT):
         '''
         '''
         location = '%s' % DUT
         service = 'MONITOR'
-        request = 'QUERY MACHINE %s NAME %s' % (, self.monitor_name)
+        request = 'LIST MACHINES'
         
         return self._staf_handle_submit(location, service, request)
+        
+    def get_monitor_message(self, DUT):
+        '''
+        '''
+        machine_name = self.get_monitor_machine_name(DUT)
+        location = '%s' % DUT
+        service = 'MONITOR'
+        request = 'QUERY MACHINE %s NAME %s' % (machine_name, self.monitor_name)
+        
+        return self._staf_handle_submit(location, service, request)
+        
+    def delete_all_monitor_message(self, DUT):
+        '''
+        '''
+        location = '%s' % DUT
+        service = 'MONITOR'
+        request = 'DELETE CONFIRM'
+        
+        return self._staf_handle_submit(location, service, request)
+        
+    ########################################
+    #
+    # trust service
+    #     Used to simulate lock function, prevent DUT used by others
+    #
+    ########################################
         
     def lock_DUT(self, DUT):
         '''
         '''
         location = '%s' % DUT
         service = 'TRUST'
-        request = 'SET DEFAULT 3'
+        request = 'SET DEFAULT LEVEL 3'
         
-        return self._staf_handle_submit(location, service, request)
+        self._staf_handle_submit(location, service, request)
+        
+        location = '%s' % DUT
+        service = 'TRUST'
+        request = 'SET MACHINE %s LEVEL 5' % self.server_name
+        
+        self._staf_handle_submit(location, service, request)
         
     def release_DUT(self, DUT):
         '''
         '''
         location = '%s' % DUT
         service = 'TRUST'
-        request = 'SET DEFAULT 5'
+        request = 'SET DEFAULT LEVEL 5'
         
         return self._staf_handle_submit(location, service, request)
     
