@@ -143,7 +143,7 @@ class STAF(object):
         service = 'Queue'
         request = 'LIST'
         
-        return self._staf_handle_submit(location, service, request))
+        return self._staf_handle_submit(location, service, request)
         
     ########################################
     #

@@ -99,7 +99,7 @@
   </widget>
   <action name="actionSettings">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/settings.png</normaloff>:/icons/icons/settings.png</iconset>
    </property>
    <property name="text">
@@ -108,7 +108,7 @@
   </action>
   <action name="actionAddDUT">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/add.png</normaloff>:/icons/icons/add.png</iconset>
    </property>
    <property name="text">
@@ -117,7 +117,7 @@
   </action>
   <action name="actionRemoveDUT">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/minus.png</normaloff>:/icons/icons/minus.png</iconset>
    </property>
    <property name="text">
@@ -126,7 +126,7 @@
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset>
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
    </property>
    <property name="text">
