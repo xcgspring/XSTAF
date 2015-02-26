@@ -22,6 +22,9 @@ class Server(object):
     def start_message_processer(self):
         pass
         
+    def has_DUT(self, ip):
+        return (ip in self.DUTs)
+        
     def add_DUT(self, ip, name):
         #add DUT will create a new thread for DUT
         queue, DUT_thread = createDUT(self.staf_instance, ip, name)
@@ -31,5 +34,11 @@ class Server(object):
         self.DUTs[ip] = (queue, DUT_thread)
         
     def remove_DUT(self, ip):
-        pass
+        print("Remove DUT: %s" % ip)
+        DUT = self.DUTs[ip]
+        DUT_thread = DUT[1]
+        #remove it from server DUT list
+        del self.DUTs[ip]
+        #stop thread
+        DUT_thread.stop()
         

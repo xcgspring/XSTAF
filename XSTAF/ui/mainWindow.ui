@@ -73,7 +73,7 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
-      <widget class="QTextEdit" name="textEdit_2"/>
+      <widget class="QTextEdit" name="infoEdit"/>
      </item>
     </layout>
    </widget>
@@ -88,7 +88,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QTextEdit" name="textEdit"/>
+      <widget class="QTextEdit" name="consoleEdit"/>
      </item>
     </layout>
    </widget>

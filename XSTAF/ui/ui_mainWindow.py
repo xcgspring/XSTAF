@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Thu Feb 26 14:10:32 2015
+# Created: Thu Feb 26 16:32:45 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,9 +58,9 @@ class Ui_XSTAFMainWindow(object):
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.gridLayout_2 = QtGui.QGridLayout(self.dockWidgetContents)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.textEdit_2 = QtGui.QTextEdit(self.dockWidgetContents)
-        self.textEdit_2.setObjectName(_fromUtf8("textEdit_2"))
-        self.gridLayout_2.addWidget(self.textEdit_2, 0, 0, 1, 1)
+        self.infoEdit = QtGui.QTextEdit(self.dockWidgetContents)
+        self.infoEdit.setObjectName(_fromUtf8("infoEdit"))
+        self.gridLayout_2.addWidget(self.infoEdit, 0, 0, 1, 1)
         self.Info.setWidget(self.dockWidgetContents)
         XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.Info)
         self.console = QtGui.QDockWidget(XSTAFMainWindow)
@@ -69,9 +69,9 @@ class Ui_XSTAFMainWindow(object):
         self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
         self.gridLayout = QtGui.QGridLayout(self.dockWidgetContents_2)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.textEdit = QtGui.QTextEdit(self.dockWidgetContents_2)
-        self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.gridLayout.addWidget(self.textEdit, 0, 0, 1, 1)
+        self.consoleEdit = QtGui.QTextEdit(self.dockWidgetContents_2)
+        self.consoleEdit.setObjectName(_fromUtf8("consoleEdit"))
+        self.gridLayout.addWidget(self.consoleEdit, 0, 0, 1, 1)
         self.console.setWidget(self.dockWidgetContents_2)
         XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.console)
         self.toolBar = QtGui.QToolBar(XSTAFMainWindow)

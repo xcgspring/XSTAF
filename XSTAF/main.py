@@ -48,6 +48,10 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionRegisterHandle, QtCore.SIGNAL("triggered(bool)"), self.init_STAF)
         self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.refresh)
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
+        self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
+        
+        self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
+        self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_double_clicked)
         
         #init some status
         self.actionRefresh.setDisabled(True)
@@ -83,9 +87,25 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.refresh()
         
     def remove_DUT(self):
-        pass
+        for selectedIndex in self.DUTView.selectedIndexes():
+            DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selectedIndex.row(), 1)).text())
+            if self.server.has_DUT(DUT_IP):
+                self.server.remove_DUT(DUT_IP)
+        self.refresh()
         
+    def DUT_clicked(self, index):
+        print("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        DUT_IP = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text()
+        DUT_name = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 0)).text()
+        self.infoEdit.clear()
+        self.infoEdit.append((QtCore.QString("DUT IP: %0 name: %1").arg(DUT_IP).arg(DUT_name)))
         
+    def DUT_double_clicked(self, index):
+        print("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
+        DUT_IP = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text()
+        DUT_name = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 0)).text()
+        print(DUT_IP)
+
     def closeEvent(self, event):
         #we need terminate all threads before close
         #stop DUT threads
