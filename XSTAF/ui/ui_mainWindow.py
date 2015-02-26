@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Wed Feb 25 16:47:58 2015
+# Created: Thu Feb 26 14:10:32 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_XSTAFMainWindow(object):
     def setupUi(self, XSTAFMainWindow):
         XSTAFMainWindow.setObjectName(_fromUtf8("XSTAFMainWindow"))
-        XSTAFMainWindow.resize(800, 600)
+        XSTAFMainWindow.resize(718, 600)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/X.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         XSTAFMainWindow.setWindowIcon(icon)
@@ -35,11 +35,14 @@ class Ui_XSTAFMainWindow(object):
         self.gridLayout_3 = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.DUTView = QtGui.QTableView(self.centralwidget)
+        self.DUTView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.DUTView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.DUTView.setObjectName(_fromUtf8("DUTView"))
+        self.DUTView.verticalHeader().setVisible(False)
         self.gridLayout_3.addWidget(self.DUTView, 0, 0, 1, 1)
         XSTAFMainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(XSTAFMainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 718, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -94,13 +97,22 @@ class Ui_XSTAFMainWindow(object):
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRefresh.setIcon(icon4)
         self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
+        self.actionRegisterHandle = QtGui.QAction(XSTAFMainWindow)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRegisterHandle.setIcon(icon5)
+        self.actionRegisterHandle.setObjectName(_fromUtf8("actionRegisterHandle"))
         self.menuFile.addAction(self.actionSettings)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionRegisterHandle)
         self.menuDUTs.addAction(self.actionRefresh)
         self.menuDUTs.addAction(self.actionAddDUT)
         self.menuDUTs.addAction(self.actionRemoveDUT)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuDUTs.menuAction())
         self.toolBar.addAction(self.actionSettings)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionRegisterHandle)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionRefresh)
         self.toolBar.addAction(self.actionAddDUT)
@@ -111,7 +123,7 @@ class Ui_XSTAFMainWindow(object):
 
     def retranslateUi(self, XSTAFMainWindow):
         XSTAFMainWindow.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF", None))
-        self.menuFile.setTitle(_translate("XSTAFMainWindow", "File", None))
+        self.menuFile.setTitle(_translate("XSTAFMainWindow", "STAF", None))
         self.menuDUTs.setTitle(_translate("XSTAFMainWindow", "DUTs", None))
         self.Info.setWindowTitle(_translate("XSTAFMainWindow", "Info", None))
         self.console.setWindowTitle(_translate("XSTAFMainWindow", "Console", None))
@@ -120,5 +132,6 @@ class Ui_XSTAFMainWindow(object):
         self.actionAddDUT.setText(_translate("XSTAFMainWindow", "addDUT", None))
         self.actionRemoveDUT.setText(_translate("XSTAFMainWindow", "removeDUT", None))
         self.actionRefresh.setText(_translate("XSTAFMainWindow", "refresh", None))
+        self.actionRegisterHandle.setText(_translate("XSTAFMainWindow", "registerHandle", None))
 
 import resources_rc

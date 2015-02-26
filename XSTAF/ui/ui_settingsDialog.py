@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'settingsDialog.ui'
 #
-# Created: Wed Feb 25 16:47:58 2015
+# Created: Thu Feb 26 14:10:33 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,16 +26,17 @@ except AttributeError:
 class Ui_Settings(object):
     def setupUi(self, Settings):
         Settings.setObjectName(_fromUtf8("Settings"))
-        Settings.resize(400, 84)
+        Settings.resize(400, 70)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/settings.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Settings.setWindowIcon(icon)
         self.gridLayout = QtGui.QGridLayout(Settings)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        spacerItem = QtGui.QSpacerItem(93, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem, 0, 0, 1, 1)
         self.label = QtGui.QLabel(Settings)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
-        spacerItem1 = QtGui.QSpacerItem(93, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 0, 2, 1, 1)
+        spacerItem = QtGui.QSpacerItem(160, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 0, 2, 1, 1)
         self.STAFDir = QtGui.QLineEdit(Settings)
         self.STAFDir.setObjectName(_fromUtf8("STAFDir"))
         self.gridLayout.addWidget(self.STAFDir, 0, 3, 1, 1)
@@ -55,3 +56,4 @@ class Ui_Settings(object):
         self.label.setText(_translate("Settings", "STAF dir", None))
         self.STAFDir.setText(_translate("Settings", "c:\\staf", None))
 
+import resources_rc

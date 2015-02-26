@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>718</width>
     <height>600</height>
    </rect>
   </property>
@@ -20,7 +20,17 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
-     <widget class="QTableView" name="DUTView"/>
+     <widget class="QTableView" name="DUTView">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -29,15 +39,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>718</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>STAF</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionRegisterHandle"/>
    </widget>
    <widget class="QMenu" name="menuDUTs">
     <property name="title">
@@ -93,6 +105,8 @@
    </attribute>
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
+   <addaction name="actionRegisterHandle"/>
+   <addaction name="separator"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionAddDUT"/>
    <addaction name="actionRemoveDUT"/>
@@ -131,6 +145,15 @@
    </property>
    <property name="text">
     <string>refresh</string>
+   </property>
+  </action>
+  <action name="actionRegisterHandle">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/connect.png</normaloff>:/icons/icons/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>registerHandle</string>
    </property>
   </action>
  </widget>
