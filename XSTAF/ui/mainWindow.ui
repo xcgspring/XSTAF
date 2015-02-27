@@ -49,7 +49,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
-    <addaction name="actionRegisterHandle"/>
+    <addaction name="actionCheckAndStartSTAF"/>
    </widget>
    <widget class="QMenu" name="menuDUTs">
     <property name="title">
@@ -105,7 +105,7 @@
    </attribute>
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
-   <addaction name="actionRegisterHandle"/>
+   <addaction name="actionCheckAndStartSTAF"/>
    <addaction name="separator"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionAddDUT"/>
@@ -147,13 +147,16 @@
     <string>refresh</string>
    </property>
   </action>
-  <action name="actionRegisterHandle">
+  <action name="actionCheckAndStartSTAF">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/connect.png</normaloff>:/icons/icons/connect.png</iconset>
    </property>
    <property name="text">
-    <string>registerHandle</string>
+    <string>checkAndStartSTAF</string>
+   </property>
+   <property name="toolTip">
+    <string>checkAndStartSTAF</string>
    </property>
   </action>
  </widget>

@@ -3,17 +3,45 @@ import Queue
 import threading
 
 class DUT(threading.Thread):
+    #DUT status
+    #Invalid status, we cannot assign task to DUT under these status
+    DUTStatusUnknown = 0b10000001
+    STAFHandleRegisterFail = 0b10000002
+    DUTNotDetected = 0b10000003
+    DUTLocked = 0b10000004
+
+    #Normal status, we can assign task to DUT
+    DUTIdle = 0b00000001
+    DUTBusy = 0b00000002
     
-    def __init__(self, staf_instance, queue, ip, name):
+    def __init__(self, staf_handle, queue, ip, name):
         threading.Thread.__init__(self)
 
-        self.staf_instance = staf_instance
+        self.staf_handle = staf_handle
         self.queue = queue
-        
-        self.testsuites = []
-        
         self.ip = ip
         self.name = name
+        
+        self.testsuites = {}
+        self.status = DUTStatusUnknown
+        
+    def _init_and_set_status(self):
+        #create and register staf handle
+        if not self.staf_handle.register():
+            self.status = STAFHandleRegisterFail
+            return
+        
+        #configure the staf handle
+        assert(self.staf_handle.configure())
+        
+        #check DUTstatus
+        self.DUT_status()
+        
+    def DUT_status(self):
+        '''
+        return DUT status
+        '''
+        self.staf_handle.ping(self.ip)
         
     def run(self):
         print("DUT thread for IP %s start" % self.ip)
@@ -52,6 +80,5 @@ class DUT(threading.Thread):
         
 def createDUT(staf_instance, ip, name):
     queue = Queue.Queue()
-    dut = DUT(staf_instance, queue, ip, name)
-    
-    return queue, dut
+    staf_handle = staf_instance.get_handle(ip)
+    return DUT(staf_handle, queue, ip, name)

@@ -3,31 +3,52 @@ from PyQt4 import QtCore, QtGui
 from ui.ui_mainWindow import Ui_XSTAFMainWindow
 from ui.ui_settingsDialog import Ui_Settings
 from ui.ui_addDUT import Ui_addDUT
+from ui.ui_DUT import Ui_DUTWindow, _translate
 
+from server import Server
+STAFServer = Server()
+
+class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
+    def __init__(self, parent, ip):
+        self.parent = parent
+        self.ip = ip
+        self.DUT_thread = STAFServer.DUTs[ip]
+        self.name = self.DUT_thread.name
+        QtGui.QMainWindow.__init__(self, self.parent)
+
+        #view
+        self.setupUi(self)
+        
+        #set more view
+        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s" % (self.ip, self.name), None))
+        
+    def closeEvent(self, event):
+        #need update parent's DUTWindow list when one DUTWindow close
+        del self.parent.DUTWindows[self.ip]
+    
 class SettingsDialog(QtGui.QDialog, Ui_Settings):
-    def __init__(self, server):
+    def __init__(self):
         QtGui.QDialog.__init__(self)
         
         self.setupUi(self)
-        self.server = server
         
     def accept(self):
-        self.server.staf_dir = str(self.STAFDir.text())
-        print("Setting staf_dir to %s" % self.server.staf_dir)
+        STAFDir = str(self.STAFDir.text())
+        STAFServer.update_settings(STAF_dir=STAFDir)
+        print("Setting staf_dir to %s" % STAFDir)
         QtGui.QDialog.accept(self)
 
 class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
-    def __init__(self, server):
+    def __init__(self):
         QtGui.QDialog.__init__(self)
         
         self.setupUi(self)
-        self.server = server
     
     def accept(self):
         ip = str(self.DUTIP.text())
         name = str(self.DUTName.text())
         print("Add DUT ip: %s name: %s" % (ip, name))
-        self.server.add_DUT(ip, name)
+        STAFServer.add_DUT(ip, name)
         QtGui.QDialog.accept(self)
         
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
@@ -38,14 +59,12 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.setupUi(self)
         
         #model
-        from server import Server
-        self.server = Server()
         self.DUTsModel = QtGui.QStandardItemModel()
         self.DUTView.setModel(self.DUTsModel)
         
         #signals and slots
         self.connect(self.actionSettings, QtCore.SIGNAL("triggered(bool)"), self.settings)
-        self.connect(self.actionRegisterHandle, QtCore.SIGNAL("triggered(bool)"), self.init_STAF)
+        self.connect(self.actionCheckAndStartSTAF, QtCore.SIGNAL("triggered(bool)"), self.check_and_start_STAF)
         self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.refresh)
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
@@ -58,13 +77,17 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.actionAddDUT.setDisabled(True)
         self.actionRemoveDUT.setDisabled(True)
         
+        #DUTWindow list
+        self.DUTWindows = {}
+        
+        
     def settings(self):
-        settingsDialog = SettingsDialog(self.server)
+        settingsDialog = SettingsDialog()
         settingsDialog.exec_()
         
-    def init_STAF(self):
-        self.server.init_STAF()
-        self.actionRegisterHandle.setDisabled(True)
+    def check_and_start_STAF(self):
+        STAFServer.check_and_start_staf()
+
         self.actionRefresh.setEnabled(True)
         self.actionAddDUT.setEnabled(True)
         self.actionRemoveDUT.setEnabled(True)
@@ -75,22 +98,22 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
         self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
         self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
-        for DUT in self.server.DUTs.items():
-            IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[0]))
-            name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1][1].name))
+        for DUT in STAFServer.DUTs.items():
+            IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].ip))
+            name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].name))
             status = QtGui.QStandardItem(QtCore.QString("%0").arg("unknown"))
             self.DUTsModel.appendRow([name, IP, status])
         
     def add_DUT(self):
-        addDUTDialog = AddDUTDialog(self.server)
+        addDUTDialog = AddDUTDialog()
         addDUTDialog.exec_()
         self.refresh()
         
     def remove_DUT(self):
         for selectedIndex in self.DUTView.selectedIndexes():
             DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selectedIndex.row(), 1)).text())
-            if self.server.has_DUT(DUT_IP):
-                self.server.remove_DUT(DUT_IP)
+            if STAFServer.has_DUT(DUT_IP):
+                STAFServer.remove_DUT(DUT_IP)
         self.refresh()
         
     def DUT_clicked(self, index):
@@ -102,15 +125,20 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         
     def DUT_double_clicked(self, index):
         print("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
-        DUT_IP = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text()
-        DUT_name = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 0)).text()
-        print(DUT_IP)
-
+        DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text())
+        if DUT_IP not in self.DUTWindows:
+            DUT_window = DUTWindow(self, DUT_IP)
+            self.DUTWindows[DUT_IP] = DUT_window
+            DUT_window.show()
+        else:
+            DUT_window = self.DUTWindows[DUT_IP]
+            DUT_window.setFocus()
+        
     def closeEvent(self, event):
         #we need terminate all threads before close
         #stop DUT threads
-        for DUT in self.server.DUTs.items():
-            DUT_thread = DUT[1][1]
+        for DUT in STAFServer.DUTs.items():
+            DUT_thread = DUT[1]
             DUT_thread.stop()
             DUT_thread.join()
         

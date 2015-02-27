@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Thu Feb 26 16:32:45 2015
+# Created: Fri Feb 27 10:55:34 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -97,14 +97,14 @@ class Ui_XSTAFMainWindow(object):
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRefresh.setIcon(icon4)
         self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
-        self.actionRegisterHandle = QtGui.QAction(XSTAFMainWindow)
+        self.actionCheckAndStartSTAF = QtGui.QAction(XSTAFMainWindow)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionRegisterHandle.setIcon(icon5)
-        self.actionRegisterHandle.setObjectName(_fromUtf8("actionRegisterHandle"))
+        self.actionCheckAndStartSTAF.setIcon(icon5)
+        self.actionCheckAndStartSTAF.setObjectName(_fromUtf8("actionCheckAndStartSTAF"))
         self.menuFile.addAction(self.actionSettings)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionRegisterHandle)
+        self.menuFile.addAction(self.actionCheckAndStartSTAF)
         self.menuDUTs.addAction(self.actionRefresh)
         self.menuDUTs.addAction(self.actionAddDUT)
         self.menuDUTs.addAction(self.actionRemoveDUT)
@@ -112,7 +112,7 @@ class Ui_XSTAFMainWindow(object):
         self.menubar.addAction(self.menuDUTs.menuAction())
         self.toolBar.addAction(self.actionSettings)
         self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionRegisterHandle)
+        self.toolBar.addAction(self.actionCheckAndStartSTAF)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionRefresh)
         self.toolBar.addAction(self.actionAddDUT)
@@ -132,6 +132,7 @@ class Ui_XSTAFMainWindow(object):
         self.actionAddDUT.setText(_translate("XSTAFMainWindow", "addDUT", None))
         self.actionRemoveDUT.setText(_translate("XSTAFMainWindow", "removeDUT", None))
         self.actionRefresh.setText(_translate("XSTAFMainWindow", "refresh", None))
-        self.actionRegisterHandle.setText(_translate("XSTAFMainWindow", "registerHandle", None))
+        self.actionCheckAndStartSTAF.setText(_translate("XSTAFMainWindow", "checkAndStartSTAF", None))
+        self.actionCheckAndStartSTAF.setToolTip(_translate("XSTAFMainWindow", "checkAndStartSTAF", None))
 
 import resources_rc

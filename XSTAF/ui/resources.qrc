@@ -1,9 +1,14 @@
 <RCC>
   <qresource prefix="icons">
-    <file>icons/connect.png</file>
     <file>icons/add.png</file>
+    <file>icons/addTestSuite.png</file>
+    <file>icons/connect.png</file>
+    <file>icons/Console.png</file>
+    <file>icons/lock.png</file>
     <file>icons/minus.png</file>
     <file>icons/refresh.png</file>
+    <file>icons/releaseLock.png</file>
+    <file>icons/removeTestSuite.png</file>
     <file>icons/settings.png</file>
   </qresource>
 </RCC>

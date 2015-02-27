@@ -2,50 +2,57 @@
 import os
 import sys
 import socket
+import subprocess
 #import custom logger
+
+#server name
+ServerName = socket.getfqdn()
+#staf monitor name
+MonitorName = "DUTSTATUS"
 
 class STAF(object):
     '''
-    use this class to configure and control STAF process
-    functions "check_staf", "connect_staf", "configure_staf" need run first before use other functions
+    STAF class
     '''
     def __init__(self, staf_dir):
         self.staf_dir = staf_dir
         self.staf_starter = "startSTAFProc.bat"
-        self.staf_handle_name = "XSTAF_client"
+
+        self.handles = {}
+
+    def check_and_start_staf(self):
+        '''
+        check if staf exist
+        and start staf process if exist
+        '''
+        abs_staf_starter = os.path.join(self.staf_dir, self.staf_starter)
+        if not os.path.isfile(abs_staf_starter):
+            print("STAF starter not exist: %s" % abs_staf_starter)
+            return False
+            
+        #by default we only have one staf process
+        subprocess.Popen(abs_staf_starter, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
+        
+    def get_handle(self, handle_name):
+        '''
+        create and get STAF handle to control STAF service
+        '''
+        return STAFHandle(handle_name)
+        
+class STAFHandle(object):
+    '''
+    staf handle, every DUT thread will get a handle instance
+    '''
+    def __init__(self, handle_name):
+        self.staf_handle_name = handle_name
         #staf id, 0 is an invalid id
         self.staf_handle_id = 0
         self.staf_handle = None
         
-        #staf monitor name
-        self.monitor_name = "DUTSTATUS"
-        
-        #server name
-        self.server_name = socket.getfqdn()
-
-    def check_staf(self):
-        '''
-        check if staf exist
-        if exist
-            return
-        if not exist
-            prompt a dialog warn user
-            return
-        '''
-        self.abs_staf_starter = os.path.join(self.staf_dir, self.staf_starter)
-        if not os.path.isfile(self.abs_staf_starter):
-            print("STAF starter not exist: %s" % self.abs_staf_starter)
-            return False
-            
-        return True
-        
-    def connect_staf(self):
-        '''
-        check if local staf process start
-        if not
-            start staf process
-            
-        create a staf handle to connect to staf process
+    def register(self):
+        ''' 
+        create a staf handle and register to staf process
         '''
         #check if staf process start
         python_staf_lib_path = os.path.join(self.staf_dir, "bin")
@@ -70,16 +77,16 @@ class STAF(object):
         self.staf_handle_id = self.staf_handle.handle
         return True
         
-    def configure_staf(self):
+    def configure(self):
         '''
-        need to configure staf before run test
+        add custom configurations here
         '''
         #add more configures here
         
         return True
         
     def _staf_handle_submit(self, location, service, request):
-        assert(not self.staf_handle is None, "Need create staf handle first")
+        assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
         if (result.rc != 0):
             print("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
@@ -87,6 +94,19 @@ class STAF(object):
             return False
         
         return result.result
+        
+    ########################################
+    #
+    # Ping Service
+    #     used to detect if DUT exist
+    #
+    ########################################
+    def ping(self, DUT):
+        location = 'local'
+        service = 'Ping'
+        request = 'Ping %s' % DUT
+        
+        return self._staf_handle_submit(location, service, request)
         
     ########################################
     #
@@ -184,7 +204,7 @@ class STAF(object):
         '''
         location = '%s' % DUT
         service = 'MONITOR'
-        request = 'LOG MESSAGE %s NAME %s' % (message, self.monitor_name)
+        request = 'LOG MESSAGE %s NAME %s' % (message, MonitorName)
         
         return self._staf_handle_submit(location, service, request)
         
@@ -203,7 +223,7 @@ class STAF(object):
         machine_name = self.get_monitor_machine_name(DUT)
         location = '%s' % DUT
         service = 'MONITOR'
-        request = 'QUERY MACHINE %s NAME %s' % (machine_name, self.monitor_name)
+        request = 'QUERY MACHINE %s NAME %s' % (machine_name, MonitorName)
         
         return self._staf_handle_submit(location, service, request)
         
@@ -222,6 +242,14 @@ class STAF(object):
     #     Used to simulate lock function, prevent DUT used by others
     #
     ########################################
+    def check_if_DUT_locked(self, DUT):
+        '''
+        '''
+        location = '%s' % DUT
+        service = 'TRUST'
+        request = 'GET MACHINE %s' % ServerName
+        
+        return self._staf_handle_submit(location, service, request)
         
     def lock_DUT(self, DUT):
         '''
@@ -234,7 +262,7 @@ class STAF(object):
         
         location = '%s' % DUT
         service = 'TRUST'
-        request = 'SET MACHINE %s LEVEL 5' % self.server_name
+        request = 'SET MACHINE %s LEVEL 5' % ServerName
         
         self._staf_handle_submit(location, service, request)
         

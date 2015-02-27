@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DUTWindow</class>
+ <widget class="QMainWindow" name="DUTWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>716</width>
+    <height>578</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTreeView" name="TestsTreeView"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>716</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuDUT">
+    <property name="title">
+     <string>DUT</string>
+    </property>
+    <addaction name="actionLockDUT"/>
+    <addaction name="actionReleaseDUT"/>
+   </widget>
+   <widget class="QMenu" name="menuTestSuite">
+    <property name="title">
+     <string>TestSuite</string>
+    </property>
+    <addaction name="actionAddTestSuite"/>
+    <addaction name="actionRemoveTestSuite"/>
+   </widget>
+   <addaction name="menuDUT"/>
+   <addaction name="menuTestSuite"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddTestSuite"/>
+   <addaction name="actionRemoveTestSuite"/>
+   <addaction name="separator"/>
+   <addaction name="actionLockDUT"/>
+   <addaction name="actionReleaseDUT"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_2">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit_2"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_3">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QTextEdit" name="textEdit_3"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionAddTestSuite">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/addTestSuite.png</normaloff>:/icons/icons/addTestSuite.png</iconset>
+   </property>
+   <property name="text">
+    <string>addTestSuite</string>
+   </property>
+  </action>
+  <action name="actionRemoveTestSuite">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/removeTestSuite.png</normaloff>:/icons/icons/removeTestSuite.png</iconset>
+   </property>
+   <property name="text">
+    <string>removeTestSuite</string>
+   </property>
+  </action>
+  <action name="actionLockDUT">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/lock.png</normaloff>:/icons/icons/lock.png</iconset>
+   </property>
+   <property name="text">
+    <string>lockDUT</string>
+   </property>
+  </action>
+  <action name="actionReleaseDUT">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/releaseLock.png</normaloff>:/icons/icons/releaseLock.png</iconset>
+   </property>
+   <property name="text">
+    <string>releaseDUT</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
