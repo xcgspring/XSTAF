@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Fri Feb 27 10:55:34 2015
+# Created: Sat Feb 28 16:44:28 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,10 +38,10 @@ class Ui_DUTWindow(object):
         self.menubar = QtGui.QMenuBar(DUTWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 716, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
-        self.menuDUT = QtGui.QMenu(self.menubar)
-        self.menuDUT.setObjectName(_fromUtf8("menuDUT"))
         self.menuTestSuite = QtGui.QMenu(self.menubar)
         self.menuTestSuite.setObjectName(_fromUtf8("menuTestSuite"))
+        self.menuRun = QtGui.QMenu(self.menubar)
+        self.menuRun.setObjectName(_fromUtf8("menuRun"))
         DUTWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(DUTWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -102,29 +102,53 @@ class Ui_DUTWindow(object):
         icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/releaseLock.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionReleaseDUT.setIcon(icon3)
         self.actionReleaseDUT.setObjectName(_fromUtf8("actionReleaseDUT"))
-        self.menuDUT.addAction(self.actionLockDUT)
-        self.menuDUT.addAction(self.actionReleaseDUT)
+        self.actionRunTest = QtGui.QAction(DUTWindow)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/run.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRunTest.setIcon(icon4)
+        self.actionRunTest.setObjectName(_fromUtf8("actionRunTest"))
+        self.actionPauseStopTest = QtGui.QAction(DUTWindow)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/pause.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionPauseStopTest.setIcon(icon5)
+        self.actionPauseStopTest.setObjectName(_fromUtf8("actionPauseStopTest"))
+        self.actionRefresh = QtGui.QAction(DUTWindow)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionRefresh.setIcon(icon6)
+        self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
         self.menuTestSuite.addAction(self.actionAddTestSuite)
         self.menuTestSuite.addAction(self.actionRemoveTestSuite)
-        self.menubar.addAction(self.menuDUT.menuAction())
+        self.menuRun.addAction(self.actionRunTest)
+        self.menuRun.addAction(self.actionPauseStopTest)
         self.menubar.addAction(self.menuTestSuite.menuAction())
+        self.menubar.addAction(self.menuRun.menuAction())
         self.toolBar.addAction(self.actionAddTestSuite)
         self.toolBar.addAction(self.actionRemoveTestSuite)
         self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionLockDUT)
-        self.toolBar.addAction(self.actionReleaseDUT)
+        self.toolBar.addAction(self.actionRefresh)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionRunTest)
+        self.toolBar.addAction(self.actionPauseStopTest)
+        self.toolBar.addSeparator()
 
         self.retranslateUi(DUTWindow)
         QtCore.QMetaObject.connectSlotsByName(DUTWindow)
 
     def retranslateUi(self, DUTWindow):
         DUTWindow.setWindowTitle(_translate("DUTWindow", "MainWindow", None))
-        self.menuDUT.setTitle(_translate("DUTWindow", "DUT", None))
         self.menuTestSuite.setTitle(_translate("DUTWindow", "TestSuite", None))
+        self.menuRun.setTitle(_translate("DUTWindow", "Run", None))
         self.toolBar.setWindowTitle(_translate("DUTWindow", "toolBar", None))
         self.actionAddTestSuite.setText(_translate("DUTWindow", "addTestSuite", None))
         self.actionRemoveTestSuite.setText(_translate("DUTWindow", "removeTestSuite", None))
         self.actionLockDUT.setText(_translate("DUTWindow", "lockDUT", None))
         self.actionReleaseDUT.setText(_translate("DUTWindow", "releaseDUT", None))
+        self.actionRunTest.setText(_translate("DUTWindow", "RunTest", None))
+        self.actionRunTest.setToolTip(_translate("DUTWindow", "RunTest", None))
+        self.actionPauseStopTest.setText(_translate("DUTWindow", "PauseStopTest", None))
+        self.actionPauseStopTest.setToolTip(_translate("DUTWindow", "PauseStopTest", None))
+        self.actionRefresh.setText(_translate("DUTWindow", "Refresh", None))
+        self.actionRefresh.setToolTip(_translate("DUTWindow", "Refresh", None))
 
 import resources_rc

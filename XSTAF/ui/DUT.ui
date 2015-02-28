@@ -29,13 +29,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuDUT">
-    <property name="title">
-     <string>DUT</string>
-    </property>
-    <addaction name="actionLockDUT"/>
-    <addaction name="actionReleaseDUT"/>
-   </widget>
    <widget class="QMenu" name="menuTestSuite">
     <property name="title">
      <string>TestSuite</string>
@@ -43,8 +36,15 @@
     <addaction name="actionAddTestSuite"/>
     <addaction name="actionRemoveTestSuite"/>
    </widget>
-   <addaction name="menuDUT"/>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="actionRunTest"/>
+    <addaction name="actionPauseStopTest"/>
+   </widget>
    <addaction name="menuTestSuite"/>
+   <addaction name="menuRun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget">
@@ -72,8 +72,11 @@
    <addaction name="actionAddTestSuite"/>
    <addaction name="actionRemoveTestSuite"/>
    <addaction name="separator"/>
-   <addaction name="actionLockDUT"/>
-   <addaction name="actionReleaseDUT"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="separator"/>
+   <addaction name="actionRunTest"/>
+   <addaction name="actionPauseStopTest"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_2">
    <attribute name="dockWidgetArea">
@@ -133,6 +136,42 @@
    </property>
    <property name="text">
     <string>releaseDUT</string>
+   </property>
+  </action>
+  <action name="actionRunTest">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/run.png</normaloff>:/icons/icons/run.png</iconset>
+   </property>
+   <property name="text">
+    <string>RunTest</string>
+   </property>
+   <property name="toolTip">
+    <string>RunTest</string>
+   </property>
+  </action>
+  <action name="actionPauseStopTest">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/pause.png</normaloff>:/icons/icons/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>PauseStopTest</string>
+   </property>
+   <property name="toolTip">
+    <string>PauseStopTest</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh</string>
    </property>
   </action>
  </widget>

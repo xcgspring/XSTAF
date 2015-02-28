@@ -6,13 +6,23 @@ class DUT(threading.Thread):
     #DUT status
     #Invalid status, we cannot assign task to DUT under these status
     DUTStatusUnknown = 0b10000001
-    STAFHandleRegisterFail = 0b10000002
-    DUTNotDetected = 0b10000003
-    DUTLocked = 0b10000004
+    STAFHandleRegisterFail = 0b10000010
+    DUTNotDetected = 0b10000011
+    DUTLockedbyOthers = 0b10000100
 
     #Normal status, we can assign task to DUT
     DUTIdle = 0b00000001
-    DUTBusy = 0b00000002
+    DUTBusy = 0b00000010
+    
+    #pretty status list
+    PrettyStatus = {
+        DUTStatusUnknown : "Unknown",
+        STAFHandleRegisterFail : "STAF handle register fail",
+        DUTNotDetected : "DUT not detected",
+        DUTLockedbyOthers : "DUT Locked by others",
+        DUTIdle : "DUT idle",
+        DUTBusy : "DUT Busy",
+    }
     
     def __init__(self, staf_handle, queue, ip, name):
         threading.Thread.__init__(self)
@@ -23,12 +33,14 @@ class DUT(threading.Thread):
         self.name = name
         
         self.testsuites = {}
-        self.status = DUTStatusUnknown
+        self.status = self.DUTStatusUnknown
+        
+        self._init_and_set_status()
         
     def _init_and_set_status(self):
         #create and register staf handle
         if not self.staf_handle.register():
-            self.status = STAFHandleRegisterFail
+            self.status = self.STAFHandleRegisterFail
             return
         
         #configure the staf handle
@@ -41,7 +53,22 @@ class DUT(threading.Thread):
         '''
         return DUT status
         '''
-        self.staf_handle.ping(self.ip)
+        if not self.staf_handle.ping(self.ip):
+            self.status = self.DUTNotDetected
+            return self.status
+            
+        if self.staf_handle.check_if_DUT_locked(self.ip):
+            self.status = self.DUTLockedbyOthers
+            return self.status
+            
+        self.status = self.DUTIdle
+        return self.status
+        
+    def DUT_pretty_status(self):
+        '''
+        return DUT pretty status
+        '''
+        return self.PrettyStatus[self.DUT_status()]
         
     def run(self):
         print("DUT thread for IP %s start" % self.ip)

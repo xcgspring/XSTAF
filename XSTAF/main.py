@@ -19,9 +19,29 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #view
         self.setupUi(self)
         
-        #set more view
-        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s" % (self.ip, self.name), None))
+        #set DUTWindow UI status
+        self.set_UI_status()
         
+        #signals and slots
+        
+    def set_UI_status(self):
+        #get DUT status
+        self.pretty_status = self.DUT_thread.DUT_pretty_status()
+        self.status = self.DUT_thread.status
+        
+        #set window title
+        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None))
+        #set action status
+        if self.status & 0b10000000:
+            #Cannot control DUT
+            self.actionRunTest.setDisabled(True)
+            self.actionPauseStopTest.setDisabled(True)
+        else:
+            if self.status == self.DUT_thread.DUTIdle and len(self.DUT_thread.testsuites) > 0:
+                self.actionRunTest.setEnabled(True)
+            if self.status == self.DUT_thread.DUTBusy:
+                self.actionPauseStopTest.setEnabled(True)
+
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
         del self.parent.DUTWindows[self.ip]
@@ -101,7 +121,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         for DUT in STAFServer.DUTs.items():
             IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].ip))
             name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].name))
-            status = QtGui.QStandardItem(QtCore.QString("%0").arg("unknown"))
+            status = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].DUT_pretty_status()))
             self.DUTsModel.appendRow([name, IP, status])
         
     def add_DUT(self):

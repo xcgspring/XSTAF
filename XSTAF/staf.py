@@ -38,23 +38,25 @@ class STAF(object):
         '''
         create and get STAF handle to control STAF service
         '''
-        return STAFHandle(handle_name)
+        return STAFHandle(handle_name, self.staf_dir)
         
 class STAFHandle(object):
     '''
     staf handle, every DUT thread will get a handle instance
     '''
-    def __init__(self, handle_name):
+    def __init__(self, handle_name, staf_dir):
         self.staf_handle_name = handle_name
         #staf id, 0 is an invalid id
         self.staf_handle_id = 0
         self.staf_handle = None
         
+        self.staf_dir = staf_dir
+        
     def register(self):
         ''' 
         create a staf handle and register to staf process
         '''
-        #check if staf process start
+        #import python lib
         python_staf_lib_path = os.path.join(self.staf_dir, "bin")
         sys.path.append(python_staf_lib_path)
         try:
@@ -104,7 +106,7 @@ class STAFHandle(object):
     def ping(self, DUT):
         location = 'local'
         service = 'Ping'
-        request = 'Ping %s' % DUT
+        request = 'Ping machine %s' % DUT
         
         return self._staf_handle_submit(location, service, request)
         
@@ -242,32 +244,57 @@ class STAFHandle(object):
     #     Used to simulate lock function, prevent DUT used by others
     #
     ########################################
-    def check_if_DUT_locked(self, DUT):
+    def check_if_DUT_locked (self, DUT):
         '''
+        check if DUT locked
+        if trust level for server is less than 5, server cannot change DUT trust level 
         '''
         location = '%s' % DUT
         service = 'TRUST'
         request = 'GET MACHINE %s' % ServerName
         
-        return self._staf_handle_submit(location, service, request)
+        result = self._staf_handle_submit(location, service, request)
+        if result:
+            print("Trust level for machine: %s is %s" % (ServerName, result))
+            if int(result) < 5:
+                print("DUT is locked")
+                return True
+            else:
+                print("DUT is unlocked")
+                return False
+        else:
+            #Cannot get trust level, could be trust level is less than 2
+            #So DUT is locked
+            return True
         
     def lock_DUT(self, DUT):
         '''
+        set DUT trust level for server to 5
+        then set DUT default trust level to 3
         '''
-        location = '%s' % DUT
-        service = 'TRUST'
-        request = 'SET DEFAULT LEVEL 3'
-        
-        self._staf_handle_submit(location, service, request)
-        
         location = '%s' % DUT
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 5' % ServerName
         
-        self._staf_handle_submit(location, service, request)
+        result = self._staf_handle_submit(location, service, request)
+        if not result:
+            print("Lock fail")
+            return False
+            
+        location = '%s' % DUT
+        service = 'TRUST'
+        request = 'SET DEFAULT LEVEL 3'
+        
+        result = self._staf_handle_submit(location, service, request)
+        if not result:
+            print("Lock fail")
+            return False
+            
+        return True
         
     def release_DUT(self, DUT):
         '''
+        set DUT default trust level to 5
         '''
         location = '%s' % DUT
         service = 'TRUST'

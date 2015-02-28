@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+<XMLTestCollection>
+	<TestList>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25360" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-008-HS system "MP3\CBR\1ch\MP3_CBR_8khz_1ch_64kbps_271s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-008-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25365" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-013-HS system "MP3\CBR\1ch\MP3_CBR_8khz_1ch_144kbps_16s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-013-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25371" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-019-HS system "MP3\CBR\1ch\MP3_CBR_11khz_1ch_40kbps_26s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-019-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25373" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-021-HS system "MP3\CBR\1ch\MP3_CBR_11khz_1ch_56kbps_26s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-021-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25453" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-101-HS system "MP3\CBR\1ch\MP3_CBR_44khz_1ch_48kbps_60s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-101-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25473" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-121-HS system "DAILY_TEST\USB Headset  1\MP3_CBR_48khz_1ch_128kbps_29s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-121-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25498" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-170-HS system "MP3\CBR\2ch\MP3_CBR_11khz_2ch_48kbps_12s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-170-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25521" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-234-HS system "MP3\CBR\2ch\MP3_CBR_24khz_2ch_160kbps_25s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-234-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25549" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-262-HS system "MP3\CBR\2ch\MP3_CBR_44khz_2ch_320kbps_62s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-262-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25585" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-322-HS system "bitstreams\MP3Inputs\m_22k_16_vbr.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-322-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25598" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-335-HS system "MP3 (Full Range)\VBR_1Ch\MP3_VBR_24khz_1ch_147kbps_190s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-335-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25654" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-422-HS system "MP3 (Full Range)\VBR_2Ch\MP3_VBR_16khz_2ch_159kbps_30s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-422-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25675" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-443-HS system "MP3\VBR\2ch\MP3_VBR_32khz_2ch_64kbps_190s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-443-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25698" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-466-HS system "MP3\VBR\2ch\MP3_VBR_48khz_2ch_40kbps_271s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-466-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25709" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-477-HS system "MP3\VBR\2ch\MP3_VBR_48khz_2ch_320kbps_271s_AKM.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-477-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25711" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-502-HS system "MP3\CBR\2ch\MP3_CBR_44khz_2ch_256kbps_20s_js.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-502-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25714" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-505-HS system "MP3\VBR\2ch\MP3_VBR_48khz_2ch_128kbps_47s_dm.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-505-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25717" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-508-HS system "MP3 (Full Range)\2Ch_Variations\MP3_VBR_48khz_2ch_128kbps_47s_s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-508-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25719" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-532-HS system "MP3 (Full Range)\Header\Standard_Header.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-532-HS</Description>
+		</ToolCase>
+		<ToolCase name="TSIE_2014WW37\Regular\Audio\Auto_Audio_Full_MP3_HS\25731" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>C:/AutoBat/bat/playback.py MP3-702-HS system "MP3 (Full Range)\MP3_Surround\MP3s_48khz_6ch_192kbps_325s.mp3" MP3 HS</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-702-HS</Description>
+		</ToolCase>
+	</TestList>
+</XMLTestCollection>
