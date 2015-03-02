@@ -12,22 +12,62 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def __init__(self, parent, ip):
         self.parent = parent
         self.ip = ip
-        self.DUT_thread = STAFServer.DUTs[ip]
-        self.name = self.DUT_thread.name
+        self.DUT_instance = STAFServer.DUTs[ip]
+        self.name = self.DUT_instance.name
         QtGui.QMainWindow.__init__(self, self.parent)
 
         #view
         self.setupUi(self)
         
+        #model
+        self.testsModel = QtGui.QStandardItemModel()
+        self.TestsTreeView.setModel(self.testsModel)
+        
         #set DUTWindow UI status
-        self.set_UI_status()
+        self.actionRemoveTestSuite.setDisabled(True)
+        self.actionRunTest.setDisabled(True)
+        self.actionPauseStopTest.setDisabled(True)
         
         #signals and slots
+        self.connect(self.actionAddTestSuite, QtCore.SIGNAL("triggered(bool)"), self.add_test_suite)
+        self.connect(self.actionRemoveTestSuite, QtCore.SIGNAL("triggered(bool)"), self.remove_test_suite)
+        self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.set_UI_status)
+        
+        self.connect(self.TestsTreeView, QtCore.SIGNAL("clicked(QModelIndex)"), self.test_clicked)
+        
+    def add_test_suite(self):
+        test_suite_file = QtGui.QFileDialog.getOpenFileName(self, "Add TestSuite")
+        import os
+        if os.path.isfile(test_suite_file):
+            testsuite = self.DUT_instance.add_testsuite(str(test_suite_file))
+            
+            testsuite_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite.name))
+            for testcase in testsuite.testcases.items():
+                testcase_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase[0]))
+                testsuite_item.appendRow(testcase_item)
+                
+            self.testsModel.appendRow(testsuite_item)
+        
+    def remove_test_suite(self):
+        for selected_index in self.TestsTreeView.selectedIndexes():
+            item = self.testsModel.itemFromIndex(selected_index)
+            if item.parent() is None:
+                self.DUT_instance.remove_testsuite(str(item.text()))
+                self.testsModel.removeRow(selected_index.row())
+        
+    def test_clicked(self, index):
+        print("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        item = self.testsModel.itemFromIndex(index)
+
+        if item.parent() is None:
+            #click on testsuite
+            self.actionRemoveTestSuite.setEnabled(True)
         
     def set_UI_status(self):
         #get DUT status
-        self.pretty_status = self.DUT_thread.DUT_pretty_status()
-        self.status = self.DUT_thread.status
+        self.DUT_instance.refresh()
+        self.pretty_status = self.DUT_instance.pretty_status
+        self.status = self.DUT_instance.status
         
         #set window title
         self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None))
@@ -37,11 +77,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             self.actionRunTest.setDisabled(True)
             self.actionPauseStopTest.setDisabled(True)
         else:
-            if self.status == self.DUT_thread.DUTIdle and len(self.DUT_thread.testsuites) > 0:
-                self.actionRunTest.setEnabled(True)
-            if self.status == self.DUT_thread.DUTBusy:
-                self.actionPauseStopTest.setEnabled(True)
-
+            self.actionRunTest.setEnabled(True)
+            self.actionPauseStopTest.setEnabled(True)
+            
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
         del self.parent.DUTWindows[self.ip]
@@ -119,9 +157,11 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
         self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
         for DUT in STAFServer.DUTs.items():
-            IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].ip))
-            name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].name))
-            status = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT[1].DUT_pretty_status()))
+            DUT_instance = DUT[1]
+            DUT_instance.refresh()
+            IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.ip))
+            name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.name))
+            status = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.pretty_status))
             self.DUTsModel.appendRow([name, IP, status])
         
     def add_DUT(self):
@@ -158,9 +198,8 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #we need terminate all threads before close
         #stop DUT threads
         for DUT in STAFServer.DUTs.items():
-            DUT_thread = DUT[1]
-            DUT_thread.stop()
-            DUT_thread.join()
+            DUT_instance = DUT[1]
+            DUT_instance.stop_task_runner()
         
 if __name__ == '__main__':
     import sys

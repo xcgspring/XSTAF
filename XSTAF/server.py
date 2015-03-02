@@ -1,11 +1,11 @@
 
-from DUT import createDUT
+from DUT import DUT
 from staf import STAF
 
 class Server(object):
 
     def __init__(self):
-        #DUT list
+        #DUT instance list for DUT management
         self.DUTs = {}
         #settings
         self.settings = {
@@ -27,18 +27,16 @@ class Server(object):
         return (ip in self.DUTs)
         
     def add_DUT(self, ip, name):
-        #add DUT will create a new thread for DUT
-        DUT_thread = createDUT(self.staf_instance, ip, name)
-        #start thread
-        DUT_thread.start()
-        #add queue to server dict, for controlling DUT later
-        self.DUTs[ip] = DUT_thread
+        #add DUT
+        print("Add DUT: %s" % ip)
+        self.DUTs[ip] = DUT(self.staf_instance, ip, name)
         
     def remove_DUT(self, ip):
         print("Remove DUT: %s" % ip)
-        DUT_thread = self.DUTs[ip]
+        DUT_instance = self.DUTs[ip]
+        #stop DUT task runner thread
+        DUT_instance.stop_task_runner()
         #remove it from server DUT list
         del self.DUTs[ip]
-        #stop thread
-        DUT_thread.stop()
+
         

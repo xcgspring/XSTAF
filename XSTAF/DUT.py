@@ -2,52 +2,74 @@
 import Queue
 import threading
 
-class DUT(threading.Thread):
-    #DUT status
-    #Invalid status, we cannot assign task to DUT under these status
-    DUTStatusUnknown = 0b10000001
-    STAFHandleRegisterFail = 0b10000010
-    DUTNotDetected = 0b10000011
-    DUTLockedbyOthers = 0b10000100
+from test_manage import TestSuite, PyAnvilTestSuite
 
-    #Normal status, we can assign task to DUT
-    DUTIdle = 0b00000001
-    DUTBusy = 0b00000010
-    
-    #pretty status list
-    PrettyStatus = {
-        DUTStatusUnknown : "Unknown",
-        STAFHandleRegisterFail : "STAF handle register fail",
-        DUTNotDetected : "DUT not detected",
-        DUTLockedbyOthers : "DUT Locked by others",
-        DUTIdle : "DUT idle",
-        DUTBusy : "DUT Busy",
-    }
-    
-    def __init__(self, staf_handle, queue, ip, name):
+class DUTTaskRunner(threading.Thread):
+    def __init__(self, staf_instance, ip):
         threading.Thread.__init__(self)
-
-        self.staf_handle = staf_handle
-        self.queue = queue
         self.ip = ip
-        self.name = name
+        #task queue used to store task to process 
+        self.task_queue = Queue.Queue()
+        #result queue used to store task process results
+        self.result_queue = Queue.Queue()
         
-        self.testsuites = {}
-        self.status = self.DUTStatusUnknown
-        
-        self._init_and_set_status()
-        
-    def _init_and_set_status(self):
+        #staf handle used to push task to DUT
+        self.staf_handle = staf_instance.get_handle("%s_task_runner"%self.ip)
         #create and register staf handle
-        if not self.staf_handle.register():
-            self.status = self.STAFHandleRegisterFail
-            return
-        
+        assert(self.staf_handle.register())
         #configure the staf handle
         assert(self.staf_handle.configure())
         
-        #check DUTstatus
-        self.DUT_status()
+    def run_task(self, work):
+        print(work)
+        pass
+        
+    def run(self):
+        print("DUT task runner thread for IP %s start" % self.ip)
+        while True:
+            work = self.task_queue.get(block=True)
+            if work == "stop":
+                break
+            self.run_task(work)
+        print("DUT task runner thread for IP %s exit" % self.ip)
+        
+    def stop(self):
+        print("DUT task runner thread for IP %s stopping" % self.ip)
+        self.task_queue.put("stop")
+    
+class DUTMonitor(object):
+    #DUT status
+    #Unknown Failure
+    UnknownFailure = 0b10000000
+    #Invalid status, we cannot assign task to DUT under these status
+    DUTStatusUnknown = 0b10000001
+    DUTNotDetected = 0b10000010
+    #locked by others, we only can do limited operations
+    DUTLockedbyOthers = 0b10000011
+
+    #Normal status, we have full DUT control
+    DUTNormal = 0b00000001
+    
+    #pretty status list
+    PrettyStatus = {
+        UnknownFailure : "Unknown failure",
+        DUTStatusUnknown : "Status unknown",
+        DUTNotDetected : "DUT not detected",
+        DUTLockedbyOthers : "DUT Locked by others",
+        DUTNormal : "DUT normal",
+    }
+
+    def __init__(self, staf_instance, ip):
+    
+        self.ip = ip
+        self.status = self.DUTStatusUnknown
+        
+        #this staf handle is for checking DUT status, all use of this handle should be no blocking, not to freeze UI 
+        self.staf_handle = staf_instance.get_handle("%s_monitor"%self.ip)
+        #create and register staf handle
+        assert(self.staf_handle.register())
+        #configure the staf handle
+        assert(self.staf_handle.configure())
         
     def DUT_status(self):
         '''
@@ -61,37 +83,47 @@ class DUT(threading.Thread):
             self.status = self.DUTLockedbyOthers
             return self.status
             
-        self.status = self.DUTIdle
+        self.status = self.DUTNormal
         return self.status
         
-    def DUT_pretty_status(self):
+    def DUT_pretty_status(self, status):
         '''
         return DUT pretty status
         '''
-        return self.PrettyStatus[self.DUT_status()]
+        return self.PrettyStatus[status]
         
-    def run(self):
-        print("DUT thread for IP %s start" % self.ip)
-        while True:
-            work = self.queue.get(block=True)
-            if work == "stop":
-                break
-            self.do_work(work)
-        print("DUT thread for IP %s exit" % self.ip)
-            
-    def stop(self):
-        print("DUT thread for IP %s stopping" % self.ip)
-        self.queue.put("stop")
-            
-    def do_work(self, work):
-        print(work)
-        pass
+class DUT(object):
+    def __init__(self, staf_instance, ip, name):
+        self.ip = ip
+        self.name = name
+
+        #start monitor
+        self.monitor = DUTMonitor(staf_instance, self.ip)
+        #start task runner
+        self.task_runner = DUTTaskRunner(staf_instance, self.ip)
         
-    def add_testsuite(self, testsuite):
-        pass
+        #test suite list for manage test suite
+        self.testsuites = {}
         
-    def remove_testsuite(self, testsuite):
-        pass
+        #do some pre-loads
+        self.task_runner.start()
+        
+    def refresh(self):
+        #check DUT status
+        self.status = self.monitor.DUT_status()
+        self.pretty_status = self.monitor.DUT_pretty_status(self.status)
+        
+    def stop_task_runner(self):
+        self.task_runner.stop()
+        
+    def add_testsuite(self, testsuite_file):
+        testsuite = PyAnvilTestSuite(testsuite_file)
+        self.testsuites[testsuite.name] = testsuite
+        
+        return testsuite
+        
+    def remove_testsuite(self, testsuite_name):
+        del self.testsuites[testsuite_name]
         
     def info(self):
         pass
@@ -105,7 +137,3 @@ class DUT(threading.Thread):
     def stop_running(self):
         pass
         
-def createDUT(staf_instance, ip, name):
-    queue = Queue.Queue()
-    staf_handle = staf_instance.get_handle(ip)
-    return DUT(staf_handle, queue, ip, name)
