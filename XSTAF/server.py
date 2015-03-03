@@ -35,7 +35,7 @@ class Server(object):
         print("Remove DUT: %s" % ip)
         DUT_instance = self.DUTs[ip]
         #stop DUT task runner thread
-        DUT_instance.stop_task_runner()
+        DUT_instance.pause_task_runner()
         #remove it from server DUT list
         del self.DUTs[ip]
 

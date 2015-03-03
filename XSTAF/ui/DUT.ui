@@ -17,6 +17,9 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTreeView" name="TestsTreeView">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
@@ -47,21 +50,27 @@
     <property name="title">
      <string>Run</string>
     </property>
-    <addaction name="actionRunTest"/>
-    <addaction name="actionPauseStopTest"/>
+    <addaction name="actionStartRunner"/>
    </widget>
    <addaction name="menuTestSuite"/>
    <addaction name="menuRun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="TaskQueueDock">
+   <property name="windowTitle">
+    <string>Task Queue</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QTextEdit" name="textEdit"/>
+     <item row="0" column="1">
+      <widget class="QListView" name="taskQueueListView">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -81,8 +90,8 @@
    <addaction name="separator"/>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
-   <addaction name="actionRunTest"/>
-   <addaction name="actionPauseStopTest"/>
+   <addaction name="actionStartRunner"/>
+   <addaction name="actionPauseRunner"/>
    <addaction name="separator"/>
   </widget>
   <action name="actionAddTestSuite">
@@ -121,28 +130,16 @@
     <string>releaseDUT</string>
    </property>
   </action>
-  <action name="actionRunTest">
+  <action name="actionStartRunner">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/run.png</normaloff>:/icons/icons/run.png</iconset>
    </property>
    <property name="text">
-    <string>RunTest</string>
+    <string>StartRunner</string>
    </property>
    <property name="toolTip">
-    <string>RunTest</string>
-   </property>
-  </action>
-  <action name="actionPauseStopTest">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/icons/pause.png</normaloff>:/icons/icons/pause.png</iconset>
-   </property>
-   <property name="text">
-    <string>PauseStopTest</string>
-   </property>
-   <property name="toolTip">
-    <string>PauseStopTest</string>
+    <string>StartRunner</string>
    </property>
   </action>
   <action name="actionRefresh">
@@ -155,6 +152,34 @@
    </property>
    <property name="toolTip">
     <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionPauseRunner">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/pause.png</normaloff>:/icons/icons/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>PauseRunner</string>
+   </property>
+   <property name="toolTip">
+    <string>PauseRunner</string>
+   </property>
+  </action>
+  <action name="actionAddtoTaskQueue">
+   <property name="text">
+    <string>addtoTaskQueue</string>
+   </property>
+   <property name="toolTip">
+    <string>addtoTaskQueue</string>
+   </property>
+  </action>
+  <action name="actionRemoveFromTaskQueue">
+   <property name="text">
+    <string>removeFromTaskQueue</string>
+   </property>
+   <property name="toolTip">
+    <string>removeFromTaskQueue</string>
    </property>
   </action>
  </widget>
