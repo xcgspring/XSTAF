@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'settingsDialog.ui'
 #
-# Created: Wed Mar 04 13:03:26 2015
+# Created: Wed Mar 04 16:43:43 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,25 +26,55 @@ except AttributeError:
 class Ui_Settings(object):
     def setupUi(self, Settings):
         Settings.setObjectName(_fromUtf8("Settings"))
-        Settings.resize(400, 70)
+        Settings.resize(400, 157)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/settings.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Settings.setWindowIcon(icon)
         self.gridLayout = QtGui.QGridLayout(Settings)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.label = QtGui.QLabel(Settings)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
-        spacerItem = QtGui.QSpacerItem(160, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(132, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 0, 2, 1, 1)
-        self.STAFDir = QtGui.QLineEdit(Settings)
-        self.STAFDir.setObjectName(_fromUtf8("STAFDir"))
-        self.gridLayout.addWidget(self.STAFDir, 0, 3, 1, 1)
         self.buttonBox = QtGui.QDialogButtonBox(Settings)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 4)
+        self.gridLayout.addWidget(self.buttonBox, 5, 0, 1, 4)
+        self.label = QtGui.QLabel(Settings)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 0, 1, 1, 1)
+        self.STAFDirEdit = QtGui.QLineEdit(Settings)
+        self.STAFDirEdit.setText(_fromUtf8(""))
+        self.STAFDirEdit.setObjectName(_fromUtf8("STAFDirEdit"))
+        self.gridLayout.addWidget(self.STAFDirEdit, 0, 3, 1, 1)
+        self.loggingFileEdit = QtGui.QLineEdit(Settings)
+        self.loggingFileEdit.setObjectName(_fromUtf8("loggingFileEdit"))
+        self.gridLayout.addWidget(self.loggingFileEdit, 2, 3, 1, 1)
+        self.line = QtGui.QFrame(Settings)
+        self.line.setFrameShape(QtGui.QFrame.HLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName(_fromUtf8("line"))
+        self.gridLayout.addWidget(self.line, 1, 1, 1, 3)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem1, 2, 2, 1, 1)
+        self.label_2 = QtGui.QLabel(Settings)
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.gridLayout.addWidget(self.label_2, 2, 1, 1, 1)
+        self.label_3 = QtGui.QLabel(Settings)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout.addWidget(self.label_3, 3, 1, 1, 1)
+        spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem2, 3, 2, 1, 1)
+        self.label_4 = QtGui.QLabel(Settings)
+        self.label_4.setObjectName(_fromUtf8("label_4"))
+        self.gridLayout.addWidget(self.label_4, 4, 1, 1, 1)
+        spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem3, 4, 2, 1, 1)
+        self.loggingFileLevel = QtGui.QComboBox(Settings)
+        self.loggingFileLevel.setObjectName(_fromUtf8("loggingFileLevel"))
+        self.gridLayout.addWidget(self.loggingFileLevel, 3, 3, 1, 1)
+        self.loggingStreamLevel = QtGui.QComboBox(Settings)
+        self.loggingStreamLevel.setObjectName(_fromUtf8("loggingStreamLevel"))
+        self.gridLayout.addWidget(self.loggingStreamLevel, 4, 3, 1, 1)
 
         self.retranslateUi(Settings)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), Settings.accept)
@@ -54,6 +84,8 @@ class Ui_Settings(object):
     def retranslateUi(self, Settings):
         Settings.setWindowTitle(_translate("Settings", "Settings", None))
         self.label.setText(_translate("Settings", "STAF dir", None))
-        self.STAFDir.setText(_translate("Settings", "c:\\staf", None))
+        self.label_2.setText(_translate("Settings", "logging file", None))
+        self.label_3.setText(_translate("Settings", "logging file level", None))
+        self.label_4.setText(_translate("Settings", "logging stream level", None))
 
 import resources_rc

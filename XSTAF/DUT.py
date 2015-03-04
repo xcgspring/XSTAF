@@ -3,6 +3,7 @@ import Queue
 import threading
 import uuid
 import time
+import logger
 
 from test_manage import TestSuite, PyAnvilTestSuite
 
@@ -21,13 +22,13 @@ class CustomQueue(Queue.Queue):
         #sleep a little time to make index unique
         time.sleep(0.01)
         self.queue[index] = item
-        print("Add task, Index: %s, task: %s" % (index, repr(item)) )
+        logger.LOGGER().debug("Add task, Index: %s, task: %s" % (index, repr(item)) )
 
     def _get(self):
         #find oldest index and pop the item
         indexs = self.queue.keys()
         indexs.sort()
-        print("Get task: %s" % repr(self.queue.pop(indexs[0])) )
+        logger.LOGGER().debug("Get task: %s" % repr(self.queue.pop(indexs[0])) )
         return self.queue.pop(indexs[0])
         
     def clear(self):
@@ -51,7 +52,6 @@ class CustomQueue(Queue.Queue):
             self.not_full.notify()
         self.mutex.release()
         
-    
 class DUTTaskRunner(threading.Thread):
     def __init__(self, staf_instance, ip):
         threading.Thread.__init__(self)
@@ -74,7 +74,7 @@ class DUTTaskRunner(threading.Thread):
         threading.Thread.start(self)
         
     def run_task(self, work):
-        print("Run task, Name: %s", (work.name)
+        logger.LOGGER().debug("Run task, Name: %s", work.name)
         
         #init result
         work.result = work.Pass
@@ -102,7 +102,7 @@ class DUTTaskRunner(threading.Thread):
             work.log = work.log+"Release DUT Fail\n"
 
     def run(self):
-        print("DUT task runner thread for IP %s start" % self.ip)
+        logger.LOGGER().debug("DUT task runner thread for IP %s start" % self.ip)
         while True:
             #check stop flag
             if self._stop_flag:
@@ -111,10 +111,10 @@ class DUTTaskRunner(threading.Thread):
             #run task
             work = self.task_queue.get(block=True)
             self.run_task(work)
-        print("DUT task runner thread for IP %s exit" % self.ip)
+        logger.LOGGER().debug("DUT task runner thread for IP %s exit" % self.ip)
         
     def pause(self):
-        print("DUT task runner thread for IP %s stopping" % self.ip)
+        logger.LOGGER().debug("DUT task runner thread for IP %s stopping" % self.ip)
         self._stop_flag = True
     
 class DUTMonitor(object):

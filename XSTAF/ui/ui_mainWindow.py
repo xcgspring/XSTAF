@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Wed Mar 04 13:03:26 2015
+# Created: Wed Mar 04 16:43:42 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,17 +52,6 @@ class Ui_XSTAFMainWindow(object):
         self.statusbar = QtGui.QStatusBar(XSTAFMainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         XSTAFMainWindow.setStatusBar(self.statusbar)
-        self.DUTInfoDock = QtGui.QDockWidget(XSTAFMainWindow)
-        self.DUTInfoDock.setObjectName(_fromUtf8("DUTInfoDock"))
-        self.dockWidgetContents = QtGui.QWidget()
-        self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
-        self.gridLayout_2 = QtGui.QGridLayout(self.dockWidgetContents)
-        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.infoEdit = QtGui.QTextEdit(self.dockWidgetContents)
-        self.infoEdit.setObjectName(_fromUtf8("infoEdit"))
-        self.gridLayout_2.addWidget(self.infoEdit, 0, 0, 1, 1)
-        self.DUTInfoDock.setWidget(self.dockWidgetContents)
-        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.DUTInfoDock)
         self.XSTAFLogDock = QtGui.QDockWidget(XSTAFMainWindow)
         self.XSTAFLogDock.setObjectName(_fromUtf8("XSTAFLogDock"))
         self.dockWidgetContents_2 = QtGui.QWidget()
@@ -125,7 +114,6 @@ class Ui_XSTAFMainWindow(object):
         XSTAFMainWindow.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF", None))
         self.menuFile.setTitle(_translate("XSTAFMainWindow", "STAF", None))
         self.menuDUTs.setTitle(_translate("XSTAFMainWindow", "DUTs", None))
-        self.DUTInfoDock.setWindowTitle(_translate("XSTAFMainWindow", "DUT Info", None))
         self.XSTAFLogDock.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF Log", None))
         self.toolBar.setWindowTitle(_translate("XSTAFMainWindow", "toolBar", None))
         self.actionSettings.setText(_translate("XSTAFMainWindow", "settings", None))

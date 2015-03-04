@@ -3,7 +3,7 @@ import os
 import sys
 import socket
 import subprocess
-#import custom logger
+import logger
 
 #server name
 ServerName = socket.getfqdn()
@@ -27,7 +27,7 @@ class STAF(object):
         '''
         abs_staf_starter = os.path.join(self.staf_dir, self.staf_starter)
         if not os.path.isfile(abs_staf_starter):
-            print("STAF starter not exist: %s" % abs_staf_starter)
+            logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
             return False
             
         #by default we only have one staf process
@@ -62,7 +62,7 @@ class STAFHandle(object):
         try:
             import PySTAF
         except ImportError:
-            print("Cannot import PySTAF")
+            logger.LOGGER().error("Cannot import PySTAF")
             return False
             
         try:
@@ -70,9 +70,9 @@ class STAFHandle(object):
         except PySTAF.STAFException, e:
             if e.rc == 21:
                 #error value 21 indicate STAF not running
-                print("Error code 21, STAF not running, please start it and try again")
+                logger.LOGGER().error("Error code 21, STAF not running, please start it and try again")
             else:
-                print("Error registering with STAF, RC: %d" % e.rc)
+                logger.LOGGER().error("Error registering with STAF, RC: %d" % e.rc)
             return False
             
         #get handle id here
@@ -91,8 +91,8 @@ class STAFHandle(object):
         assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
         if (result.rc != 0):
-            print("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
-            print("Location: %s, Service: %s, Request: %s" % (location, service, request))
+            logger.LOGGER().error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
+            logger.LOGGER().error("Location: %s, Service: %s, Request: %s" % (location, service, request))
             return False
         
         return result.result
@@ -218,12 +218,12 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if result:
-            print("Trust level for machine: %s is %s" % (ServerName, result))
+            logger.LOGGER().debug("Trust level for machine: %s is %s" % (ServerName, result))
             if int(result) < 5:
-                print("DUT is locked")
+                logger.LOGGER().debug("DUT is locked")
                 return True
             else:
-                print("DUT is unlocked")
+                logger.LOGGER().debug("DUT is unlocked")
                 return False
         else:
             #Cannot get trust level, could be trust level is less than 2
@@ -241,7 +241,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            print("Lock fail")
+            logger.LOGGER().debug("Lock fail")
             return False
             
         location = '%s' % DUT
@@ -250,7 +250,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            print("Lock fail")
+            logger.LOGGER().debug("Lock fail")
             return False
             
         return True

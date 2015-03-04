@@ -6,7 +6,9 @@ from ui.ui_settingsDialog import Ui_Settings
 from ui.ui_addDUT import Ui_addDUT
 from ui.ui_DUT import Ui_DUTWindow, _translate
 
+import logger
 from server import Server
+
 STAFServer = Server()
 
 class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
@@ -68,7 +70,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         if os.path.isfile(test_suite_file):
             testsuite = self.DUT_instance.add_testsuite(str(test_suite_file))
             self._refresh_test_view()
-            print("Add testsuite: %s" % test_suite_file)
+            logger.LOGGER().debug("Add testsuite: %s" % test_suite_file)
         
     def remove_test_suite(self):
         for selected_index in self.TestsTreeView.selectedIndexes():
@@ -76,10 +78,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             if item.parent() is None:
                 self.DUT_instance.remove_testsuite(str(item.text()))
                 self._refresh_test_view()
-                print("Remove testsuite: %s" % item.text())
+                logger.LOGGER().debug("Remove testsuite: %s" % item.text())
         
     def test_view_clicked(self, index):
-        print("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER().debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
 
         if item.parent() is None:
@@ -127,13 +129,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             if item.parent() is None:
                 #add test suite
                 testsuite_name = str(item.text())
-                print("Add testsuite to task queue: %s" % testsuite_name)
+                logger.LOGGER().debug("Add testsuite to task queue: %s" % testsuite_name)
                 self.DUT_instance.add_testsuite_to_task_queue(testsuite_name)
             else:
                 #add test case
                 testsuite_name = str(item.parent().text())
                 testcase_name = str(item.text())
-                print("Add testcase to task queue: %s, %s" % (testsuite_name, testcase_name))
+                logger.LOGGER().debug("Add testcase to task queue: %s, %s" % (testsuite_name, testcase_name))
                 self.DUT_instance.add_testcase_to_task_queue(testsuite_name, testcase_name)
     
         self._refresh_task_queue_view()
@@ -144,7 +146,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             task_index = str(task_item.data().toString())
             
             self.DUT_instance.remove_testcase_from_task_queue(task_index)
-            print("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
+            logger.LOGGER().debug("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
         
         self._refresh_task_queue_view()
         
@@ -155,7 +157,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setEnabled(True)
         
         self.task_runner_running = True
-        print("Start task runner")
+        logger.LOGGER().debug("Start task runner")
         
     def pause_task_runner(self):
         self.DUT_instance.pause_task_runner()
@@ -164,7 +166,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setDisabled(True)
         
         self.task_runner_running = False
-        print("Pause task runner")
+        logger.LOGGER().debug("Pause task runner")
         
     def refresh(self):
         #get DUT status
@@ -200,10 +202,33 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         
         self.setupUi(self)
         
+        #init the settings
+        self.STAFDirEdit.setText(QtCore.QString("%0").arg(STAFServer.get_settings("STAF_dir")))
+        self.loggingFileEdit.setText(QtCore.QString("%0").arg(logger.CONFIGS["logging_file"]))
+        
+        indexs = {"CRITICAL": 0,
+                "ERROR": 1, 
+                "WARN": 2,
+                "INFO": 3,
+                "DEBUG": 4, }
+        
+        for key in indexs.keys():
+            self.loggingFileLevel.addItem(QtCore.QString(key))
+            self.loggingStreamLevel.addItem(QtCore.QString(key))
+        
+        logging_level_file = logger.level_name(logger.CONFIGS["logging_level_file"])
+        logging_level_stream = logger.level_name(logger.CONFIGS["logging_level_stream"])
+        
+        self.loggingFileLevel.setCurrentIndex(indexs[logging_level_file])
+        self.loggingStreamLevel.setCurrentIndex(indexs[logging_level_stream])
+
     def accept(self):
-        STAFDir = str(self.STAFDir.text())
+        STAFDir = str(self.STAFDirEdit.text())
         STAFServer.update_settings(STAF_dir=STAFDir)
-        print("Setting staf_dir to %s" % STAFDir)
+        logger.CONFIGS["logging_file"] = str(self.loggingFileEdit.text())
+        logger.CONFIGS["logging_level_file"] = logger.level_name(str(self.loggingFileLevel.currentText()))
+        logger.CONFIGS["logging_level_stream"] = logger.level_name(str(self.loggingStreamLevel.currentText()))
+        
         QtGui.QDialog.accept(self)
 
 class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
@@ -215,9 +240,16 @@ class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
     def accept(self):
         ip = str(self.DUTIP.text())
         name = str(self.DUTName.text())
-        print("Add DUT ip: %s name: %s" % (ip, name))
+        logger.LOGGER().debug("Add DUT ip: %s name: %s" % (ip, name))
         STAFServer.add_DUT(ip, name)
         QtGui.QDialog.accept(self)
+        
+class EditStream(object):
+    def __init__(self, edit):
+        self.edit = edit
+        
+    def write(self, string):
+        self.edit.append(QtCore.QString(string))
         
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def __init__(self):
@@ -237,7 +269,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
         
-        self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
+        #self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
         self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_double_clicked)
         
         #init some status
@@ -248,10 +280,18 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #DUTWindow list
         self.DUTWindows = {}
         
+        #init logger
+        self.init_logger()
         
     def settings(self):
         settingsDialog = SettingsDialog()
         settingsDialog.exec_()
+        
+    def init_logger(self):
+        #set logger stream handle to XSTAFLogEdit
+        #other settings use default
+        logger.CONFIGS["logging_stream"] = EditStream(self.XSTAFLogEdit)
+        logger.config()
         
     def check_and_start_STAF(self):
         STAFServer.check_and_start_staf()
@@ -285,16 +325,18 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             if STAFServer.has_DUT(DUT_IP):
                 STAFServer.remove_DUT(DUT_IP)
         self.refresh()
-        
+    
+    '''
     def DUT_clicked(self, index):
-        print("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER().debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         DUT_IP = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text()
         DUT_name = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 0)).text()
         self.infoEdit.clear()
-        self.infoEdit.append((QtCore.QString("DUT IP: %0 name: %1").arg(DUT_IP).arg(DUT_name)))
-        
+        self.infoEdit.append(QtCore.QString("DUT IP: %0 name: %1").arg(DUT_IP).arg(DUT_name))
+    '''
+    
     def DUT_double_clicked(self, index):
-        print("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER().debug("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
         DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text())
         if DUT_IP not in self.DUTWindows:
             DUT_window = DUTWindow(self, DUT_IP)

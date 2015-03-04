@@ -1,4 +1,5 @@
 
+import logger
 from DUT import DUT
 from staf import STAF
 
@@ -19,6 +20,12 @@ class Server(object):
             if arg[0] in self.settings:
                 self.settings[arg[0]] = arg[1]
         
+    def get_settings(self, index):
+        if index in self.settings:
+            return self.settings[index]
+        else:
+            return None
+        
     def check_and_start_staf(self):
         self.staf_instance = STAF(self.settings["STAF_dir"])
         assert(self.staf_instance.check_and_start_staf())
@@ -28,11 +35,11 @@ class Server(object):
         
     def add_DUT(self, ip, name):
         #add DUT
-        print("Add DUT: %s" % ip)
+        logger.LOGGER().debug("Add DUT: %s" % ip)
         self.DUTs[ip] = DUT(self.staf_instance, ip, name)
         
     def remove_DUT(self, ip):
-        print("Remove DUT: %s" % ip)
+        logger.LOGGER().debug("Remove DUT: %s" % ip)
         DUT_instance = self.DUTs[ip]
         #stop DUT task runner thread
         DUT_instance.pause_task_runner()
