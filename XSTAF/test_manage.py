@@ -1,5 +1,8 @@
 
 import os
+import time
+import uuid
+import threading
 import xml.etree.ElementTree as ET
 
 class TestCase(object):
@@ -8,17 +11,25 @@ class TestCase(object):
     Fail = 0b00000001
     Pass = 0b00000000
     
+    #to make ID generation thread safe
+    mutex = threading.Lock()
+    
     def __init__(self):
-        self.ID = ""
+        #make a unique ID for each test case instance
+        self.mutex.acquire()
+        self.ID = uuid.uuid1()
+        time.sleep(0.01)
+        self.mutex.release()
+        
         self.name = ""
         self.command = ""
         self.auto = False
         self.timeout = 600
         self.description = ""
+        self.log = ""
+        self.log_location = ""
         self.result = self.NotRun
 
-        
-        
 class TestSuite(object):
     def __init__(self):
         pass

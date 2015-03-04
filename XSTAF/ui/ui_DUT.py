@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Tue Mar 03 14:49:54 2015
+# Created: Wed Mar 04 13:03:26 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,6 +64,17 @@ class Ui_DUTWindow(object):
         self.toolBar = QtGui.QToolBar(DUTWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         DUTWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.TestInfoDock = QtGui.QDockWidget(DUTWindow)
+        self.TestInfoDock.setObjectName(_fromUtf8("TestInfoDock"))
+        self.dockWidgetContents_4 = QtGui.QWidget()
+        self.dockWidgetContents_4.setObjectName(_fromUtf8("dockWidgetContents_4"))
+        self.gridLayout_5 = QtGui.QGridLayout(self.dockWidgetContents_4)
+        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
+        self.TestInfoEdit = QtGui.QTextEdit(self.dockWidgetContents_4)
+        self.TestInfoEdit.setObjectName(_fromUtf8("TestInfoEdit"))
+        self.gridLayout_5.addWidget(self.TestInfoEdit, 0, 0, 1, 1)
+        self.TestInfoDock.setWidget(self.dockWidgetContents_4)
+        DUTWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.TestInfoDock)
         self.actionAddTestSuite = QtGui.QAction(DUTWindow)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/addTestSuite.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -126,6 +137,7 @@ class Ui_DUTWindow(object):
         self.menuRun.setTitle(_translate("DUTWindow", "Run", None))
         self.TaskQueueDock.setWindowTitle(_translate("DUTWindow", "Task Queue", None))
         self.toolBar.setWindowTitle(_translate("DUTWindow", "toolBar", None))
+        self.TestInfoDock.setWindowTitle(_translate("DUTWindow", "Test Info", None))
         self.actionAddTestSuite.setText(_translate("DUTWindow", "addTestSuite", None))
         self.actionRemoveTestSuite.setText(_translate("DUTWindow", "removeTestSuite", None))
         self.actionLockDUT.setText(_translate("DUTWindow", "lockDUT", None))

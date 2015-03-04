@@ -63,9 +63,9 @@
    <addaction name="menuDUTs"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="Info">
+  <widget class="QDockWidget" name="DUTInfoDock">
    <property name="windowTitle">
-    <string>Info</string>
+    <string>DUT Info</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -78,9 +78,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="console">
+  <widget class="QDockWidget" name="XSTAFLogDock">
    <property name="windowTitle">
-    <string>Console</string>
+    <string>XSTAF Log</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -88,7 +88,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QTextEdit" name="consoleEdit"/>
+      <widget class="QTextEdit" name="XSTAFLogEdit"/>
      </item>
     </layout>
    </widget>

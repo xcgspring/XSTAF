@@ -16,20 +16,19 @@ class CustomQueue(Queue.Queue):
         return len(self.queue)
 
     def _put(self, item):
-        #assign a global id to item when putting item to queue
-        #use time stamp as id
-        id = "%.3f" % time.time()
-        #sleep a little time to make id unique
+        #use time stamp as index when putting item to queue
+        index = "%.3f" % time.time()
+        #sleep a little time to make index unique
         time.sleep(0.01)
-        self.queue[id] = item
-        print("Add task, ID: %s, task: %s" % (id, repr(item)) )
+        self.queue[index] = item
+        print("Add task, Index: %s, task: %s" % (index, repr(item)) )
 
     def _get(self):
-        #find oldest id and pop the item
-        ids = self.queue.keys()
-        ids.sort()
-        print("Get task: %s" % repr(self.queue.pop(ids[0])) )
-        return self.queue.pop(ids[0])
+        #find oldest index and pop the item
+        indexs = self.queue.keys()
+        indexs.sort()
+        print("Get task: %s" % repr(self.queue.pop(indexs[0])) )
+        return self.queue.pop(indexs[0])
         
     def clear(self):
         self.not_empty.acquire()
@@ -45,10 +44,11 @@ class CustomQueue(Queue.Queue):
         self.mutex.release()
         return tasks
         
-    def remove(self, id):
+    def remove(self, index):
         self.mutex.acquire()
-        if id in self.queue:
-            del self.queue[id]
+        if index in self.queue:
+            del self.queue[index]
+            self.not_full.notify()
         self.mutex.release()
         
     
@@ -58,8 +58,6 @@ class DUTTaskRunner(threading.Thread):
         self.ip = ip
         #task queue used to store task to process 
         self.task_queue = CustomQueue()
-        #result queue used to store task process results
-        self.result_queue = CustomQueue()
         
         #staf handle used to push task to DUT
         self.staf_handle = staf_instance.get_handle("%s_task_runner"%self.ip)
@@ -76,9 +74,33 @@ class DUTTaskRunner(threading.Thread):
         threading.Thread.start(self)
         
     def run_task(self, work):
-        print(work)
-        pass
+        print("Run task, Name: %s", (work.name)
         
+        #init result
+        work.result = work.Pass
+        #lock DUT
+        if not self.staf_handle.lock_DUT(self.ip):
+            work.result = work.Fail
+            work.log = "Lock DUT Fail\n"
+        else:
+            #run case
+            remote_log_file = os.path.join(r"c:\tmp", work.ID, "%s.log"%work.name)
+            if not self.staf_handle.start_process(self.ip, work.command, remote_log_file):
+                work.result = work.Fail
+                work.log = "Test Run Fail\n"
+                
+            #copy log
+            local_log_location = os.path.join(r"c:\tmp", work.ID)
+            if not self.staf_handle.copy_log(self.ip, remote_log_file, local_log_location):
+                work.result = work.Fail
+                work.log = work.log+"Copy log Fail\n"
+            else:
+                work.log_location = local_log_location
+        #release DUT
+        if not self.staf_handle.release_DUT(self.ip):
+            work.result = work.Fail
+            work.log = work.log+"Release DUT Fail\n"
+
     def run(self):
         print("DUT task runner thread for IP %s start" % self.ip)
         while True:

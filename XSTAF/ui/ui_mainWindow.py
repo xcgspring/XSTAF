@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Tue Mar 03 14:49:54 2015
+# Created: Wed Mar 04 13:03:26 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,8 +52,8 @@ class Ui_XSTAFMainWindow(object):
         self.statusbar = QtGui.QStatusBar(XSTAFMainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         XSTAFMainWindow.setStatusBar(self.statusbar)
-        self.Info = QtGui.QDockWidget(XSTAFMainWindow)
-        self.Info.setObjectName(_fromUtf8("Info"))
+        self.DUTInfoDock = QtGui.QDockWidget(XSTAFMainWindow)
+        self.DUTInfoDock.setObjectName(_fromUtf8("DUTInfoDock"))
         self.dockWidgetContents = QtGui.QWidget()
         self.dockWidgetContents.setObjectName(_fromUtf8("dockWidgetContents"))
         self.gridLayout_2 = QtGui.QGridLayout(self.dockWidgetContents)
@@ -61,19 +61,19 @@ class Ui_XSTAFMainWindow(object):
         self.infoEdit = QtGui.QTextEdit(self.dockWidgetContents)
         self.infoEdit.setObjectName(_fromUtf8("infoEdit"))
         self.gridLayout_2.addWidget(self.infoEdit, 0, 0, 1, 1)
-        self.Info.setWidget(self.dockWidgetContents)
-        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.Info)
-        self.console = QtGui.QDockWidget(XSTAFMainWindow)
-        self.console.setObjectName(_fromUtf8("console"))
+        self.DUTInfoDock.setWidget(self.dockWidgetContents)
+        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.DUTInfoDock)
+        self.XSTAFLogDock = QtGui.QDockWidget(XSTAFMainWindow)
+        self.XSTAFLogDock.setObjectName(_fromUtf8("XSTAFLogDock"))
         self.dockWidgetContents_2 = QtGui.QWidget()
         self.dockWidgetContents_2.setObjectName(_fromUtf8("dockWidgetContents_2"))
         self.gridLayout = QtGui.QGridLayout(self.dockWidgetContents_2)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.consoleEdit = QtGui.QTextEdit(self.dockWidgetContents_2)
-        self.consoleEdit.setObjectName(_fromUtf8("consoleEdit"))
-        self.gridLayout.addWidget(self.consoleEdit, 0, 0, 1, 1)
-        self.console.setWidget(self.dockWidgetContents_2)
-        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.console)
+        self.XSTAFLogEdit = QtGui.QTextEdit(self.dockWidgetContents_2)
+        self.XSTAFLogEdit.setObjectName(_fromUtf8("XSTAFLogEdit"))
+        self.gridLayout.addWidget(self.XSTAFLogEdit, 0, 0, 1, 1)
+        self.XSTAFLogDock.setWidget(self.dockWidgetContents_2)
+        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.XSTAFLogDock)
         self.toolBar = QtGui.QToolBar(XSTAFMainWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         XSTAFMainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
@@ -125,8 +125,8 @@ class Ui_XSTAFMainWindow(object):
         XSTAFMainWindow.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF", None))
         self.menuFile.setTitle(_translate("XSTAFMainWindow", "STAF", None))
         self.menuDUTs.setTitle(_translate("XSTAFMainWindow", "DUTs", None))
-        self.Info.setWindowTitle(_translate("XSTAFMainWindow", "Info", None))
-        self.console.setWindowTitle(_translate("XSTAFMainWindow", "Console", None))
+        self.DUTInfoDock.setWindowTitle(_translate("XSTAFMainWindow", "DUT Info", None))
+        self.XSTAFLogDock.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF Log", None))
         self.toolBar.setWindowTitle(_translate("XSTAFMainWindow", "toolBar", None))
         self.actionSettings.setText(_translate("XSTAFMainWindow", "settings", None))
         self.actionAddDUT.setText(_translate("XSTAFMainWindow", "addDUT", None))

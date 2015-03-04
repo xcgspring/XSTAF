@@ -112,60 +112,23 @@ class STAFHandle(object):
         
     ########################################
     #
-    # Queue Service
-    #     We use STAF Queue to manage all tasks to be executed on clients
+    # File System (FS) Service
+    #     We use FS service to copy log files to server
     #
     ########################################
 
-    def add_message(self, ID, message, priority):
-        '''
-        Add message to handle message queue
-        '''
+    def copy_log(self, DUT, remote_file, local_location):
+        #before copy file to local, need give DUT trust level 4
         location = 'local'
-        service = 'Queue'
-        request = 'QUEUE MESSAGE %s HANDLE %s NAME %s' % (message, self.staf_handle_id, priority, ID) 
+        service = 'TRUST'
+        request = 'SET MACHINE %s LEVEL 4' % DUT
+        assert(self._staf_handle_submit(location, service, request))
         
-        return self._staf_handle_submit(location, service, request)
-            
-    def get_message(self):
-        '''
-        retrieve and removes oldest message form handle message queue
-        '''
-        location = 'local'
-        service = 'Queue'
-        request = 'GET FIRST 1'
-        
+        location = '%s' % DUT
+        service = 'FS'
+        request = 'COPY FILE %s TODIRECTORY  %s TOMACHINE %s' % (remote_file, local_location, ServerName)
         return self._staf_handle_submit(location, service, request)
         
-    def peek_message(self):
-        '''
-        retrieve oldest message form handle message queue
-        '''
-        location = 'local'
-        service = 'Queue'
-        request = 'PEEK FIRST 1'
-        
-        return self._staf_handle_submit(location, service, request)
-        
-    def delete_message(self, ID):
-        '''
-        delete message form handle message queue
-        '''
-        location = 'local'
-        service = 'Queue'
-        request = 'DELETE NAME %s' % ID
-        
-        return self._staf_handle_submit(location, service, request)
-        
-    def list_message(self):
-        '''
-        retrieve the entire contents from handle message queue
-        '''
-        location = 'local'
-        service = 'Queue'
-        request = 'LIST'
-        
-        return self._staf_handle_submit(location, service, request)
         
     ########################################
     #
@@ -174,13 +137,13 @@ class STAFHandle(object):
     #
     ########################################
         
-    def start_process(self, DUT, command):
+    def start_process(self, DUT, command, log_file):
         '''
-        start a process
+        start a process, stdout and stderr store to a tmp location
         '''
         location = '%s' % DUT
         service = 'Process'
-        request = 'START COMMAND %s ' % command
+        request = 'START COMMAND %s wait stdout %s stderr %s' % (command, log_file, log_file)
         
         return self._staf_handle_submit(location, service, request)
         

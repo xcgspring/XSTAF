@@ -108,16 +108,16 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
     def _refresh_task_queue_view(self):
         task_queue = self.DUT_instance.list_all_tasks_in_task_queue()
-        task_ids = task_queue.keys()
-        task_ids.sort()
-        task_ids.reverse()
+        task_indexs = task_queue.keys()
+        task_indexs.sort()
+        task_indexs.reverse()
         self.taskQueueModel.clear()
-        for task_id in task_ids:
-            task = task_queue[task_id]
-            format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(task_id)))
-            task_item = QtGui.QStandardItem(QtCore.QString("ID: %0 Name: %1 Time: %2").arg(task_id).arg(task.name).arg(format_time))
-            #store the task_id in item data
-            task_item.setData(QtCore.QVariant(task_id))
+        for task_index in task_indexs:
+            task = task_queue[task_index]
+            format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(task_index)))
+            task_item = QtGui.QStandardItem(QtCore.QString("ID: %0 Name: %1 Time: %2").arg(task_index).arg(task.name).arg(format_time))
+            #store the task_index in item data
+            task_item.setData(QtCore.QVariant(task_index))
             
             self.taskQueueModel.appendRow(task_item)
 
@@ -141,10 +141,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def remove_test_from_task_queue(self):
         for selected_index in self.taskQueueListView.selectedIndexes():
             task_item = self.taskQueueModel.itemFromIndex(selected_index)
-            task_id = str(task_item.data().toString())
+            task_index = str(task_item.data().toString())
             
-            self.DUT_instance.remove_testcase_from_task_queue(task_id)
-            print("Remove task: %s, ID: %s" % (task_item.text(), repr(task_id)))
+            self.DUT_instance.remove_testcase_from_task_queue(task_index)
+            print("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
         
         self._refresh_task_queue_view()
         
