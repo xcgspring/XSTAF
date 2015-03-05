@@ -3,6 +3,7 @@ import Queue
 import threading
 import uuid
 import time
+import socket
 import logger
 
 from test_manage import TestSuite, PyAnvilTestSuite
@@ -173,10 +174,10 @@ class DUTMonitor(object):
         return self.PrettyStatus[status]
         
 class DUT(object):
-    def __init__(self, staf_instance, ip, name):
+    def __init__(self, staf_instance, ip, name=""):
         self.ip = ip
         self.name = name
-
+        
         #start monitor
         self.monitor = DUTMonitor(staf_instance, self.ip)
         #start task runner
@@ -185,12 +186,18 @@ class DUT(object):
         #test suite list for manage test suite
         self.testsuites = {}
         
-        #do some pre-loads
+        #init status
+        self.status = self.monitor.DUTStatusUnknown
+        self.pretty_status = self.monitor.DUT_pretty_status(self.status)
         
     def refresh(self):
         #check DUT status
         self.status = self.monitor.DUT_status()
         self.pretty_status = self.monitor.DUT_pretty_status(self.status)
+        
+        #auto name DUT
+        if not self.name:
+            self.name = socket.gethostbyaddr(self.ip)[0]
         
     def start_task_runner(self):
         self.task_runner.start()

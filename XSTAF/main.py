@@ -1,10 +1,12 @@
 
 import time
+import threading
 from PyQt4 import QtCore, QtGui
-from ui.ui_mainWindow import Ui_XSTAFMainWindow
+from ui.ui_mainWindow import Ui_XSTAFMainWindow, _translate
 from ui.ui_settingsDialog import Ui_Settings
 from ui.ui_addDUT import Ui_addDUT
-from ui.ui_DUT import Ui_DUTWindow, _translate
+from ui.ui_DUT import Ui_DUTWindow
+from ui.ui_refresh import Ui_refreshDialog
 
 import logger
 from server import Server
@@ -21,6 +23,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
 
         #view
         self.setupUi(self)
+        #set DUT window title
+        self.setWindowTitle("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None)
         
         #model
         self.testsModel = QtGui.QStandardItemModel()
@@ -175,7 +179,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.status = self.DUT_instance.status
         
         #set window title
-        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None))
+        self.setWindowTitle("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None)
         #set action status
         if self.status & 0b10000000:
             #Cannot control DUT
@@ -190,7 +194,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #refresh test view
         self._refresh_test_view()
         #refresh task queue
-        self._refresh_task_queue()
+        self._refresh_task_queue_view()
             
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
@@ -208,13 +212,13 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         
         indexs = {"CRITICAL": 0,
                 "ERROR": 1, 
-                "WARN": 2,
+                "WARNING": 2,
                 "INFO": 3,
                 "DEBUG": 4, }
         
         for key in indexs.keys():
-            self.loggingFileLevel.addItem(QtCore.QString(key))
-            self.loggingStreamLevel.addItem(QtCore.QString(key))
+            self.loggingFileLevel.insertItem(indexs[key], QtCore.QString(key))
+            self.loggingStreamLevel.insertItem(indexs[key], QtCore.QString(key))
         
         logging_level_file = logger.level_name(logger.CONFIGS["logging_level_file"])
         logging_level_stream = logger.level_name(logger.CONFIGS["logging_level_stream"])
@@ -228,14 +232,19 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         logger.CONFIGS["logging_file"] = str(self.loggingFileEdit.text())
         logger.CONFIGS["logging_level_file"] = logger.level_name(str(self.loggingFileLevel.currentText()))
         logger.CONFIGS["logging_level_stream"] = logger.level_name(str(self.loggingStreamLevel.currentText()))
+        logger.config()
+        logger.LOGGER().debug("Config staf dir: %s" % STAFDir)
+        logger.LOGGER().debug("Config logging_file: %s" % str(self.loggingFileEdit.text()) )
+        logger.LOGGER().debug("Config logging_level_file: %s" % str(self.loggingFileLevel.currentText()) )
+        logger.LOGGER().debug("Config logging_level_stream: %s" % str(self.loggingStreamLevel.currentText()) )
         
         QtGui.QDialog.accept(self)
 
 class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
     def __init__(self):
         QtGui.QDialog.__init__(self)
-        
         self.setupUi(self)
+        self.DUTIP.setInputMask("000.000.000.000")
     
     def accept(self):
         ip = str(self.DUTIP.text())
@@ -243,6 +252,46 @@ class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
         logger.LOGGER().debug("Add DUT ip: %s name: %s" % (ip, name))
         STAFServer.add_DUT(ip, name)
         QtGui.QDialog.accept(self)
+        
+class RefreshThread(QtCore.QThread):
+    
+    def __init__(self):
+        QtCore.QThread.__init__(self)
+    
+    def run(self):
+        for DUT in STAFServer.DUTs.items():
+            DUT_instance = DUT[1]
+            self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
+            #refresh DUT, will check DUT status, time cost
+            DUT_instance.refresh()
+            #this signal will update DUT view
+            self.emit(QtCore.SIGNAL("notify_DUTsView"))
+            
+        time.sleep(0.1)
+        self.emit(QtCore.SIGNAL("notify_stop"))
+            
+class RefreshDialog(QtGui.QDialog, Ui_refreshDialog):
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+        
+        self.parent = parent
+        self.progressBar.setRange(0, 0)
+        self.refresh_thread = RefreshThread()
+        
+        #signal and slot
+        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_status"), self.update_status)
+        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_DUTsView"), self.update_DUTsView)
+        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_stop"), self.accept)
+
+        self.refresh_thread.start()
+
+        
+    def update_status(self, status):
+        self.statusLabel.setText(status)
+        
+    def update_DUTsView(self):
+        self.parent.refresh_without_checking_status()
         
 class EditStream(object):
     def __init__(self, edit):
@@ -261,6 +310,10 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #model
         self.DUTsModel = QtGui.QStandardItemModel()
         self.DUTView.setModel(self.DUTsModel)
+        
+        self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
+        self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
+        self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
         
         #signals and slots
         self.connect(self.actionSettings, QtCore.SIGNAL("triggered(bool)"), self.settings)
@@ -299,16 +352,18 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.actionRefresh.setEnabled(True)
         self.actionAddDUT.setEnabled(True)
         self.actionRemoveDUT.setEnabled(True)
-        
+            
     def refresh(self):
-        #
+        refresh_dialog = RefreshDialog(self)
+        refresh_dialog.exec_()
+        
+    def refresh_without_checking_status(self):
         self.DUTsModel.clear()
         self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
         self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
         self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
         for DUT in STAFServer.DUTs.items():
             DUT_instance = DUT[1]
-            DUT_instance.refresh()
             IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.ip))
             name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.name))
             status = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.pretty_status))
@@ -317,14 +372,14 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def add_DUT(self):
         addDUTDialog = AddDUTDialog()
         addDUTDialog.exec_()
-        self.refresh()
+        self.refresh_without_checking_status()
         
     def remove_DUT(self):
         for selectedIndex in self.DUTView.selectedIndexes():
             DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selectedIndex.row(), 1)).text())
             if STAFServer.has_DUT(DUT_IP):
                 STAFServer.remove_DUT(DUT_IP)
-        self.refresh()
+        self.refresh_without_checking_status()
     
     '''
     def DUT_clicked(self, index):

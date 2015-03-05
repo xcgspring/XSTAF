@@ -91,8 +91,8 @@ class STAFHandle(object):
         assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
         if (result.rc != 0):
-            logger.LOGGER().error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
-            logger.LOGGER().error("Location: %s, Service: %s, Request: %s" % (location, service, request))
+            #logger.LOGGER().error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
+            #logger.LOGGER().error("Location: %s, Service: %s, Request: %s" % (location, service, request))
             return False
         
         return result.result
