@@ -2,11 +2,12 @@
 import time
 import threading
 from PyQt4 import QtCore, QtGui
-from ui.ui_mainWindow import Ui_XSTAFMainWindow, _translate
+from ui.ui_mainWindow import Ui_XSTAFMainWindow, _translate, _fromUtf8
 from ui.ui_settingsDialog import Ui_Settings
 from ui.ui_addDUT import Ui_addDUT
 from ui.ui_DUT import Ui_DUTWindow
 from ui.ui_refresh import Ui_refreshDialog
+import ui.resources_rc
 
 import logger
 from server import Server
@@ -93,13 +94,30 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.task_runner_running = False
         
     def _refresh_test_view(self):
+        notRunIcon = QtGui.QIcon()
+        notRunIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/not-run.png")))
+        failIcon = QtGui.QIcon()
+        failIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/fail.png")))
+        passIcon = QtGui.QIcon()
+        passIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/pass.png")))
+
         self.testsModel.clear()
         for testsuite in self.DUT_instance.testsuites.items():
             testsuite_name = testsuite[0]
             
             testsuite_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite_name))
             for testcase in testsuite[1].testcases.items():
-                testcase_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase[0]))
+                if testcase[1].result & 0b10000000:
+                    icon = notRunIcon
+                elif testcase[1].result & 0b00000001:
+                    icon = failIcon
+                elif not testcase[1].result:
+                    icon = passIcon
+                else:
+                    logger.LOGGER.warn("Encounter expected test result: %s" % testcase[1].result)
+                    icon = QtGui.QIcon()
+                    
+                testcase_item = QtGui.QStandardItem(icon, QtCore.QString("%0").arg(testcase[0]))
                 testsuite_item.appendRow(testcase_item)
                 
             self.testsModel.appendRow(testsuite_item)

@@ -6,7 +6,7 @@ import threading
 import xml.etree.ElementTree as ET
 
 class TestCase(object):
-    #test case status
+    #test case result
     NotRun = 0b10000000
     Fail = 0b00000001
     Pass = 0b00000000
@@ -26,7 +26,7 @@ class TestCase(object):
         self.auto = False
         self.timeout = 600
         self.description = ""
-        self.log = ""
+        self.status = ""
         self.log_location = ""
         self.result = self.NotRun
 

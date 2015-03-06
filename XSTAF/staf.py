@@ -95,7 +95,7 @@ class STAFHandle(object):
             logger.LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
             return False
         
-        return result.result
+        return result
         
     ########################################
     #
@@ -143,9 +143,16 @@ class STAFHandle(object):
         '''
         location = '%s' % DUT
         service = 'Process'
-        request = 'START COMMAND %s wait stdout %s stderr %s' % (command, log_file, log_file)
+        request = 'START COMMAND %s wait stdout %s stderrTostdout' % (command, log_file)
         
-        return self._staf_handle_submit(location, service, request)
+        result = self._staf_handle_submit(location, service, request)
+
+        return_code = result.resultContext.getRootObject()["rc"]
+        logger.LOGGER.debug("Return code is: %s" % return_code)
+        if return_code != "0":
+            return False
+        else:
+            return True
         
     def stop_process(self, DUT, process):
         '''
@@ -218,8 +225,8 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if result:
-            logger.LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result))
-            if int(result) < 5:
+            logger.LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result.result))
+            if int(result.result) < 5:
                 logger.LOGGER.debug("DUT is locked")
                 return True
             else:
@@ -241,7 +248,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            logger.LOGGER.debug("Lock fail")
+            logger.LOGGER.debug("Lock fail, request: %s" % request)
             return False
             
         location = '%s' % DUT
@@ -250,7 +257,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            logger.LOGGER.debug("Lock fail")
+            logger.LOGGER.debug("Lock fail, request: %s" % request)
             return False
             
         return True

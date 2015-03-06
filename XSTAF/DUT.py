@@ -1,10 +1,11 @@
 
+import os
 import Queue
-import threading
 import uuid
 import time
 import socket
 import logger
+from PyQt4 import QtCore
 
 from test_manage import TestSuite, PyAnvilTestSuite
 
@@ -29,7 +30,7 @@ class CustomQueue(Queue.Queue):
         #find oldest index and pop the item
         indexs = self.queue.keys()
         indexs.sort()
-        logger.LOGGER.debug("Get task: %s" % repr(self.queue.pop(indexs[0])) )
+        logger.LOGGER.debug("Get task: %s" % indexs[0] )
         return self.queue.pop(indexs[0])
         
     def clear(self):
@@ -53,9 +54,9 @@ class CustomQueue(Queue.Queue):
             self.not_full.notify()
         self.mutex.release()
         
-class DUTTaskRunner(threading.Thread):
+class DUTTaskRunner(QtCore.QThread):
     def __init__(self, staf_instance, ip):
-        threading.Thread.__init__(self)
+        QtCore.QThread.__init__(self)
         self.ip = ip
         #task queue used to store task to process 
         self.task_queue = CustomQueue()
@@ -72,35 +73,42 @@ class DUTTaskRunner(threading.Thread):
         
     def start(self):
         self._stop_flag = False
-        threading.Thread.start(self)
+        QtCore.QThread.start(self)
         
     def run_task(self, work):
-        logger.LOGGER.debug("Run task, Name: %s", work.name)
+        logger.LOGGER.debug("Start task, Name: %s" % work.name)
         
         #init result
         work.result = work.Pass
         #lock DUT
+        logger.LOGGER.debug("\tStep1: Lock DUT, DUT: %s" % self.ip)
         if not self.staf_handle.lock_DUT(self.ip):
             work.result = work.Fail
-            work.log = "Lock DUT Fail\n"
+            work.status = "Lock DUT Fail\n"
         else:
             #run case
+            logger.LOGGER.debug("\tStep2: Run command, command: %s" % work.command)
             remote_log_file = os.path.join(r"c:\tmp", work.ID, "%s.log"%work.name)
             if not self.staf_handle.start_process(self.ip, work.command, remote_log_file):
                 work.result = work.Fail
-                work.log = "Test Run Fail\n"
+                work.status = "Test Run Fail\n"
                 
             #copy log
             local_log_location = os.path.join(r"c:\tmp", work.ID)
+            if not os.path.isdir(local_log_location):
+                os.makedirs(local_log_location)
+            logger.LOGGER.debug("\tStep3: Copy log, from %s to %s" % (remote_log_file, local_log_location) )
             if not self.staf_handle.copy_log(self.ip, remote_log_file, local_log_location):
                 work.result = work.Fail
-                work.log = work.log+"Copy log Fail\n"
+                work.status = work.status+"Copy log Fail\n"
             else:
                 work.log_location = local_log_location
+                
         #release DUT
+        logger.LOGGER.debug("\tStep4: Release DUT, DUT: %s" % self.ip )
         if not self.staf_handle.release_DUT(self.ip):
             work.result = work.Fail
-            work.log = work.log+"Release DUT Fail\n"
+            work.status = work.status+"Release DUT Fail\n"
 
     def run(self):
         logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.ip)
