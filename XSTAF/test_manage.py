@@ -11,6 +11,11 @@ class TestCase(object):
     Fail = 0b00000001
     Pass = 0b00000000
     
+    #pretty results
+    PrettyResults = { NotRun : "not run",
+                    Fail: "fail",
+                    Pass: "pass", }
+    
     #to make ID generation thread safe
     mutex = threading.Lock()
     
@@ -29,6 +34,11 @@ class TestCase(object):
         self.status = ""
         self.log_location = ""
         self.result = self.NotRun
+        self.pretty_result = self.get_pretty_result()
+        
+    def get_pretty_result(self):
+        self.pretty_result = self.PrettyResults[self.result]
+        return self.pretty_result
 
 class TestSuite(object):
     def __init__(self):
@@ -62,3 +72,24 @@ class PyAnvilTestSuite(object):
                 testcase.description = testcase_element.find("Description").text
             
             self.testcases[testcase.ID] = testcase
+            
+    def passed_count(self):
+        count = 0
+        for testcase in self.testcases.items():
+            if testcase[1].result == testcase[1].Pass:
+                count +=1
+        return count
+        
+    def failed_count(self):
+        count = 0
+        for testcase in self.testcases.items():
+            if testcase[1].result == testcase[1].Fail:
+                count +=1
+        return count
+        
+    def not_run_count(self):
+        count = 0
+        for testcase in self.testcases.items():
+            if testcase[1].result == testcase[1].NotRun:
+                count +=1
+        return count

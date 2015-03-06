@@ -142,13 +142,39 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 logger.LOGGER.debug("Remove testsuite: %s" % item.text())
         
     def test_view_clicked(self, index):
-        logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        #logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
         if not item is None:
             if item.parent() is None:
                 #click on testsuite
                 self.actionRemoveTestSuite.setEnabled(True)
+                #print testsuite info in test view
+                testsuite = self.DUT_instance.testsuites[str(item.text())]
+                info = "TestSuite: %s\n" % testsuite.test_suite_file
+                info += "  Total test case: %d\n" % len(testsuite.testcases)
+                info += "  Passed: %d\n" % testsuite.passed_count()
+                info += "  Failed: %d\n" % testsuite.failed_count()
+                info += "  NotRun: %d\n" % testsuite.not_run_count()
+            else:
+                self.actionRemoveTestSuite.setDisabled(True)
+                #print testcase info in test view
+                testsuite_name = str(item.parent().text())
+                testcase_name = str(item.text())
+                testsuite = self.DUT_instance.testsuites[testsuite_name]
+                testcase = testsuite.testcases[testcase_name]
+                info = "TestCase: %s\n" % testcase.name
+                info += "  ID: %s\n" % testcase.ID
+                info += "  Command: %s\n" % testcase.command
+                info += "  Auto: %s\n" % testcase.auto
+                info += "  TimeOut: %s\n" % testcase.timeout
+                info += "  Description: %s\n" % testcase.description
+                info += "  Status: %s\n" % testcase.status
+                info += "  Log location: %s\n" % testcase.log_location
+                info += "  Result: %s\n" % testcase.get_pretty_result()
             
+            self.TestInfoEdit.clear()
+            self.TestInfoEdit.append(info)
+                
     def test_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()
         index = self.TestsTreeView.indexAt(point)
