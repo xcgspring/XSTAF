@@ -90,6 +90,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.TestsTreeView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.test_view_right_clicked)
         self.connect(self.taskQueueListView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.task_queue_view_right_clicked)
         
+        self.connect(self.DUT_instance.task_runner, self.DUT_instance.task_runner.updateDUTUI, self.refresh_without_checking_status)
+        #self.connect(self.DUT_instance.task_runner, self.DUT_instance.task_runner.taskRunnerExit, self.taskRunnerExit)
+        
         #some states
         self.task_runner_running = False
         
@@ -141,10 +144,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def test_view_clicked(self, index):
         logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
-
-        if item.parent() is None:
-            #click on testsuite
-            self.actionRemoveTestSuite.setEnabled(True)
+        if not item is None:
+            if item.parent() is None:
+                #click on testsuite
+                self.actionRemoveTestSuite.setEnabled(True)
             
     def test_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()
@@ -250,7 +253,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self._refresh_task_queue_view()
         #refresh Server DUTView
         self.parent.refresh_without_checking_status()
-            
+    '''
+    def taskRunnerExit(self):
+        self.task_runner_running = False
+        self.refresh_without_checking_status()
+    '''
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
         del self.parent.DUTWindows[self.ip]
