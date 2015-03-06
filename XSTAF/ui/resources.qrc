@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/DUT.png</file>
+    <file>icons/server.png</file>
+    <file>icons/x.png</file>
+    <file>icons/block.png</file>
+    <file>icons/fail.png</file>
+    <file>icons/not-run.png</file>
+    <file>icons/pass.png</file>
     <file>icons/pause.png</file>
     <file>icons/run.png</file>
     <file>icons/add.png</file>

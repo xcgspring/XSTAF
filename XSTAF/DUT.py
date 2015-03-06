@@ -23,13 +23,13 @@ class CustomQueue(Queue.Queue):
         #sleep a little time to make index unique
         time.sleep(0.01)
         self.queue[index] = item
-        logger.LOGGER().debug("Add task, Index: %s, task: %s" % (index, repr(item)) )
+        logger.LOGGER.debug("Add task, Index: %s, task: %s" % (index, repr(item)) )
 
     def _get(self):
         #find oldest index and pop the item
         indexs = self.queue.keys()
         indexs.sort()
-        logger.LOGGER().debug("Get task: %s" % repr(self.queue.pop(indexs[0])) )
+        logger.LOGGER.debug("Get task: %s" % repr(self.queue.pop(indexs[0])) )
         return self.queue.pop(indexs[0])
         
     def clear(self):
@@ -75,7 +75,7 @@ class DUTTaskRunner(threading.Thread):
         threading.Thread.start(self)
         
     def run_task(self, work):
-        logger.LOGGER().debug("Run task, Name: %s", work.name)
+        logger.LOGGER.debug("Run task, Name: %s", work.name)
         
         #init result
         work.result = work.Pass
@@ -103,7 +103,7 @@ class DUTTaskRunner(threading.Thread):
             work.log = work.log+"Release DUT Fail\n"
 
     def run(self):
-        logger.LOGGER().debug("DUT task runner thread for IP %s start" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.ip)
         while True:
             #check stop flag
             if self._stop_flag:
@@ -112,10 +112,10 @@ class DUTTaskRunner(threading.Thread):
             #run task
             work = self.task_queue.get(block=True)
             self.run_task(work)
-        logger.LOGGER().debug("DUT task runner thread for IP %s exit" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s exit" % self.ip)
         
     def pause(self):
-        logger.LOGGER().debug("DUT task runner thread for IP %s stopping" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s stopping" % self.ip)
         self._stop_flag = True
     
 class DUTMonitor(object):
@@ -126,7 +126,7 @@ class DUTMonitor(object):
     DUTStatusUnknown = 0b10000001
     DUTNotDetected = 0b10000010
     #locked by others, we only can do limited operations
-    DUTLockedbyOthers = 0b10000011
+    DUTLockedbyOthers = 0b01000001
 
     #Normal status, we have full DUT control
     DUTNormal = 0b00000001
@@ -196,7 +196,7 @@ class DUT(object):
         self.pretty_status = self.monitor.DUT_pretty_status(self.status)
         
         #auto name DUT
-        if not self.name:
+        if not self.name and not(self.status & 0b10000000) :
             self.name = socket.gethostbyaddr(self.ip)[0]
         
     def start_task_runner(self):

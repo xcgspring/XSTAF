@@ -13,6 +13,42 @@ from server import Server
 
 STAFServer = Server()
 
+class RefreshDUTThread(QtCore.QThread):
+    def __init__(self, ip):
+        QtCore.QThread.__init__(self)
+        self.ip = ip
+    
+    def run(self):
+        DUT_instance = STAFServer.DUTs[self.ip]
+        self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
+        #refresh DUT, will check DUT status, time cost
+        DUT_instance.refresh()
+            
+        time.sleep(0.1)
+        self.emit(QtCore.SIGNAL("notify_stop"))
+            
+class RefreshDUTDialog(QtGui.QDialog, Ui_refreshDialog):
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+        
+        self.parent = parent
+        self.progressBar.setRange(0, 0)
+        self.refresh_thread = RefreshDUTThread(parent.ip)
+        
+        #signal and slot
+        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_status"), self.update_status)
+        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_stop"), self.accept)
+
+        self.refresh_thread.start()
+
+    def update_status(self, status):
+        self.statusLabel.setText(status)
+        
+    def accept(self):
+        self.parent.refresh_without_checking_status()
+        QtGui.QDialog.accept(self)
+
 class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def __init__(self, parent, ip):
         self.parent = parent
@@ -24,13 +60,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #view
         self.setupUi(self)
         #set DUT window title
-        self.setWindowTitle("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None)
+        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.DUT_instance.pretty_status), None))
         
         #model
-        self.testsModel = QtGui.QStandardItemModel()
+        self.testsModel = QtGui.QStandardItemModel(self.TestsTreeView)
         self.TestsTreeView.setModel(self.testsModel)
         
-        self.taskQueueModel = QtGui.QStandardItemModel()
+        self.taskQueueModel = QtGui.QStandardItemModel(self.taskQueueListView)
         self.taskQueueListView.setModel(self.taskQueueModel)
         
         #set DUTWindow UI status
@@ -74,7 +110,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         if os.path.isfile(test_suite_file):
             testsuite = self.DUT_instance.add_testsuite(str(test_suite_file))
             self._refresh_test_view()
-            logger.LOGGER().debug("Add testsuite: %s" % test_suite_file)
+            logger.LOGGER.debug("Add testsuite: %s" % test_suite_file)
         
     def remove_test_suite(self):
         for selected_index in self.TestsTreeView.selectedIndexes():
@@ -82,10 +118,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             if item.parent() is None:
                 self.DUT_instance.remove_testsuite(str(item.text()))
                 self._refresh_test_view()
-                logger.LOGGER().debug("Remove testsuite: %s" % item.text())
+                logger.LOGGER.debug("Remove testsuite: %s" % item.text())
         
     def test_view_clicked(self, index):
-        logger.LOGGER().debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
 
         if item.parent() is None:
@@ -133,13 +169,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             if item.parent() is None:
                 #add test suite
                 testsuite_name = str(item.text())
-                logger.LOGGER().debug("Add testsuite to task queue: %s" % testsuite_name)
+                logger.LOGGER.debug("Add testsuite to task queue: %s" % testsuite_name)
                 self.DUT_instance.add_testsuite_to_task_queue(testsuite_name)
             else:
                 #add test case
                 testsuite_name = str(item.parent().text())
                 testcase_name = str(item.text())
-                logger.LOGGER().debug("Add testcase to task queue: %s, %s" % (testsuite_name, testcase_name))
+                logger.LOGGER.debug("Add testcase to task queue: %s, %s" % (testsuite_name, testcase_name))
                 self.DUT_instance.add_testcase_to_task_queue(testsuite_name, testcase_name)
     
         self._refresh_task_queue_view()
@@ -150,7 +186,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             task_index = str(task_item.data().toString())
             
             self.DUT_instance.remove_testcase_from_task_queue(task_index)
-            logger.LOGGER().debug("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
+            logger.LOGGER.debug("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
         
         self._refresh_task_queue_view()
         
@@ -161,7 +197,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setEnabled(True)
         
         self.task_runner_running = True
-        logger.LOGGER().debug("Start task runner")
+        logger.LOGGER.debug("Start task runner")
         
     def pause_task_runner(self):
         self.DUT_instance.pause_task_runner()
@@ -170,18 +206,17 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setDisabled(True)
         
         self.task_runner_running = False
-        logger.LOGGER().debug("Pause task runner")
+        logger.LOGGER.debug("Pause task runner")
         
     def refresh(self):
-        #get DUT status
-        self.DUT_instance.refresh()
-        self.pretty_status = self.DUT_instance.pretty_status
-        self.status = self.DUT_instance.status
+        refresh_dialog = RefreshDUTDialog(self)
+        refresh_dialog.exec_()
         
+    def refresh_without_checking_status(self):
         #set window title
-        self.setWindowTitle("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.pretty_status), None)
+        self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.DUT_instance.pretty_status), None))
         #set action status
-        if self.status & 0b10000000:
+        if self.DUT_instance.status & 0b11000000:
             #Cannot control DUT
             self.actionStartRunner.setDisabled(True)
             self.actionPauseRunner.setDisabled(True)
@@ -195,6 +230,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self._refresh_test_view()
         #refresh task queue
         self._refresh_task_queue_view()
+        #refresh Server DUTView
+        self.parent.refresh_without_checking_status()
             
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
@@ -208,7 +245,7 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         
         #init the settings
         self.STAFDirEdit.setText(QtCore.QString("%0").arg(STAFServer.get_settings("STAF_dir")))
-        self.loggingFileEdit.setText(QtCore.QString("%0").arg(logger.CONFIGS["logging_file"]))
+        self.loggingFileEdit.setText(QtCore.QString("%0").arg(logger.LOGGER.configs["logging_file"]))
         
         indexs = {"CRITICAL": 0,
                 "ERROR": 1, 
@@ -220,8 +257,8 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
             self.loggingFileLevel.insertItem(indexs[key], QtCore.QString(key))
             self.loggingStreamLevel.insertItem(indexs[key], QtCore.QString(key))
         
-        logging_level_file = logger.level_name(logger.CONFIGS["logging_level_file"])
-        logging_level_stream = logger.level_name(logger.CONFIGS["logging_level_stream"])
+        logging_level_file = logger.level_name(logger.LOGGER.configs["logging_level_file"])
+        logging_level_stream = logger.level_name(logger.LOGGER.configs["logging_level_stream"])
         
         self.loggingFileLevel.setCurrentIndex(indexs[logging_level_file])
         self.loggingStreamLevel.setCurrentIndex(indexs[logging_level_stream])
@@ -229,14 +266,13 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
     def accept(self):
         STAFDir = str(self.STAFDirEdit.text())
         STAFServer.update_settings(STAF_dir=STAFDir)
-        logger.CONFIGS["logging_file"] = str(self.loggingFileEdit.text())
-        logger.CONFIGS["logging_level_file"] = logger.level_name(str(self.loggingFileLevel.currentText()))
-        logger.CONFIGS["logging_level_stream"] = logger.level_name(str(self.loggingStreamLevel.currentText()))
-        logger.config()
-        logger.LOGGER().debug("Config staf dir: %s" % STAFDir)
-        logger.LOGGER().debug("Config logging_file: %s" % str(self.loggingFileEdit.text()) )
-        logger.LOGGER().debug("Config logging_level_file: %s" % str(self.loggingFileLevel.currentText()) )
-        logger.LOGGER().debug("Config logging_level_stream: %s" % str(self.loggingStreamLevel.currentText()) )
+        logger.LOGGER.config(  logging_file = str(self.loggingFileEdit.text()), 
+                        logging_level_file = logger.level_name(str(self.loggingFileLevel.currentText())),
+                        logging_level_stream = logger.level_name(str(self.loggingStreamLevel.currentText())) )
+        logger.LOGGER.debug("Config staf dir: %s" % STAFDir)
+        logger.LOGGER.debug("Config logging_file: %s" % str(self.loggingFileEdit.text()) )
+        logger.LOGGER.debug("Config logging_level_file: %s" % str(self.loggingFileLevel.currentText()) )
+        logger.LOGGER.debug("Config logging_level_stream: %s" % str(self.loggingStreamLevel.currentText()) )
         
         QtGui.QDialog.accept(self)
 
@@ -249,12 +285,11 @@ class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
     def accept(self):
         ip = str(self.DUTIP.text())
         name = str(self.DUTName.text())
-        logger.LOGGER().debug("Add DUT ip: %s name: %s" % (ip, name))
+        logger.LOGGER.debug("Add DUT ip: %s name: %s" % (ip, name))
         STAFServer.add_DUT(ip, name)
         QtGui.QDialog.accept(self)
         
-class RefreshThread(QtCore.QThread):
-    
+class RefreshAllThread(QtCore.QThread):
     def __init__(self):
         QtCore.QThread.__init__(self)
     
@@ -270,14 +305,14 @@ class RefreshThread(QtCore.QThread):
         time.sleep(0.1)
         self.emit(QtCore.SIGNAL("notify_stop"))
             
-class RefreshDialog(QtGui.QDialog, Ui_refreshDialog):
+class RefreshAllDialog(QtGui.QDialog, Ui_refreshDialog):
     def __init__(self, parent):
         QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
         
         self.parent = parent
         self.progressBar.setRange(0, 0)
-        self.refresh_thread = RefreshThread()
+        self.refresh_thread = RefreshAllThread()
         
         #signal and slot
         self.connect(self.refresh_thread, QtCore.SIGNAL("notify_status"), self.update_status)
@@ -286,19 +321,11 @@ class RefreshDialog(QtGui.QDialog, Ui_refreshDialog):
 
         self.refresh_thread.start()
 
-        
     def update_status(self, status):
         self.statusLabel.setText(status)
         
     def update_DUTsView(self):
         self.parent.refresh_without_checking_status()
-        
-class EditStream(object):
-    def __init__(self, edit):
-        self.edit = edit
-        
-    def write(self, string):
-        self.edit.append(QtCore.QString(string))
         
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def __init__(self):
@@ -308,7 +335,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.setupUi(self)
         
         #model
-        self.DUTsModel = QtGui.QStandardItemModel()
+        self.DUTsModel = QtGui.QStandardItemModel(self.DUTView)
         self.DUTView.setModel(self.DUTsModel)
         
         self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
@@ -325,6 +352,11 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
         self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_double_clicked)
         
+        #connect logger signal to mainWindow slot
+        self.connect(logger.LOGGER, logger.LOGGER.updateLog, self.update_log)
+        #config logger with default configuration
+        logger.LOGGER.config()
+        
         #init some status
         self.actionRefresh.setDisabled(True)
         self.actionAddDUT.setDisabled(True)
@@ -333,18 +365,26 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #DUTWindow list
         self.DUTWindows = {}
         
-        #init logger
-        self.init_logger()
-        
     def settings(self):
         settingsDialog = SettingsDialog()
         settingsDialog.exec_()
         
-    def init_logger(self):
-        #set logger stream handle to XSTAFLogEdit
-        #other settings use default
-        logger.CONFIGS["logging_stream"] = EditStream(self.XSTAFLogEdit)
-        logger.config()
+    def update_log(self, record):
+        levelno = record.levelno
+        if(levelno>=logger.level_name("CRITICAL")):
+            color_str = '<div style="color:red">%s</div>' # red
+        elif(levelno>=logger.level_name("ERROR")):
+            color_str = '<div style="color:red">%s</div>' # red
+        elif(levelno>=logger.level_name("WARN")):
+            color_str = '<div style="color:yellow">%s</div>' # yellow
+        elif(levelno>=logger.level_name("INFO")):
+            color_str = '<div style="color:black">%s</div>' # black
+        elif(levelno>=logger.level_name("DEBUG")):
+            color_str = '<div style="color:gray">%s</div>' # gray
+        else:
+            color_str = '<div style="color:black">%s</div>' # black
+        msg = color_str % record.msg
+        self.XSTAFLogEdit.append(msg)
         
     def check_and_start_STAF(self):
         STAFServer.check_and_start_staf()
@@ -354,7 +394,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.actionRemoveDUT.setEnabled(True)
             
     def refresh(self):
-        refresh_dialog = RefreshDialog(self)
+        refresh_dialog = RefreshAllDialog(self)
         refresh_dialog.exec_()
         
     def refresh_without_checking_status(self):
@@ -383,7 +423,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     
     '''
     def DUT_clicked(self, index):
-        logger.LOGGER().debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
         DUT_IP = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text()
         DUT_name = self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 0)).text()
         self.infoEdit.clear()
@@ -391,7 +431,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     '''
     
     def DUT_double_clicked(self, index):
-        logger.LOGGER().debug("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
+        logger.LOGGER.debug("Double Click: column: %s, raw: %s" % (index.column(), index.row()))
         DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text())
         if DUT_IP not in self.DUTWindows:
             DUT_window = DUTWindow(self, DUT_IP)

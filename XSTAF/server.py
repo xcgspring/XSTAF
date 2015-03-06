@@ -35,11 +35,11 @@ class Server(object):
         
     def add_DUT(self, ip, name):
         #add DUT
-        logger.LOGGER().debug("Add DUT: %s" % ip)
+        logger.LOGGER.debug("Add DUT: %s" % ip)
         self.DUTs[ip] = DUT(self.staf_instance, ip, name)
         
     def remove_DUT(self, ip):
-        logger.LOGGER().debug("Remove DUT: %s" % ip)
+        logger.LOGGER.debug("Remove DUT: %s" % ip)
         DUT_instance = self.DUTs[ip]
         #stop DUT task runner thread
         DUT_instance.pause_task_runner()

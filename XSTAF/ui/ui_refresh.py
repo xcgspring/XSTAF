@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'refresh.ui'
 #
-# Created: Thu Mar 05 14:20:29 2015
+# Created: Fri Mar 06 12:47:40 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,9 @@ class Ui_refreshDialog(object):
     def setupUi(self, refreshDialog):
         refreshDialog.setObjectName(_fromUtf8("refreshDialog"))
         refreshDialog.resize(377, 58)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        refreshDialog.setWindowIcon(icon)
         self.gridLayout = QtGui.QGridLayout(refreshDialog)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.progressBar = QtGui.QProgressBar(refreshDialog)
@@ -45,3 +48,4 @@ class Ui_refreshDialog(object):
         refreshDialog.setWindowTitle(_translate("refreshDialog", "Refreshing", None))
         self.statusLabel.setText(_translate("refreshDialog", "TextLabel", None))
 
+import resources_rc

@@ -14,8 +14,8 @@
    <string>XSTAF</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icons/icons/X.png</normaloff>:/icons/icons/X.png</iconset>
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/icons/server.png</normaloff>:/icons/icons/server.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">

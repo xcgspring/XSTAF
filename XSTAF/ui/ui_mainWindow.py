@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Thu Mar 05 14:20:29 2015
+# Created: Fri Mar 06 12:47:40 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,7 +28,7 @@ class Ui_XSTAFMainWindow(object):
         XSTAFMainWindow.setObjectName(_fromUtf8("XSTAFMainWindow"))
         XSTAFMainWindow.resize(718, 600)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/X.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/server.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         XSTAFMainWindow.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(XSTAFMainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))

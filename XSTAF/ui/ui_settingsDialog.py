@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'settingsDialog.ui'
 #
-# Created: Thu Mar 05 14:20:29 2015
+# Created: Fri Mar 06 12:47:41 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
