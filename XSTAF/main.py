@@ -96,6 +96,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #some states
         self.task_runner_running = False
         
+        #load existing test suites
+        self._refresh_test_view()
+        
     def _refresh_test_view(self):
         notRunIcon = QtGui.QIcon()
         notRunIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/not-run.png")))

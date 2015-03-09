@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/new.png</file>
+    <file>icons/open.png</file>
+    <file>icons/save.png</file>
     <file>icons/DUT.png</file>
     <file>icons/server.png</file>
     <file>icons/x.png</file>

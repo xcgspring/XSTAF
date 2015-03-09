@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<XSTAF>
+    <settings>
+        <setting name=""> </setting>
+        <setting name=""> </setting>
+        <setting name=""> </setting>
+    </settings>
+
+    <DUTs>
+        <DUT ip="" name="" >
+            <testsuites>
+                <testsuite name="" />
+                <testsuite name="" />
+                <testsuite name="" />
+                <testsuite name="" />
+            </testsuites>
+        </DUT>
+        <DUT ip="" name="" >
+            <testsuites>
+                <testsuite name="" />
+                <testsuite name="" />
+                <testsuite name="" />
+                <testsuite name="" />
+            </testsuites>
+        </DUT>
+    </DUTs>
+    
+</XSTAF>
