@@ -28,6 +28,14 @@ class CustomLogger(QtCore.QObject):
                     "file_logging_mode":"w", 
                     "formatter":"[ %(levelname)s ][ %(filename)s:%(lineno)d ] %(message)s", }
         
+        #logger methods
+        self.debug = self.logger.debug
+        self.info = self.logger.info
+        self.warn = self.logger.warn
+        self.warning = self.logger.warning
+        self.error = self.logger.error
+        self.critical = self.logger.critical
+        
     def config(self, **kwargs):
         '''config logger with settings in configure file
         '''
@@ -73,23 +81,5 @@ class CustomLogger(QtCore.QObject):
         formatter = logging.Formatter(formatter_string)
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
-        
-    def debug(self, msg):
-        self.logger.debug(msg)
-        
-    def info(self, msg):
-        self.logger.info(msg)
-        
-    def warn(self, msg):
-        self.logger.warn(msg)
-        
-    def warning(self, msg):
-        self.logger.warn(msg)
-        
-    def error(self, msg):
-        self.logger.error(msg)
-        
-    def critical(self, msg):
-        self.logger.critical(msg)
         
 LOGGER = CustomLogger()

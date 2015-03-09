@@ -93,13 +93,13 @@ class DUTTaskRunner(QtCore.QThread):
         else:
             #run case
             logger.LOGGER.debug("\tStep2: Run command, command: %s" % work.command)
-            remote_log_file = os.path.join(r"c:\tmp", work.ID, "%s.log"%work.name)
+            remote_log_file = os.path.join(r"c:\tmp", str(work.ID), "%s.log"%work.name)
             if not self.staf_handle.start_process(self.ip, work.command, remote_log_file):
                 work.result = work.Fail
                 work.status = "Test Run Fail\n"
                 
             #copy log
-            local_log_location = os.path.join(r"c:\tmp", work.ID)
+            local_log_location = os.path.join(r"c:\tmp", str(work.ID))
             if not os.path.isdir(local_log_location):
                 os.makedirs(local_log_location)
             logger.LOGGER.debug("\tStep3: Copy log, from %s to %s" % (remote_log_file, local_log_location) )
@@ -240,8 +240,8 @@ class DUT(object):
     def list_all_tasks_in_task_queue(self):
         return self.task_runner.task_queue.list()
         
-    def add_testcase_to_task_queue(self, testsuite_name, testcase_name):
-        testcase = self.testsuites[testsuite_name].testcases[testcase_name]
+    def add_testcase_to_task_queue(self, testsuite_name, testcase_id):
+        testcase = self.testsuites[testsuite_name].testcases[testcase_id]
         self.task_runner.task_queue.put(testcase)
         
     def add_testsuite_to_task_queue(self, testsuite_name):

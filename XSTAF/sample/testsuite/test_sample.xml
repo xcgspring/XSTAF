@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<XMLTestCollection>
+	<TestList>
+		<ToolCase name="test1" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>c:\tmp\test1.py</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-008-HS</Description>
+		</ToolCase>
+
+		<ToolCase name="test2" scriptVersion="1.0.0">
+			<Executable>C:/python27/python.exe</Executable>
+			<InternalTest>False</InternalTest>
+			<Parameters>c:\tmp\test2.py</Parameters>
+			<Timeout>6000</Timeout>
+			<ExeCount>1</ExeCount>
+			<Description>MP3-008-HS</Description>
+		</ToolCase>
+        
+	</TestList>
+</XMLTestCollection>

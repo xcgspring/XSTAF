@@ -60,7 +60,7 @@ class PyAnvilTestSuite(object):
         for testcase_element in testcase_elements:
             testcase = TestCase()
             testcase.name = testcase_element.attrib["name"]
-            testcase.ID = testcase.name
+            #testcase.ID = testcase.name
             executable = testcase_element.find("Executable").text
             parameters = testcase_element.find("Parameters").text
             testcase.command = executable+" "+parameters

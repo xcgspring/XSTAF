@@ -117,10 +117,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 elif not testcase[1].result:
                     icon = passIcon
                 else:
-                    logger.LOGGER.warn("Encounter expected test result: %s" % testcase[1].result)
+                    logger.LOGGER.warn("Encounter unexpected test result: %s" % testcase[1].result)
                     icon = QtGui.QIcon()
-                    
-                testcase_item = QtGui.QStandardItem(icon, QtCore.QString("%0").arg(testcase[0]))
+
+                testcase_item = QtGui.QStandardItem(icon, QtCore.QString(testcase[1].name))
+                #store test id in test case item
+                testcase_id = testcase[0]
+                testcase_item.setData(QtCore.QVariant(testcase_id))
                 testsuite_item.appendRow(testcase_item)
                 
             self.testsModel.appendRow(testsuite_item)
@@ -137,9 +140,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         for selected_index in self.TestsTreeView.selectedIndexes():
             item = self.testsModel.itemFromIndex(selected_index)
             if item.parent() is None:
+                logger.LOGGER.debug("Remove testsuite: %s" % item.text())
                 self.DUT_instance.remove_testsuite(str(item.text()))
                 self._refresh_test_view()
-                logger.LOGGER.debug("Remove testsuite: %s" % item.text())
         
     def test_view_clicked(self, index):
         #logger.LOGGER.debug("Click: column: %s, raw: %s" % (index.column(), index.row()))
@@ -159,9 +162,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 self.actionRemoveTestSuite.setDisabled(True)
                 #print testcase info in test view
                 testsuite_name = str(item.parent().text())
-                testcase_name = str(item.text())
+                testcase_id = item.data().toPyObject()
                 testsuite = self.DUT_instance.testsuites[testsuite_name]
-                testcase = testsuite.testcases[testcase_name]
+                testcase = testsuite.testcases[testcase_id]
                 info = "TestCase: %s\n" % testcase.name
                 info += "  ID: %s\n" % testcase.ID
                 info += "  Command: %s\n" % testcase.command
@@ -222,8 +225,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 #add test case
                 testsuite_name = str(item.parent().text())
                 testcase_name = str(item.text())
+                testcase_id = item.data().toPyObject()
                 logger.LOGGER.debug("Add testcase to task queue: %s, %s" % (testsuite_name, testcase_name))
-                self.DUT_instance.add_testcase_to_task_queue(testsuite_name, testcase_name)
+                self.DUT_instance.add_testcase_to_task_queue(testsuite_name, testcase_id)
     
         self._refresh_task_queue_view()
     
