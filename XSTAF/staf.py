@@ -3,6 +3,7 @@ import os
 import sys
 import socket
 import subprocess
+
 import logger
 
 #server name
@@ -14,50 +15,48 @@ class STAF(object):
     '''
     STAF class
     '''
-    def __init__(self, staf_dir):
-        self.staf_dir = staf_dir
+
+    def __init__(self):
         self.staf_starter = "startSTAFProc.bat"
-
         self.handles = {}
-
+        
     def check_and_start_staf(self):
         '''
         check if staf exist
         and start staf process if exist
         '''
-        abs_staf_starter = os.path.join(self.staf_dir, self.staf_starter)
+        abs_staf_starter = os.path.join(STAFDir, self.staf_starter)
         if not os.path.isfile(abs_staf_starter):
             logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
             return False
             
         #by default we only have one staf process
         subprocess.Popen(abs_staf_starter, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
         return True
         
     def get_handle(self, handle_name):
         '''
         create and get STAF handle to control STAF service
         '''
-        return STAFHandle(handle_name, self.staf_dir)
+        return STAFHandle(handle_name)
         
 class STAFHandle(object):
     '''
     staf handle, every DUT thread will get a handle instance
     '''
-    def __init__(self, handle_name, staf_dir):
+    def __init__(self, handle_name):
         self.staf_handle_name = handle_name
         #staf id, 0 is an invalid id
         self.staf_handle_id = 0
         self.staf_handle = None
-        
-        self.staf_dir = staf_dir
         
     def register(self):
         ''' 
         create a staf handle and register to staf process
         '''
         #import python lib
-        python_staf_lib_path = os.path.join(self.staf_dir, "bin")
+        python_staf_lib_path = os.path.join(STAFDir, "bin")
         sys.path.append(python_staf_lib_path)
         try:
             import PySTAF
@@ -272,3 +271,15 @@ class STAFHandle(object):
         
         return self._staf_handle_submit(location, service, request)
     
+    
+#global staf instance
+STAFInstance = STAF()
+
+#some staf settings
+STAFDir = r"c:\staf"
+
+def config_staf(staf_dir):
+    STAFDir = staf_dir
+    
+def get_staf_instance():
+    return STAFInstance

@@ -7,7 +7,8 @@ import socket
 import logger
 from PyQt4 import QtCore
 
-from test_manage import TestSuite, PyAnvilTestSuite
+from test_manage import TestSuite, Run
+from staf import get_staf_instance
 
 class CustomQueue(Queue.Queue):
     #custom queue basing on dict
@@ -64,7 +65,7 @@ class DUTTaskRunner(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.ip = ip
         #task queue used to store task to process 
-        self.task_queue = CustomQueue()
+        self.task_queue = None
         
         #staf handle used to push task to DUT
         self.staf_handle = staf_instance.get_handle("%s_task_runner"%self.ip)
@@ -81,22 +82,25 @@ class DUTTaskRunner(QtCore.QThread):
         QtCore.QThread.start(self)
         
     def run_task(self, work):
-        logger.LOGGER.debug("Start task, Name: %s" % work.name)
+        logger.LOGGER.debug("Start task, Name: %s" % work[1].name)
         
+        run = Run()
+        #start time
+        run.start = "%.3f" % time.time()
         #init result
-        work.result = work.Pass
+        run.result = run.Pass
         #lock DUT
         logger.LOGGER.debug("\tStep1: Lock DUT, DUT: %s" % self.ip)
         if not self.staf_handle.lock_DUT(self.ip):
-            work.result = work.Fail
-            work.status = "Lock DUT Fail\n"
+            run.result = run.Fail
+            run.status = "Lock DUT Fail\n"
         else:
             #run case
             logger.LOGGER.debug("\tStep2: Run command, command: %s" % work.command)
-            remote_log_file = os.path.join(r"c:\tmp", str(work.ID), "%s.log"%work.name)
+            remote_log_file = os.path.join(r"c:\tmp", str(work.ID), "%s_%s.log"%(work.name, run.start) )
             if not self.staf_handle.start_process(self.ip, work.command, remote_log_file):
-                work.result = work.Fail
-                work.status = "Test Run Fail\n"
+                run.result = run.Fail
+                run.status = "Test Run Fail\n"
                 
             #copy log
             local_log_location = os.path.join(r"c:\tmp", str(work.ID))
@@ -104,17 +108,22 @@ class DUTTaskRunner(QtCore.QThread):
                 os.makedirs(local_log_location)
             logger.LOGGER.debug("\tStep3: Copy log, from %s to %s" % (remote_log_file, local_log_location) )
             if not self.staf_handle.copy_log(self.ip, remote_log_file, local_log_location):
-                work.result = work.Fail
-                work.status = work.status+"Copy log Fail\n"
+                run.result = run.Fail
+                run.status = run.status+"Copy log Fail\n"
             else:
-                work.log_location = local_log_location
+                run.log_location = local_log_location
                 
         #release DUT
         logger.LOGGER.debug("\tStep4: Release DUT, DUT: %s" % self.ip )
         if not self.staf_handle.release_DUT(self.ip):
-            work.result = work.Fail
-            work.status = work.status+"Release DUT Fail\n"
+            run.result = run.Fail
+            run.status = run.status+"Release DUT Fail\n"
 
+        run.end = "%.3f" % time.time()
+        
+        #add this run to work, index using start time
+        self.work.runs[run.start] = run
+        
         #emit update ui signal
         self.emit(self.updateDUTUI)
         
@@ -187,28 +196,41 @@ class DUTMonitor(object):
         self.status = self.DUTNormal
         return self.status
         
-    def DUT_pretty_status(self, status):
+    @classmethod
+    def DUT_pretty_status(cls, status):
         '''
         return DUT pretty status
         '''
-        return self.PrettyStatus[status]
+        return cls.PrettyStatus[status]
         
 class DUT(object):
-    def __init__(self, staf_instance, ip, name=""):
+    def __init__(self, ip, name=""):
         self.ip = ip
         self.name = name
         
-        #start monitor
-        self.monitor = DUTMonitor(staf_instance, self.ip)
-        #start task runner
-        self.task_runner = DUTTaskRunner(staf_instance, self.ip)
+        #monitor
+        self.monitor = None
+        #task runner
+        self.task_runner = None
+        #task queue
+        self.task_queue = CustomQueue()
         
         #test suite list for manage test suite
         self.testsuites = {}
         
         #init status
-        self.status = self.monitor.DUTStatusUnknown
-        self.pretty_status = self.monitor.DUT_pretty_status(self.status)
+        self.status = DUTMonitor.DUTStatusUnknown
+        self.pretty_status = DUTMonitor.DUT_pretty_status(self.status)
+        
+    def add_monitor(self):
+        #add monitor if needed
+        if self.monitor is None:
+            self.monitor = DUTMonitor(get_staf_instance(), self.ip)
+            
+    def add_runner(self):
+        if self.task_runner is None:
+            self.task_runner = DUTTaskRunner(get_staf_instance(), self.ip)
+            self.task_runner.task_queue = self.task_queue
         
     def refresh(self):
         #check DUT status
@@ -220,36 +242,37 @@ class DUT(object):
             self.name = socket.gethostbyaddr(self.ip)[0]
         
     def start_task_runner(self):
-        self.task_runner.start()
+        if not self.task_runner is None:
+            self.task_runner.start()
         
     def pause_task_runner(self):
-        self.task_runner.pause()
+        if not self.task_runner is None:
+            self.task_runner.pause()
         
     def add_testsuite(self, testsuite_file):
-        testsuite = PyAnvilTestSuite(testsuite_file)
+        testsuite = TestSuite(testsuite_file)
         self.testsuites[testsuite.name] = testsuite
-        
         return testsuite
         
     def remove_testsuite(self, testsuite_name):
         del self.testsuites[testsuite_name]
         
     def clean_task_queue(self):
-        self.task_runner.task_queue.clear()
+        self.task_queue.clear()
         
     def list_all_tasks_in_task_queue(self):
-        return self.task_runner.task_queue.list()
+        return self.task_queue.list()
         
     def add_testcase_to_task_queue(self, testsuite_name, testcase_id):
         testcase = self.testsuites[testsuite_name].testcases[testcase_id]
-        self.task_runner.task_queue.put(testcase)
+        self.task_queue.put(testcase)
         
     def add_testsuite_to_task_queue(self, testsuite_name):
         for testcase in self.testsuites[testsuite_name].testcases.items():
-            self.task_runner.task_queue.put(testcase[1])
+            self.task_queue.put(testcase[1])
         
     def remove_testcase_from_task_queue(self, id):
-        self.task_runner.task_queue.remove(id)
+        self.task_queue.remove(id)
         
         
         

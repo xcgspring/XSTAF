@@ -50,17 +50,33 @@
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
     <addaction name="actionCheckAndStartSTAF"/>
+    <addaction name="actionRefresh"/>
    </widget>
    <widget class="QMenu" name="menuDUTs">
     <property name="title">
      <string>DUTs</string>
     </property>
-    <addaction name="actionRefresh"/>
     <addaction name="actionAddDUT"/>
     <addaction name="actionRemoveDUT"/>
    </widget>
+   <widget class="QMenu" name="menuFile_2">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNewWorkSpace"/>
+    <addaction name="actionOpenWorkSpace"/>
+    <addaction name="actionSaveWorkSpace"/>
+   </widget>
+   <widget class="QMenu" name="menuReport">
+    <property name="title">
+     <string>Report</string>
+    </property>
+    <addaction name="actionGenerateReport"/>
+   </widget>
+   <addaction name="menuFile_2"/>
    <addaction name="menuFile"/>
    <addaction name="menuDUTs"/>
+   <addaction name="menuReport"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="XSTAFLogDock">
@@ -90,11 +106,17 @@
    </attribute>
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
-   <addaction name="actionCheckAndStartSTAF"/>
+   <addaction name="actionNewWorkSpace"/>
+   <addaction name="actionOpenWorkSpace"/>
+   <addaction name="actionSaveWorkSpace"/>
    <addaction name="separator"/>
-   <addaction name="actionRefresh"/>
    <addaction name="actionAddDUT"/>
    <addaction name="actionRemoveDUT"/>
+   <addaction name="separator"/>
+   <addaction name="actionCheckAndStartSTAF"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="separator"/>
+   <addaction name="actionGenerateReport"/>
   </widget>
   <action name="actionSettings">
    <property name="icon">
@@ -142,6 +164,54 @@
    </property>
    <property name="toolTip">
     <string>checkAndStartSTAF</string>
+   </property>
+  </action>
+  <action name="actionNewWorkSpace">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/new.png</normaloff>:/icons/icons/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>newWorkSpace</string>
+   </property>
+   <property name="toolTip">
+    <string>newWorkSpace</string>
+   </property>
+  </action>
+  <action name="actionOpenWorkSpace">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/open.png</normaloff>:/icons/icons/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>openWorkSpace</string>
+   </property>
+   <property name="toolTip">
+    <string>openWorkSpace</string>
+   </property>
+  </action>
+  <action name="actionSaveWorkSpace">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/save.png</normaloff>:/icons/icons/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>saveWorkSpace</string>
+   </property>
+   <property name="toolTip">
+    <string>saveWorkSpace</string>
+   </property>
+  </action>
+  <action name="actionGenerateReport">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/report_generate.png</normaloff>:/icons/icons/report_generate.png</iconset>
+   </property>
+   <property name="text">
+    <string>generateReport</string>
+   </property>
+   <property name="toolTip">
+    <string>generateReport</string>
    </property>
   </action>
  </widget>

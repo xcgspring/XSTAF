@@ -1,11 +1,12 @@
 
 import os
+import shutil
 import zipfile
 import xml.etree.ElementTree as ET
 
 import logger
 from DUT import DUT
-from staf import STAF
+from staf import get_staf_instance, config_staf
 
 class Server(object):
     '''
@@ -32,31 +33,58 @@ class Server(object):
             return None
         
     def check_and_start_staf(self):
-        self.staf_instance = STAF(self.settings["STAF_dir"])
-        assert(self.staf_instance.check_and_start_staf())
+        config_staf(self.settings["STAF_dir"])
+        staf_instance = get_staf_instance()
+        assert(staf_instance.check_and_start_staf())
         
-    def new_workspace():
+    def check_if_default_workspace_exist(self):
+        #to handle existing default workspace
+        return _WorkSpace.check_default()
+        
+    def clean_default_workspace(self):
+        _WorkSpace.clean_default()
+        
+    def new_workspace(self):
         #new and load workspace will change workspace object in server
         #ui need prompt user to save original workspace before new or load new workspace
-        workspace = _WorkSpace(self.staf_instance)
+        workspace = _WorkSpace()
         assert(workspace.new())
         self.workspace = workspace
         #this flag used to indicate ui if need to ask user to provide workspace_path when save workspace
         #ui should only ask user to provide workspace_path when new is True
         self.new = True
         
-    def load_workspace(workspace_path):
+    def load_workspace(self, workspace_path=""):
         #new and load workspace will change workspace object in server
         #ui need prompt user to save original workspace before new or load new workspace
-        workspace = _WorkSpace(self.staf_instance)
+        if not workspace_path:
+            workspace_path = _WorkSpace.DefaultWorkspacePath
+        
+        workspace = _WorkSpace()
         assert(workspace.load(workspace_path))
         self.workspace = workspace
         self.new = False
         
-    def save_workspace(workspace_path):
+    def save_workspace(self, workspace_path=""):
         #save current workspace to workspace_path
         self.workspace.save(workspace_path)
         self.new = False
+        
+    def DUTs(self):
+        for DUT in self.workspace.DUTs.items():
+            yield DUT[1]
+            
+    def get_DUT(self, ip):
+        return self.workspace.DUTs[ip]
+        
+    def has_DUT(self, ip):
+        return self.workspace.has_DUT()
+        
+    def add_DUT(self, ip, name):
+        self.workspace.add_DUT(ip, name)
+        
+    def remove_DUT(self, ip):
+        self.workspace.remove_DUT(ip)
         
 class _WorkSpace(object):
     '''
@@ -72,11 +100,13 @@ class _WorkSpace(object):
     TestResultFolder = "test_results"
     TestLogFolder = "test_logs"
         
-    def __init__(self, staf_instance):
-        self.staf_instance = staf_instance
+    #default workspace location
+    DefaultWorkspacePath = r"c:\XSTAF\workspaces\.default"
+        
+    def __init__(self):
         #some settings
         self.settings = {}
-        
+
     def update_settings(self, **kwargs):
         for arg in kwargs.items():
             if arg[0] in self.settings:
@@ -88,8 +118,25 @@ class _WorkSpace(object):
         else:
             return None
         
+    @classmethod
+    def check_default(cls):
+        #check if default workspace already existing
+        if os.path.isdir(cls.DefaultWorkspacePath):
+            return True
+        else:
+            return False
+    
+    @classmethod
+    def clean_default(cls):
+        #clean default workspace
+        if os.path.isdir(cls.DefaultWorkspacePath):
+            shutil.rmtree(cls.DefaultWorkspacePath)
+        
     def new(self):
-        self.workspace_path = ""
+        self.clean_default()
+        #update workspace
+        self.workspace_path = self.DefaultWorkspacePath
+        os.makedirs(self.workspace_path)
         #DUT instance list for DUT management
         self.DUTs = {}
         return True
@@ -141,9 +188,11 @@ class _WorkSpace(object):
                     continue
                 DUT_instance.add_testsuite(testsuite_path)
         
-    def save(self, workspace_path):
-        #save all configs and results
-        #and copy to new location if needed
+    def save(self, workspace_path=""):
+        '''
+        save all configs and results
+        and copy to new location if needed
+        '''
         
         #save configs
         root_element = ET.Element("XSTAF")
@@ -169,31 +218,66 @@ class _WorkSpace(object):
                 testsuite_element = ET.SubElement(testsuites_element, "testsuite", attrib={"name":testsuite_name})
                 
         #write configure file
-        configure_file = os.path.join(workspace_path, self.ConfigFile)
+        configure_file = os.path.join(self.workspace_path, self.ConfigFile)
         ET.ElementTree(root_element).write(configure_file)
         
         #save testsuites and test results
         for DUT in self.DUTs.items():
+            DUT_IP = DUT[0]
+            DUT_instance = DUT[1]
             for testsuite in DUT_instance.testsuites.items():
                 testsuite_name = testsuite[0]
                 testsuite_instance = testsuite[1]
                 
-        
-        
-        
-        
-        
-        
-        
-        
-        
+                root_element = ET.Element("TestSuite")
+                testcases_element = ET.SubElement(root_element, "TestCases")
+                for testcase in testsuite_instance.testcases.items():
+                    testcase_element = ET.SubElement(testcases_element, "TestCase")
+                    name_element = ET.SubElement(testcase_element, "Name")
+                    name_element.text = testcase[1].name
+                    command_element = ET.SubElement(testcase_element, "Command")
+                    command_element.text = testcase[1].command
+                    auto_element = ET.SubElement(testcase_element, "Auto")
+                    auto_element.text = str(testcase[1].auto)
+                    timeout_element = ET.SubElement(testcase_element, "Timeout")
+                    timeout_element.text = str(testcase[1].timeout)
+                    description_element = ET.SubElement(testcase_element, "Description")
+                    description_element.text = testcase[1].description
+                    
+                    runs_element = ET.SubElement(testcase_element, "Runs")
+                    for run in testcase[1].runs.items():
+                        start_element = ET.SubElement(run_element, "Start")
+                        start_element.text = run[1].start
+                        end_element = ET.SubElement(run_element, "End")
+                        end_element.text = run[1].end
+                        run_element = ET.SubElement(runs_element, "Run")
+                        result_element = ET.SubElement(run_element, "Result")
+                        result_element.text = run[1].get_pretty_result()
+                        status_element = ET.SubElement(run_element, "Status")
+                        status_element.text = run[1].status
+                        log_element = ET.SubElement(run_element, "Log")
+                        log_element.text = run[1].log_location
+                
+                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, DUT_IP, testsuite_name)
+                os.makedirs(os.path.dirname(testsuite_path))
+                ET.ElementTree(root_element).write(testsuite_path)
+                
         #check if need copy
-        if not os.path.samefile(self.workspace_path, workspace_path):
+        if os.path.isdir(workspace_path) and (os.path.abspath(self.workspace_path).lower() != os.path.abspath(workspace_path).lower() ):
             #need copy
-        
-        
+            #clean target directory
+            shutil.rmtree(workspace_path)
+            #copy
+            shutil.copytree(self.workspace_path, workspace_path)
+            #update workspace path
+            self.workspace_path = workspace_path
+            
     def export(self, package_path):
-    
+        pass
+        
+        
+    def report(self):
+        pass
         
         
     def has_DUT(self, ip):
@@ -202,7 +286,7 @@ class _WorkSpace(object):
     def add_DUT(self, ip, name):
         #add DUT
         logger.LOGGER.debug("Add DUT: %s" % ip)
-        self.DUTs[ip] = DUT(self.staf_instance, ip, name)
+        self.DUTs[ip] = DUT(ip, name)
         
     def remove_DUT(self, ip):
         logger.LOGGER.debug("Remove DUT: %s" % ip)

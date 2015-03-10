@@ -1,4 +1,5 @@
 
+import os
 import time
 import threading
 from PyQt4 import QtCore, QtGui
@@ -7,6 +8,7 @@ from ui.ui_settingsDialog import Ui_Settings
 from ui.ui_addDUT import Ui_addDUT
 from ui.ui_DUT import Ui_DUTWindow
 from ui.ui_refresh import Ui_refreshDialog
+from ui.ui_confirmDialog import Ui_confirmDialog
 import ui.resources_rc
 
 import logger
@@ -14,13 +16,38 @@ from server import Server
 
 STAFServer = Server()
 
+class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
+    Confirmed = False
+    
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+        
+        self.connect(self.yesButton, QtCore.SIGNAL("clicked(bool)"), self.accept)
+        self.connect(self.noButton, QtCore.SIGNAL("clicked(bool)"), self.reject)
+        
+    @classmethod
+    def confirm(cls, parent=None, message=""):
+        instance = ConfirmDialog(parent)
+        instance.messageLabel.setText(message)
+        instance.exec_()
+        return instance.Confirmed
+    
+    def accept(self):
+        self.Confirmed = True
+        QtGui.QDialog.accept(self)
+        
+    def reject(self):
+        self.Confirmed = False
+        QtGui.QDialog.reject(self)
+
 class RefreshDUTThread(QtCore.QThread):
     def __init__(self, ip):
         QtCore.QThread.__init__(self)
         self.ip = ip
     
     def run(self):
-        DUT_instance = STAFServer.DUTs[self.ip]
+        DUT_instance = STAFServer.get_DUT(self.ip)
         self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
         #refresh DUT, will check DUT status, time cost
         DUT_instance.refresh()
@@ -54,7 +81,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def __init__(self, parent, ip):
         self.parent = parent
         self.ip = ip
-        self.DUT_instance = STAFServer.DUTs[ip]
+        self.DUT_instance = STAFServer.get_DUT(ip)
         self.name = self.DUT_instance.name
         QtGui.QMainWindow.__init__(self, self.parent)
 
@@ -71,6 +98,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.taskQueueListView.setModel(self.taskQueueModel)
         
         #set DUTWindow UI status
+        self.actionRefresh.setDisabled(True)
         self.actionRemoveTestSuite.setDisabled(True)
         self.actionStartRunner.setDisabled(True)
         self.actionPauseRunner.setDisabled(True)
@@ -90,8 +118,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.TestsTreeView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.test_view_right_clicked)
         self.connect(self.taskQueueListView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.task_queue_view_right_clicked)
         
-        self.connect(self.DUT_instance.task_runner, self.DUT_instance.task_runner.updateDUTUI, self.refresh_without_checking_status)
+
         #self.connect(self.DUT_instance.task_runner, self.DUT_instance.task_runner.taskRunnerExit, self.taskRunnerExit)
+        self.connect(self.parent, self.parent.STAFReady, self.add_runner_and_monitor)
         
         #some states
         self.task_runner_running = False
@@ -110,20 +139,24 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.testsModel.clear()
         for testsuite in self.DUT_instance.testsuites.items():
             testsuite_name = testsuite[0]
-            
             testsuite_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite_name))
             for testcase in testsuite[1].testcases.items():
-                if testcase[1].result & 0b10000000:
-                    icon = notRunIcon
-                elif testcase[1].result & 0b00000001:
-                    icon = failIcon
-                elif not testcase[1].result:
-                    icon = passIcon
-                else:
-                    logger.LOGGER.warn("Encounter unexpected test result: %s" % testcase[1].result)
-                    icon = QtGui.QIcon()
-
-                testcase_item = QtGui.QStandardItem(icon, QtCore.QString(testcase[1].name))
+                testcase_item = QtGui.QStandardItem(QtCore.QString(testcase[1].name))
+                for run in testcase[1].runs.items():
+                
+                    if run[1].result & 0b10000000:
+                        icon = notRunIcon
+                    elif run[1].result & 0b00000001:
+                        icon = failIcon
+                    elif not run[1].result:
+                        icon = passIcon
+                    else:
+                        logger.LOGGER.warn("Encounter unexpected test result: %s" % run[1].result)
+                        icon = QtGui.QIcon()
+                        
+                    format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run[1].start)))
+                    run_item = QtGui.QStandardItem(icon, QtCore.QString("Run begin at: %s" % format_time))
+                    testcase_item.appendRow(run_item)
                 #store test id in test case item
                 testcase_id = testcase[0]
                 testcase_item.setData(QtCore.QVariant(testcase_id))
@@ -133,7 +166,6 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
     def add_test_suite(self):
         test_suite_file = QtGui.QFileDialog.getOpenFileName(self, "Add TestSuite")
-        import os
         if os.path.isfile(test_suite_file):
             testsuite = self.DUT_instance.add_testsuite(str(test_suite_file))
             self._refresh_test_view()
@@ -244,6 +276,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
         self._refresh_task_queue_view()
         
+    def add_runner_and_monitor(self):
+        self.DUT_instance.add_monitor()
+        self.DUT_instance.add_runner()
+        self.connect(self.DUT_instance.task_runner, self.DUT_instance.task_runner.updateDUTUI, self.refresh_without_checking_status)
+        
+        self.refresh_without_checking_status()
+        
     def start_task_runner(self):
         self.DUT_instance.start_task_runner()
         
@@ -270,15 +309,18 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #set window title
         self.setWindowTitle(_translate("DUTWindow", "DUT IP: %s Name: %s Status: %s" % (self.ip, self.name, self.DUT_instance.pretty_status), None))
         #set action status
-        if self.DUT_instance.status & 0b11000000:
-            #Cannot control DUT
-            self.actionStartRunner.setDisabled(True)
-            self.actionPauseRunner.setDisabled(True)
-        else:
-            if self.task_runner_running:
-                self.actionPauseRunner.setEnabled(True)
+        if self.parent.staf_ready:
+            self.actionRefresh.setEnabled(True)
+        
+            if self.DUT_instance.status & 0b11000000:
+                #Cannot control DUT
+                self.actionStartRunner.setDisabled(True)
+                self.actionPauseRunner.setDisabled(True)
             else:
-                self.actionStartRunner.setEnabled(True)
+                if self.task_runner_running:
+                    self.actionPauseRunner.setEnabled(True)
+                else:
+                    self.actionStartRunner.setEnabled(True)
             
         #refresh test view
         self._refresh_test_view()
@@ -352,8 +394,7 @@ class RefreshAllThread(QtCore.QThread):
         QtCore.QThread.__init__(self)
     
     def run(self):
-        for DUT in STAFServer.DUTs.items():
-            DUT_instance = DUT[1]
+        for DUT_instance in STAFServer.DUTs():
             self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
             #refresh DUT, will check DUT status, time cost
             DUT_instance.refresh()
@@ -386,6 +427,9 @@ class RefreshAllDialog(QtGui.QDialog, Ui_refreshDialog):
         self.parent.refresh_without_checking_status()
         
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
+    #STAF ready signal
+    STAFReady = QtCore.SIGNAL("STAFReady")
+    
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         
@@ -396,11 +440,11 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.DUTsModel = QtGui.QStandardItemModel(self.DUTView)
         self.DUTView.setModel(self.DUTsModel)
         
-        self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
-        self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
-        self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
-        
         #signals and slots
+        self.connect(self.actionNewWorkSpace, QtCore.SIGNAL("triggered(bool)"), self.new_work_space)
+        self.connect(self.actionOpenWorkSpace, QtCore.SIGNAL("triggered(bool)"), self.open_work_space)
+        self.connect(self.actionSaveWorkSpace, QtCore.SIGNAL("triggered(bool)"), self.save_work_space)
+        
         self.connect(self.actionSettings, QtCore.SIGNAL("triggered(bool)"), self.settings)
         self.connect(self.actionCheckAndStartSTAF, QtCore.SIGNAL("triggered(bool)"), self.check_and_start_STAF)
         self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.refresh)
@@ -416,12 +460,17 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         logger.LOGGER.config()
         
         #init some status
+        self.actionSaveWorkSpace.setDisabled(True)
         self.actionRefresh.setDisabled(True)
         self.actionAddDUT.setDisabled(True)
         self.actionRemoveDUT.setDisabled(True)
-        
+
         #DUTWindow list
         self.DUTWindows = {}
+        
+        #flags
+        self.staf_ready = False
+        self.has_workspace = False
         
     def settings(self):
         settingsDialog = SettingsDialog()
@@ -444,13 +493,45 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         msg = color_str % record.msg
         self.XSTAFLogEdit.append(msg)
         
+    def new_work_space(self):
+        if STAFServer.check_if_default_workspace_exist():
+            #ask user if load exist workspace or create a new one
+            load_default = ConfirmDialog.confirm(self, "Detect existing project, load it or not?")
+            if load_default:
+                STAFServer.load_workspace()
+            else:
+                STAFServer.new_workspace()
+        else:
+            STAFServer.new_workspace()
+        
+        self.has_workspace = True
+        self.refresh_without_checking_status()
+    
+    def open_work_space(self):
+        #ask user if save workspace before open new workspace
+        save_current = ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
+        if save_current:
+            self.save_work_space()
+    
+        workspace_path = str(QtGui.QFileDialog.getExistingDirectory (self, "Open WorkSpace"))
+        if os.path.isdir(workspace_path):
+            STAFServer.load_workspace(workspace_path)
+            self.has_workspace = True
+            self.refresh_without_checking_status()
+    
+    def save_work_space(self):
+        if STAFServer.new:
+            workspace_path = str(QtGui.QFileDialog.getExistingDirectory (self, "Save WorkSpace"))
+            STAFServer.save_workspace(workspace_path)
+        else:
+            STAFServer.save_workspace()
+            
     def check_and_start_STAF(self):
         STAFServer.check_and_start_staf()
-
-        self.actionRefresh.setEnabled(True)
-        self.actionAddDUT.setEnabled(True)
-        self.actionRemoveDUT.setEnabled(True)
-            
+        self.staf_ready = True
+        #emit staf ready signal to update DUT ui
+        self.emit(self.STAFReady)
+        
     def refresh(self):
         refresh_dialog = RefreshAllDialog(self)
         refresh_dialog.exec_()
@@ -460,13 +541,22 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.DUTsModel.setHorizontalHeaderItem(0, QtGui.QStandardItem(QtCore.QString("Name")))
         self.DUTsModel.setHorizontalHeaderItem(1, QtGui.QStandardItem(QtCore.QString("IP")))
         self.DUTsModel.setHorizontalHeaderItem(2, QtGui.QStandardItem(QtCore.QString("Status")))
-        for DUT in STAFServer.DUTs.items():
-            DUT_instance = DUT[1]
+        for DUT_instance in STAFServer.DUTs():
             IP = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.ip))
             name = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.name))
             status = QtGui.QStandardItem(QtCore.QString("%0").arg(DUT_instance.pretty_status))
             self.DUTsModel.appendRow([name, IP, status])
+            
+        if self.has_workspace:
+            #if we have workspace, we can enable follow action
+            self.actionSaveWorkSpace.setEnabled(True)
+            self.actionAddDUT.setEnabled(True)
+            self.actionRemoveDUT.setEnabled(True)
         
+        if self.staf_ready:
+            #if staf start, we can enable follow action
+            self.actionRefresh.setEnabled(True)
+
     def add_DUT(self):
         addDUTDialog = AddDUTDialog()
         addDUTDialog.exec_()
@@ -502,8 +592,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def closeEvent(self, event):
         #we need terminate all threads before close
         #stop DUT threads
-        for DUT in STAFServer.DUTs.items():
-            DUT_instance = DUT[1]
+        for DUT_instance in STAFServer.DUTs():
             DUT_instance.pause_task_runner()
         
 if __name__ == '__main__':
