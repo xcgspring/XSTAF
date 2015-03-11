@@ -201,6 +201,14 @@
     <string>removeFromTaskQueue</string>
    </property>
   </action>
+  <action name="actionClearTaskQueue">
+   <property name="text">
+    <string>clearTaskQueue</string>
+   </property>
+   <property name="toolTip">
+    <string>clearTaskQueue</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>

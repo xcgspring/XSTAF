@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Tue Mar 10 14:12:27 2015
+# Created: Wed Mar 11 09:12:57 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -117,6 +117,8 @@ class Ui_DUTWindow(object):
         self.actionAddtoTaskQueue.setObjectName(_fromUtf8("actionAddtoTaskQueue"))
         self.actionRemoveFromTaskQueue = QtGui.QAction(DUTWindow)
         self.actionRemoveFromTaskQueue.setObjectName(_fromUtf8("actionRemoveFromTaskQueue"))
+        self.actionClearTaskQueue = QtGui.QAction(DUTWindow)
+        self.actionClearTaskQueue.setObjectName(_fromUtf8("actionClearTaskQueue"))
         self.menuTestSuite.addAction(self.actionAddTestSuite)
         self.menuTestSuite.addAction(self.actionRemoveTestSuite)
         self.menuRun.addAction(self.actionStartRunner)
@@ -155,5 +157,7 @@ class Ui_DUTWindow(object):
         self.actionAddtoTaskQueue.setToolTip(_translate("DUTWindow", "addtoTaskQueue", None))
         self.actionRemoveFromTaskQueue.setText(_translate("DUTWindow", "removeFromTaskQueue", None))
         self.actionRemoveFromTaskQueue.setToolTip(_translate("DUTWindow", "removeFromTaskQueue", None))
+        self.actionClearTaskQueue.setText(_translate("DUTWindow", "clearTaskQueue", None))
+        self.actionClearTaskQueue.setToolTip(_translate("DUTWindow", "clearTaskQueue", None))
 
 import resources_rc

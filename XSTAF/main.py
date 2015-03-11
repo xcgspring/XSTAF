@@ -110,6 +110,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
         self.connect(self.actionAddtoTaskQueue, QtCore.SIGNAL("triggered(bool)"), self.add_test_to_task_queue)
         self.connect(self.actionRemoveFromTaskQueue, QtCore.SIGNAL("triggered(bool)"), self.remove_test_from_task_queue)
+        self.connect(self.actionClearTaskQueue, QtCore.SIGNAL("triggered(bool)"), self.clear_task_queue)
         
         self.connect(self.actionStartRunner, QtCore.SIGNAL("triggered(bool)"), self.start_task_runner)
         self.connect(self.actionPauseRunner, QtCore.SIGNAL("triggered(bool)"), self.pause_task_runner)
@@ -230,7 +231,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         index = self.taskQueueListView.indexAt(point)
         item = self.taskQueueModel.itemFromIndex(index)
 
-        context_menu.addAction(self.actionRemoveFromTaskQueue)
+        context_menu.addAction(self.actionClearTaskQueue)
+        if not item is None:
+            context_menu.addAction(self.actionRemoveFromTaskQueue)
         context_menu.exec_(self.taskQueueListView.mapToGlobal(point))
         
     def _refresh_task_queue_view(self):
@@ -274,6 +277,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             self.DUT_instance.remove_testcase_from_task_queue(task_index)
             logger.LOGGER.debug("Remove task: %s, Index: %s" % (task_item.text(), repr(task_index)))
         
+        self._refresh_task_queue_view()
+        
+    def clear_task_queue(self):
+        self.DUT_instance.clean_task_queue()
         self._refresh_task_queue_view()
         
     def add_runner_and_monitor(self):

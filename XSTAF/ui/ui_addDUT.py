@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'addDUT.ui'
 #
-# Created: Tue Mar 10 14:12:26 2015
+# Created: Wed Mar 11 09:12:56 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
