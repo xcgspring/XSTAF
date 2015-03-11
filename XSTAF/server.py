@@ -20,6 +20,8 @@ class Server(object):
         self.settings = {
             "STAF_dir" : r"c:\staf",
         }
+        
+        self.workspace = None
 
     def update_settings(self, **kwargs):
         for arg in kwargs.items():
@@ -48,7 +50,7 @@ class Server(object):
         #new and load workspace will change workspace object in server
         #ui need prompt user to save original workspace before new or load new workspace
         workspace = _WorkSpace()
-        assert(workspace.new())
+        workspace.new()
         self.workspace = workspace
         #this flag used to indicate ui if need to ask user to provide workspace_path when save workspace
         #ui should only ask user to provide workspace_path when new is True
@@ -61,7 +63,7 @@ class Server(object):
             workspace_path = _WorkSpace.DefaultWorkspacePath
         
         workspace = _WorkSpace()
-        assert(workspace.load(workspace_path))
+        workspace.load(workspace_path)
         self.workspace = workspace
         self.new = False
         
@@ -71,20 +73,25 @@ class Server(object):
         self.new = False
         
     def DUTs(self):
-        for DUT in self.workspace.DUTs.items():
-            yield DUT[1]
+        if not self.workspace is None:
+            for DUT in self.workspace.DUTs.items():
+                yield DUT[1]
             
     def get_DUT(self, ip):
-        return self.workspace.DUTs[ip]
+        if not self.workspace is None:
+            return self.workspace.DUTs[ip]
         
     def has_DUT(self, ip):
-        return self.workspace.has_DUT()
+        if not self.workspace is None:
+            return self.workspace.has_DUT()
         
     def add_DUT(self, ip, name):
-        self.workspace.add_DUT(ip, name)
+        if not self.workspace is None:
+            self.workspace.add_DUT(ip, name)
         
     def remove_DUT(self, ip):
-        self.workspace.remove_DUT(ip)
+        if not self.workspace is None:
+            self.workspace.remove_DUT(ip)
         
 class _WorkSpace(object):
     '''
@@ -106,6 +113,8 @@ class _WorkSpace(object):
     def __init__(self):
         #some settings
         self.settings = {}
+        #DUT instance list for DUT management
+        self.DUTs = {}
 
     def update_settings(self, **kwargs):
         for arg in kwargs.items():
@@ -137,8 +146,7 @@ class _WorkSpace(object):
         #update workspace
         self.workspace_path = self.DefaultWorkspacePath
         os.makedirs(self.workspace_path)
-        #DUT instance list for DUT management
-        self.DUTs = {}
+
         return True
         
     def load(self, workspace_path):
@@ -158,7 +166,7 @@ class _WorkSpace(object):
         configure_file = os.path.join(workspace_path, self.ConfigFile)
         assert(os.path.isfile(configure_file))
         #read configures
-        xml_tree = ET.parse(self.test_suite_file)
+        xml_tree = ET.parse(configure_file)
         root_element = xml_tree.getroot()
         
         #load settings
@@ -176,7 +184,7 @@ class _WorkSpace(object):
         for DUT_element in DUT_elements:
             DUT_IP = DUT_element.attrib["ip"]
             DUT_name = DUT_element.attrib["name"]
-            DUT_instance = DUT(self.staf_instance, ip, name)
+            DUT_instance = DUT(DUT_IP, DUT_name)
             self.DUTs[DUT_IP] = DUT_instance
             testsuites_element = DUT_element.find("testsuites")
             testsuite_elements = testsuites_element.findall("testsuite")
@@ -187,6 +195,8 @@ class _WorkSpace(object):
                     logger.LOGGER.warn("testsuite not exist: %s" % testsuite_path)
                     continue
                 DUT_instance.add_testsuite(testsuite_path)
+        
+        return True
         
     def save(self, workspace_path=""):
         '''
