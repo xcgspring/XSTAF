@@ -20,9 +20,7 @@ class Server(object):
         }
         
         self.workspace = None
-        #new workspace flag
-        self.new = False
-        
+
     def config_staf(self):
         STAFInstance.config(STAFDir = self.settings["STAFDir"])
         STAFInstance.check()
@@ -45,7 +43,14 @@ class Server(object):
         
     def check_if_default_workspace_exist(self):
         #to handle existing default workspace
-        return _WorkSpace.check_default()
+        return _WorkSpace.check_default_exist()
+        
+    def check_if_current_workspace_default(self):
+        #check if current workspace is in default location
+        if self.workspace is None:
+            return False
+        else:
+            return self.workspace.check_current_default()
         
     def clean_default_workspace(self):
         _WorkSpace.clean_default()
@@ -56,10 +61,7 @@ class Server(object):
         workspace = _WorkSpace()
         workspace.new()
         self.workspace = workspace
-        #this flag used to indicate ui if need to ask user to provide workspace_path when save workspace
-        #ui should only ask user to provide workspace_path when new is True
-        self.new = True
-        
+
     def load_workspace(self, workspace_path=""):
         #new and load workspace will change workspace object in server
         #ui need prompt user to save original workspace before new or load new workspace
@@ -69,12 +71,10 @@ class Server(object):
         workspace = _WorkSpace()
         workspace.load(workspace_path)
         self.workspace = workspace
-        self.new = False
         
     def save_workspace(self, workspace_path=""):
         #save current workspace to workspace_path
         self.workspace.save(workspace_path)
-        self.new = False
         
     def DUTs(self):
         if not self.workspace is None:
@@ -132,7 +132,7 @@ class _WorkSpace(object):
             return None
         
     @classmethod
-    def check_default(cls):
+    def check_default_exist(cls):
         #check if default workspace already existing
         if os.path.isdir(cls.DefaultWorkspacePath):
             return True
@@ -168,7 +168,11 @@ class _WorkSpace(object):
         self.workspace_path = workspace_path
         
         configure_file = os.path.join(workspace_path, self.ConfigFile)
-        assert(os.path.isfile(configure_file))
+        if not os.path.isfile(configure_file):
+            #no configure file, just return
+            logger.LOGGER.warning("No configure file in workspace: %s" % self.workspace_path)
+            return True
+            
         #read configures
         xml_tree = ET.parse(configure_file)
         root_element = xml_tree.getroot()
@@ -295,14 +299,20 @@ class _WorkSpace(object):
                 ET.ElementTree(root_element).write(testsuite_path)
                 
         #check if need copy
-        if os.path.isdir(workspace_path) and (os.path.abspath(self.workspace_path).lower() != os.path.abspath(workspace_path).lower() ):
-            #need copy
-            #clean target directory
-            shutil.rmtree(workspace_path)
-            #copy
-            shutil.copytree(self.workspace_path, workspace_path)
-            #update workspace path
-            self.workspace_path = workspace_path
+        if os.path.isdir(workspace_path):
+            if (os.path.abspath(self.workspace_path).lower() != os.path.abspath(workspace_path).lower() ):
+                #need copy
+                #clean target directory
+                shutil.rmtree(workspace_path)
+                #copy
+                shutil.copytree(self.workspace_path, workspace_path)
+                #update workspace path
+                self.workspace_path = workspace_path
+        else:
+            logger.LOGGER.warning("Target workspace path not exist, please create it first: %s" % workspace_path)
+            
+    def check_current_default(self):
+        return self.workspace_path == self.DefaultWorkspacePath
             
     def export(self, package_path):
         pass

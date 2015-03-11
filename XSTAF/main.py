@@ -572,17 +572,22 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         msg = color_str % record.msg
         self.XSTAFLogEdit.append(msg)
         
-    def new_work_space(self):
+    def check_unsaved_work_space(self):
         if STAFServer.check_if_default_workspace_exist():
             #ask user if load exist workspace or create a new one
             load_default = ConfirmDialog.confirm(self, "Detect existing project, load it or not?")
             if load_default:
                 STAFServer.load_workspace()
-            else:
-                STAFServer.new_workspace()
-        else:
-            STAFServer.new_workspace()
+                self.refresh_without_checking_status()
         
+    def new_work_space(self):
+        #ask user if save workspace before open new workspace
+        if not STAFServer.workspace is None:
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
+            if save_current:
+                self.save_work_space()
+
+        STAFServer.new_workspace()
         self.has_workspace = True
         self.refresh_without_checking_status()
     
@@ -600,7 +605,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             self.refresh_without_checking_status()
     
     def save_work_space(self):
-        if STAFServer.new:
+        if STAFServer.check_if_current_workspace_default():
             workspace_path = str(QtGui.QFileDialog.getExistingDirectory (self, "Save WorkSpace"))
             STAFServer.save_workspace(workspace_path)
         else:
@@ -674,10 +679,20 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #stop DUT threads
         for DUT_instance in STAFServer.DUTs():
             DUT_instance.pause_task_runner()
+            
+        #check if need save workspace
+        if not STAFServer.workspace is None:
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before close?")
+            if save_current:
+                self.save_work_space()
+                
+        #delete tmp workspace
+        STAFServer.clean_default_workspace()
         
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
     mainWin = MainWindow()
     mainWin.show()
+    mainWin.check_unsaved_work_space()
     sys.exit(app.exec_())
