@@ -49,7 +49,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
-    <addaction name="actionCheckAndStartSTAF"/>
+    <addaction name="actionStartSTAF"/>
     <addaction name="actionRefresh"/>
    </widget>
    <widget class="QMenu" name="menuDUTs">
@@ -115,7 +115,7 @@
    <addaction name="actionAddDUT"/>
    <addaction name="actionRemoveDUT"/>
    <addaction name="separator"/>
-   <addaction name="actionCheckAndStartSTAF"/>
+   <addaction name="actionStartSTAF"/>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
    <addaction name="actionGenerateReport"/>
@@ -156,16 +156,16 @@
     <string>refresh</string>
    </property>
   </action>
-  <action name="actionCheckAndStartSTAF">
+  <action name="actionStartSTAF">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/connect.png</normaloff>:/icons/icons/connect.png</iconset>
    </property>
    <property name="text">
-    <string>checkAndStartSTAF</string>
+    <string>startSTAF</string>
    </property>
    <property name="toolTip">
-    <string>checkAndStartSTAF</string>
+    <string>startSTAF</string>
    </property>
   </action>
   <action name="actionNewWorkSpace">

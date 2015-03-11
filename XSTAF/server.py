@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 
 import logger
 from DUT import DUT
-from staf import get_staf_instance, config_staf
+from staf import STAFInstance
 
 class Server(object):
     '''
@@ -14,18 +14,25 @@ class Server(object):
     server is response for check and start STAF, and manage workspace
     '''
     def __init__(self):
-        #staf instance
-        self.staf_instance = None
         #settings
         self.settings = {
-            "STAF_dir" : r"c:\staf",
+            "STAFDir" : r"c:\staf",
         }
         
         self.workspace = None
         #new workspace flag
         self.new = False
+        
+    def config_staf(self):
+        STAFInstance.config(STAFDir = self.settings["STAFDir"])
+        STAFInstance.check()
+        return STAFInstance.status
 
-    def update_settings(self, **kwargs):
+    def start_staf(self):
+        STAFInstance.start()
+        return STAFInstance.status
+        
+    def apply_settings(self, **kwargs):
         for arg in kwargs.items():
             if arg[0] in self.settings:
                 self.settings[arg[0]] = arg[1]
@@ -35,11 +42,6 @@ class Server(object):
             return self.settings[index]
         else:
             return None
-        
-    def check_and_start_staf(self):
-        config_staf(self.settings["STAF_dir"])
-        staf_instance = get_staf_instance()
-        assert(staf_instance.check_and_start_staf())
         
     def check_if_default_workspace_exist(self):
         #to handle existing default workspace

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Wed Mar 11 11:09:19 2015
+# Created: Wed Mar 11 15:20:48 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -90,11 +90,11 @@ class Ui_XSTAFMainWindow(object):
         icon4.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/refresh.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRefresh.setIcon(icon4)
         self.actionRefresh.setObjectName(_fromUtf8("actionRefresh"))
-        self.actionCheckAndStartSTAF = QtGui.QAction(XSTAFMainWindow)
+        self.actionStartSTAF = QtGui.QAction(XSTAFMainWindow)
         icon5 = QtGui.QIcon()
         icon5.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/connect.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionCheckAndStartSTAF.setIcon(icon5)
-        self.actionCheckAndStartSTAF.setObjectName(_fromUtf8("actionCheckAndStartSTAF"))
+        self.actionStartSTAF.setIcon(icon5)
+        self.actionStartSTAF.setObjectName(_fromUtf8("actionStartSTAF"))
         self.actionNewWorkSpace = QtGui.QAction(XSTAFMainWindow)
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/new.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -121,7 +121,7 @@ class Ui_XSTAFMainWindow(object):
         self.actionHPQCSyncer.setObjectName(_fromUtf8("actionHPQCSyncer"))
         self.menuFile.addAction(self.actionSettings)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionCheckAndStartSTAF)
+        self.menuFile.addAction(self.actionStartSTAF)
         self.menuFile.addAction(self.actionRefresh)
         self.menuDUTs.addAction(self.actionAddDUT)
         self.menuDUTs.addAction(self.actionRemoveDUT)
@@ -144,7 +144,7 @@ class Ui_XSTAFMainWindow(object):
         self.toolBar.addAction(self.actionAddDUT)
         self.toolBar.addAction(self.actionRemoveDUT)
         self.toolBar.addSeparator()
-        self.toolBar.addAction(self.actionCheckAndStartSTAF)
+        self.toolBar.addAction(self.actionStartSTAF)
         self.toolBar.addAction(self.actionRefresh)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionGenerateReport)
@@ -164,8 +164,8 @@ class Ui_XSTAFMainWindow(object):
         self.actionAddDUT.setText(_translate("XSTAFMainWindow", "addDUT", None))
         self.actionRemoveDUT.setText(_translate("XSTAFMainWindow", "removeDUT", None))
         self.actionRefresh.setText(_translate("XSTAFMainWindow", "refresh", None))
-        self.actionCheckAndStartSTAF.setText(_translate("XSTAFMainWindow", "checkAndStartSTAF", None))
-        self.actionCheckAndStartSTAF.setToolTip(_translate("XSTAFMainWindow", "checkAndStartSTAF", None))
+        self.actionStartSTAF.setText(_translate("XSTAFMainWindow", "startSTAF", None))
+        self.actionStartSTAF.setToolTip(_translate("XSTAFMainWindow", "startSTAF", None))
         self.actionNewWorkSpace.setText(_translate("XSTAFMainWindow", "newWorkSpace", None))
         self.actionNewWorkSpace.setToolTip(_translate("XSTAFMainWindow", "newWorkSpace", None))
         self.actionOpenWorkSpace.setText(_translate("XSTAFMainWindow", "openWorkSpace", None))

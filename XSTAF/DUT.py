@@ -8,7 +8,7 @@ import logger
 from PyQt4 import QtCore
 
 from test_manage import TestSuite, Run
-from staf import get_staf_instance
+from staf import STAFInstance
 
 class CustomQueue(Queue.Queue):
     #custom queue basing on dict
@@ -68,7 +68,7 @@ class DUTTaskRunner(QtCore.QThread):
         self.task_queue = None
         
         #staf handle used to push task to DUT
-        self.staf_handle = get_staf_instance().get_handle("%s_task_runner"%self.DUT_instance.ip)
+        self.staf_handle = STAFInstance.get_handle("%s_task_runner"%self.DUT_instance.ip)
         #create and register staf handle
         assert(self.staf_handle.register())
         #configure the staf handle
@@ -176,7 +176,7 @@ class DUTMonitor(object):
     DUTLockedbyOthers = 0b01000001
 
     #Normal status, we have full DUT control
-    DUTNormal = 0b00000001
+    DUTNormal = 0b00000000
     
     #pretty status list
     PrettyStatus = {
@@ -193,7 +193,7 @@ class DUTMonitor(object):
         self.status = self.DUTStatusUnknown
         
         #this staf handle is for checking DUT status, all use of this handle should be no blocking, not to freeze UI 
-        self.staf_handle = get_staf_instance().get_handle("%s_monitor"%self.DUT_instance.ip)
+        self.staf_handle = STAFInstance.get_handle("%s_monitor"%self.DUT_instance.ip)
         #create and register staf handle
         assert(self.staf_handle.register())
         #configure the staf handle

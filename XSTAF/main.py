@@ -98,7 +98,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.taskQueueListView.setModel(self.taskQueueModel)
         
         #set DUTWindow UI status
-        self.actionRefresh.setDisabled(True)
+        if not self.parent.staf_ready:
+            self.actionRefresh.setDisabled(True)
         self.actionRemoveTestSuite.setDisabled(True)
         self.actionStartRunner.setDisabled(True)
         self.actionPauseRunner.setDisabled(True)
@@ -365,13 +366,14 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         del self.parent.DUTWindows[self.ip]
     
 class SettingsDialog(QtGui.QDialog, Ui_Settings):
-    def __init__(self):
-        QtGui.QDialog.__init__(self)
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
         
         self.setupUi(self)
+        self.parent = parent
         
         #init the settings
-        self.STAFDirEdit.setText(QtCore.QString("%0").arg(STAFServer.get_settings("STAF_dir")))
+        self.STAFDirEdit.setText(QtCore.QString("%0").arg(STAFServer.get_settings("STAFDir")))
         self.loggingFileEdit.setText(QtCore.QString("%0").arg(logger.LOGGER.configs["logging_file"]))
         
         indexs = {"CRITICAL": 0,
@@ -392,10 +394,28 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
 
     def accept(self):
         STAFDir = str(self.STAFDirEdit.text())
-        STAFServer.update_settings(STAF_dir=STAFDir)
+        STAFServer.apply_settings(STAFDir=STAFDir)
+        staf_status = STAFServer.config_staf()
+        if not staf_status:
+            self.parent.staf_ready = True
+            #emit staf ready signal to update DUT ui
+            self.parent.emit(self.parent.STAFReady)
+            self.parent.actionStartSTAF.setEnabled(True)
+            self.parent.actionRefresh.setEnabled(True)
+        elif (staf_status & 0b01000000):
+            #not start
+            self.parent.staf_ready = False
+            self.parent.actionStartSTAF.setEnabled(True)
+            self.parent.actionRefresh.setDisabled(True)
+        elif (staf_status & 0b10000000):
+            self.parent.staf_ready = False
+            self.parent.actionStartSTAF.setDisabled(True)
+            self.parent.actionRefresh.setDisabled(True)
+        
         logger.LOGGER.config(  logging_file = str(self.loggingFileEdit.text()), 
                         logging_level_file = logger.level_name(str(self.loggingFileLevel.currentText())),
                         logging_level_stream = logger.level_name(str(self.loggingStreamLevel.currentText())) )
+
         logger.LOGGER.debug("Config staf dir: %s" % STAFDir)
         logger.LOGGER.debug("Config logging_file: %s" % str(self.loggingFileEdit.text()) )
         logger.LOGGER.debug("Config logging_level_file: %s" % str(self.loggingFileLevel.currentText()) )
@@ -473,7 +493,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionSaveWorkSpace, QtCore.SIGNAL("triggered(bool)"), self.save_work_space)
         
         self.connect(self.actionSettings, QtCore.SIGNAL("triggered(bool)"), self.settings)
-        self.connect(self.actionCheckAndStartSTAF, QtCore.SIGNAL("triggered(bool)"), self.check_and_start_STAF)
+        self.connect(self.actionStartSTAF, QtCore.SIGNAL("triggered(bool)"), self.start_STAF)
         self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.refresh)
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
@@ -481,27 +501,59 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         #self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
         self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_double_clicked)
         
+        #flags
+        self.staf_ready = False
+        self.has_workspace = False
+        
         #connect logger signal to mainWindow slot
         self.connect(logger.LOGGER, logger.LOGGER.updateLog, self.update_log)
         #config logger with default configuration
         logger.LOGGER.config()
         
+        #init staf
+        staf_status = STAFServer.config_staf()
+        if (staf_status & 0b10000000):
+            self.actionStartSTAF.setDisabled(True)
+            self.actionRefresh.setDisabled(True)
+            self.staf_ready = False
+        elif (staf_status & 0b01000000):
+            self.staf_ready = False
+            self.actionStartSTAF.setEnabled(True)
+            self.actionRefresh.setDisabled(True)
+        elif not staf_status:
+            self.staf_ready = True
+            self.actionStartSTAF.setEnabled(True)
+            self.actionRefresh.setEnabled(True)
+        
         #init some status
         self.actionSaveWorkSpace.setDisabled(True)
-        self.actionRefresh.setDisabled(True)
         self.actionAddDUT.setDisabled(True)
         self.actionRemoveDUT.setDisabled(True)
 
         #DUTWindow list
         self.DUTWindows = {}
         
-        #flags
-        self.staf_ready = False
-        self.has_workspace = False
-        
     def settings(self):
-        settingsDialog = SettingsDialog()
+        settingsDialog = SettingsDialog(self)
         settingsDialog.exec_()
+        
+    def start_STAF(self):
+        staf_status = STAFServer.start_staf()
+        if not staf_status:
+            self.staf_ready = True
+            #emit staf ready signal to update DUT ui
+            self.emit(self.STAFReady)
+            self.actionStartSTAF.setEnabled(True)
+            self.actionRefresh.setEnabled(True)
+        elif (staf_status & 0b01000000):
+            #not start
+            self.staf_ready = False
+            self.actionStartSTAF.setEnabled(True)
+            self.actionRefresh.setDisabled(True)
+        elif (staf_status & 0b10000000):
+            self.staf_ready = False
+            self.actionStartSTAF.setDisabled(True)
+            self.actionRefresh.setDisabled(True)
         
     def update_log(self, record):
         levelno = record.levelno
@@ -553,12 +605,6 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             STAFServer.save_workspace(workspace_path)
         else:
             STAFServer.save_workspace()
-            
-    def check_and_start_STAF(self):
-        STAFServer.check_and_start_staf()
-        self.staf_ready = True
-        #emit staf ready signal to update DUT ui
-        self.emit(self.STAFReady)
         
     def refresh(self):
         refresh_dialog = RefreshAllDialog(self)
@@ -580,10 +626,16 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             self.actionSaveWorkSpace.setEnabled(True)
             self.actionAddDUT.setEnabled(True)
             self.actionRemoveDUT.setEnabled(True)
+        else:
+            self.actionSaveWorkSpace.setDisabled(True)
+            self.actionAddDUT.setDisabled(True)
+            self.actionRemoveDUT.setDisabled(True)
         
         if self.staf_ready:
             #if staf start, we can enable follow action
             self.actionRefresh.setEnabled(True)
+        else:
+            self.actionRefresh.setDisabled(True)
 
     def add_DUT(self):
         addDUTDialog = AddDUTDialog()

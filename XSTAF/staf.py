@@ -1,6 +1,7 @@
 
 import os
 import sys
+import time
 import socket
 import subprocess
 
@@ -15,25 +16,101 @@ class STAF(object):
     '''
     STAF class
     '''
-
+    #STAF status
+    StatusUnKnown = 0b10000000
+    STAFNotDetect = 0b10000001
+    CannotImportPySTAF = 0b10000010
+    CannotRegisterHandle = 0b10000011
+    CannotUnRegisterHandle = 0b10000100
+    STAFNotStart = 0b01000001
+    STAFOK = 0b00000000
+    
+    PrettyStatus = {  STAFNotDetect : "Cannot detect STAF",
+                    CannotImportPySTAF : "Cannot import PySTAF",
+                    CannotRegisterHandle : "Cannot register handle",
+                    CannotUnRegisterHandle : "Cannot unregister handle",
+                    STAFNotStart : "STAF not start",
+                    STAFOK : "STAF OK", }
+    
     def __init__(self):
         self.staf_starter = "startSTAFProc.bat"
         self.handles = {}
+        self.status = self.StatusUnKnown
         
-    def check_and_start_staf(self):
+    def config(self, **kwargs):
+        for arg in kwargs.items():
+            if arg[0] in STAFSettings:
+                STAFSettings[arg[0]] = arg[1]
+        
+    @property
+    def pretty_status(self):
+        return self.PrettyStatus[self.status]
+        
+    def _check_status(self):
+        '''
+        check if staf exist
+        check if staf process started
+        '''
+        #check if staf exist
+        abs_staf_starter = os.path.join(STAFSettings["STAFDir"], self.staf_starter)
+        if not os.path.isfile(abs_staf_starter):
+            logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
+            self.status = self.STAFNotDetect
+            return False
+            
+        self.abs_staf_starter = abs_staf_starter
+            
+        #check if staf process exist
+        #import python lib
+        python_staf_lib_path = os.path.join(STAFSettings["STAFDir"], "bin")
+        sys.path.append(python_staf_lib_path)
+        try:
+            import PySTAF
+        except ImportError:
+            logger.LOGGER.error("Cannot import PySTAF")
+            self.status = self.CannotImportPySTAF
+            return False
+            
+        #try to register a test handle
+        try:
+            self.staf_handle = PySTAF.STAFHandle("test")
+        except PySTAF.STAFException, e:
+            if e.rc == 21:
+                #error value 21 indicate STAF not running
+                logger.LOGGER.warning("Error code 21, STAF not running")
+                self.status = self.STAFNotStart
+            else:
+                logger.LOGGER.error("Error registering with STAF, RC: %d" % e.rc)
+                self.status = self.CannotRegisterHandle
+            return False
+            
+        #unregister test handle
+        try:
+            self.staf_handle.unregister()
+        except PySTAF.STAFException, e:
+            logger.LOGGER.error("Error when unregister the test handle, RC: %d" % e.rc)
+            self.status = self.CannotUnRegisterHandle
+            return False
+        
+        self.status = self.STAFOK
+        return True
+        
+    def check(self):
+        self._check_status()
+        logger.LOGGER.debug("STAF current status: %s, pretty status: %s" % (self.status, self.pretty_status))
+        
+    def start(self):
         '''
         check if staf exist
         and start staf process if exist
         '''
-        abs_staf_starter = os.path.join(STAFDir, self.staf_starter)
-        if not os.path.isfile(abs_staf_starter):
-            logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
-            return False
-            
-        #by default we only have one staf process
-        subprocess.Popen(abs_staf_starter, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        
-        return True
+        self.check()
+        if self.status & 0b01000000:
+            #by default we only have one staf process
+            logger.LOGGER.debug("Start staf process")
+            p = subprocess.Popen(self.abs_staf_starter, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            time.sleep(2)
+            self.check()
         
     def get_handle(self, handle_name):
         '''
@@ -56,7 +133,7 @@ class STAFHandle(object):
         create a staf handle and register to staf process
         '''
         #import python lib
-        python_staf_lib_path = os.path.join(STAFDir, "bin")
+        python_staf_lib_path = os.path.join(STAFSettings["STAFDir"], "bin")
         sys.path.append(python_staf_lib_path)
         try:
             import PySTAF
@@ -298,11 +375,7 @@ class STAFHandle(object):
 #global staf instance
 STAFInstance = STAF()
 
-#some staf settings
-STAFDir = r"c:\staf"
+#staf settings
+STAFSettings = {"STAFDir" : "",
+                }
 
-def config_staf(staf_dir):
-    STAFDir = staf_dir
-    
-def get_staf_instance():
-    return STAFInstance
