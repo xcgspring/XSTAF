@@ -145,10 +145,10 @@ class _WorkSpace(object):
         
     def new(self):
         self.clean_default()
-        #update workspace
+        if not os.path.isdir(self.DefaultWorkspacePath):
+            os.makedirs(self.DefaultWorkspacePath)
+            
         self.workspace_path = self.DefaultWorkspacePath
-        os.makedirs(self.workspace_path)
-
         return True
         
     def load(self, workspace_path):
@@ -205,6 +205,21 @@ class _WorkSpace(object):
         save all configs and results
         and copy to new location if needed
         '''
+        #function to format XML
+        def indent(elem, level=0):
+            i = "\n" + level*"  "
+            if len(elem):
+                if not elem.text or not elem.text.strip():
+                    elem.text = i + "  "
+                if not elem.tail or not elem.tail.strip():
+                    elem.tail = i
+                for elem in elem:
+                    indent(elem, level+1)
+                if not elem.tail or not elem.tail.strip():
+                    elem.tail = i
+            else:
+                if level and (not elem.tail or not elem.tail.strip()):
+                    elem.tail = i
         
         #save configs
         root_element = ET.Element("XSTAF")
@@ -231,6 +246,7 @@ class _WorkSpace(object):
                 
         #write configure file
         configure_file = os.path.join(self.workspace_path, self.ConfigFile)
+        indent(root_element)
         ET.ElementTree(root_element).write(configure_file)
         
         #save testsuites and test results
@@ -273,7 +289,8 @@ class _WorkSpace(object):
                 testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, DUT_IP, testsuite_name)
                 testsuite_dir = os.path.dirname(testsuite_path)
                 if not os.path.isdir(testsuite_dir):
-                    os.makedirs()
+                    os.makedirs(testsuite_dir)
+                indent(root_element)
                 ET.ElementTree(root_element).write(testsuite_path)
                 
         #check if need copy
