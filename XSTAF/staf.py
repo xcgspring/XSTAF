@@ -87,7 +87,7 @@ class STAFHandle(object):
         return True
         
     def _staf_handle_submit(self, location, service, request):
-        assert(not (self.staf_handle is None), "Need create staf handle first")
+        #assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
         if (result.rc != 0):
             logger.LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
@@ -116,19 +116,42 @@ class STAFHandle(object):
     #
     ########################################
 
-    def copy_log(self, DUT, remote_file, local_location):
+    def create_directory(self, DUT, directory):
+        location = '%s' % DUT
+        service = 'FS'
+        request = 'CREATE DIRECTORY %s FULLPATH' % directory
+        assert(self._staf_handle_submit(location, service, request))
+    
+    def copy_log_file(self, DUT, remote_file, local_location):
         #before copy file to local, need give DUT trust level 4
         location = 'local'
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 4' % DUT
         assert(self._staf_handle_submit(location, service, request))
-        
+        #copy
         location = '%s' % DUT
         service = 'FS'
         request = 'COPY FILE %s TODIRECTORY  %s TOMACHINE %s' % (remote_file, local_location, ServerName)
         return self._staf_handle_submit(location, service, request)
         
-        
+    def copy_tmp_log_directory(self, DUT, remote_log_directory, local_location):
+        #before copy file to local, need give DUT trust level 4
+        location = 'local'
+        service = 'TRUST'
+        request = 'SET MACHINE %s LEVEL 4' % DUT
+        assert(self._staf_handle_submit(location, service, request))
+        #copy
+        location = '%s' % DUT
+        service = 'FS'
+        request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s' % (remote_log_directory, local_location, ServerName)
+        assert(self._staf_handle_submit(location, service, request))
+        #delete remote log
+        location = '%s' % DUT
+        service = 'FS'
+        request = 'DELETE ENTRY %s CHILDREN RECURSE CONFIRM ' % remote_log_directory
+        assert(self._staf_handle_submit(location, service, request))
+        return True
+    
     ########################################
     #
     # Process Service

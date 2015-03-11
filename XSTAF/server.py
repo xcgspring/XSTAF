@@ -186,8 +186,7 @@ class _WorkSpace(object):
         for DUT_element in DUT_elements:
             DUT_IP = DUT_element.attrib["ip"]
             DUT_name = DUT_element.attrib["name"]
-            DUT_instance = DUT(DUT_IP, DUT_name)
-            self.DUTs[DUT_IP] = DUT_instance
+            self.add_DUT(DUT_IP, DUT_name)
             testsuites_element = DUT_element.find("testsuites")
             testsuite_elements = testsuites_element.findall("testsuite")
             for testsuite_element in testsuite_elements:
@@ -196,7 +195,7 @@ class _WorkSpace(object):
                 if not os.path.isfile(testsuite_path):
                     logger.LOGGER.warn("testsuite not exist: %s" % testsuite_path)
                     continue
-                DUT_instance.add_testsuite(testsuite_path)
+                self.DUTs[DUT_IP].add_testsuite(testsuite_path)
         
         return True
         
@@ -317,7 +316,7 @@ class _WorkSpace(object):
     def add_DUT(self, ip, name):
         #add DUT
         logger.LOGGER.debug("Add DUT: %s" % ip)
-        self.DUTs[ip] = DUT(ip, name)
+        self.DUTs[ip] = DUT(os.path.join(self.workspace_path, self.TestLogFolder), ip, name)
         
     def remove_DUT(self, ip):
         logger.LOGGER.debug("Remove DUT: %s" % ip)

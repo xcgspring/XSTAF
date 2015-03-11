@@ -69,9 +69,11 @@
    </widget>
    <widget class="QMenu" name="menuReport">
     <property name="title">
-     <string>Report</string>
+     <string>Tools</string>
     </property>
     <addaction name="actionGenerateReport"/>
+    <addaction name="actionTestSuiteGenerator"/>
+    <addaction name="actionHPQCSyncer"/>
    </widget>
    <addaction name="menuFile_2"/>
    <addaction name="menuFile"/>
@@ -212,6 +214,22 @@
    </property>
    <property name="toolTip">
     <string>generateReport</string>
+   </property>
+  </action>
+  <action name="actionTestSuiteGenerator">
+   <property name="text">
+    <string>testSuiteGenerator</string>
+   </property>
+   <property name="toolTip">
+    <string>testSuiteGenerator</string>
+   </property>
+  </action>
+  <action name="actionHPQCSyncer">
+   <property name="text">
+    <string>HPQCSyncer</string>
+   </property>
+   <property name="toolTip">
+    <string>HPQCSyncer</string>
    </property>
   </action>
  </widget>

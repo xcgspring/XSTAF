@@ -5,6 +5,8 @@ import uuid
 import threading
 import xml.etree.ElementTree as ET
 
+import logger
+
 class Run(object):
     #test case result
     NotRun = 0b10000000
@@ -12,22 +14,37 @@ class Run(object):
     Pass = 0b00000000
     
     #pretty results
-    PrettyResults = { NotRun : "not run",
-                    Fail: "fail",
-                    Pass: "pass", }
+    Results = { NotRun : "not run",
+                Fail : "fail",
+                Pass : "pass", 
+                "not run" : NotRun,
+                "fail" : Fail, 
+                "pass" : Pass, }
 
     def __init__(self):
         self.start = ""
         self.end = ""
         self.status = ""
         self.log_location = ""
-        self.result = self.NotRun
-        self.pretty_result = self.get_pretty_result()
+        self._result = self.NotRun
         
-    def get_pretty_result(self):
-        self.pretty_result = self.PrettyResults[self.result]
-        return self.pretty_result
+    @property
+    def result(self):
+        return self._result
+        
+    @result.setter
+    def result(self, value):
+        if value in self.Results:
+            if isinstance(value, str):
+                value = self.Results[value]
+            self._result = value
+        else:
+            logger.LOGGER.warning("unacceptable result: %s" % repr(value))
 
+    @property
+    def pretty_result(self):
+        return self.Results[self.result]
+        
 class TestCase(object):
     #to make ID generation thread safe
     mutex = threading.Lock()

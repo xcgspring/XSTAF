@@ -61,14 +61,14 @@ class DUTTaskRunner(QtCore.QThread):
     #signal thread exit
     #taskRunnerExit = QtCore.SIGNAL("taskRunnerExit")
     
-    def __init__(self, staf_instance, ip):
+    def __init__(self, DUT_instance):
         QtCore.QThread.__init__(self)
-        self.ip = ip
+        self.DUT_instance = DUT_instance
         #task queue used to store task to process 
         self.task_queue = None
         
         #staf handle used to push task to DUT
-        self.staf_handle = staf_instance.get_handle("%s_task_runner"%self.ip)
+        self.staf_handle = get_staf_instance().get_handle("%s_task_runner"%self.DUT_instance.ip)
         #create and register staf handle
         assert(self.staf_handle.register())
         #configure the staf handle
@@ -77,9 +77,18 @@ class DUTTaskRunner(QtCore.QThread):
         #stop flag, runner thread will check this flag to determine if need stop
         self._stop_flag = False
         
+        #remote log location
+        self.remote_log_location = r"c:\XSTAF"
+        self.remote_log_tmp_location = r"c:\XSTAF\tmplogs"
+        
     def start(self):
         self._stop_flag = False
+        self.prepare_DUT()
         QtCore.QThread.start(self)
+        
+    def prepare_DUT(self):
+        #make some dirs
+        self.staf_handle.create_directory(self.DUT_instance.ip, self.remote_log_tmp_location)
         
     def run_task(self, work):
         logger.LOGGER.debug("Start task, Name: %s" % work.name)
@@ -90,32 +99,41 @@ class DUTTaskRunner(QtCore.QThread):
         #init result
         run.result = run.Pass
         #lock DUT
-        logger.LOGGER.debug("\tStep1: Lock DUT, DUT: %s" % self.ip)
-        if not self.staf_handle.lock_DUT(self.ip):
+        logger.LOGGER.debug("    Step1: Lock DUT, DUT: %s" % self.DUT_instance.ip)
+        if not self.staf_handle.lock_DUT(self.DUT_instance.ip):
             run.result = run.Fail
             run.status = "Lock DUT Fail\n"
         else:
             #run case
-            logger.LOGGER.debug("\tStep2: Run command, command: %s" % work.command)
-            remote_log_file = os.path.join(r"c:\tmp", str(work.ID), "%s_%s.log"%(work.name, run.start) )
-            if not self.staf_handle.start_process(self.ip, work.command, remote_log_file):
+            logger.LOGGER.debug("    Step2: Run command, command: %s" % work.command)
+            remote_log_file = os.path.join(self.remote_log_location, str(work.ID), "%s_%s.log"%(work.name, run.start) )
+            if not self.staf_handle.start_process(self.DUT_instance.ip, work.command, remote_log_file):
                 run.result = run.Fail
                 run.status = "Test Run Fail\n"
                 
             #copy log
-            local_log_location = os.path.join(r"c:\tmp", str(work.ID))
+            local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID))
             if not os.path.isdir(local_log_location):
                 os.makedirs(local_log_location)
-            logger.LOGGER.debug("\tStep3: Copy log, from %s to %s" % (remote_log_file, local_log_location) )
-            if not self.staf_handle.copy_log(self.ip, remote_log_file, local_log_location):
+            logger.LOGGER.debug("    Step3: Copy logs")
+            
+            #copy stdout/stderr log
+            logger.LOGGER.debug("    Step3.1: Copy stdout/stderr logs")
+            if not self.staf_handle.copy_log_file(self.DUT_instance.ip, remote_log_file, local_log_location):
                 run.result = run.Fail
-                run.status = run.status+"Copy log Fail\n"
-            else:
-                run.log_location = local_log_location
+                run.status = run.status+"Copy stdout/stderr logs Fail\n"
+                
+            #copy tmp logs in remote global log location, and delete them after copy done
+            logger.LOGGER.debug("    Step3.2: Copy tmp logs")
+            if not self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.remote_log_tmp_location, local_log_location):
+                run.result = run.Fail
+                run.status = run.status+"Copy tmp logs Fail\n"
+
+            run.log_location = local_log_location
                 
         #release DUT
-        logger.LOGGER.debug("\tStep4: Release DUT, DUT: %s" % self.ip )
-        if not self.staf_handle.release_DUT(self.ip):
+        logger.LOGGER.debug("    Step4: Release DUT, DUT: %s" % self.DUT_instance.ip )
+        if not self.staf_handle.release_DUT(self.DUT_instance.ip):
             run.result = run.Fail
             run.status = run.status+"Release DUT Fail\n"
 
@@ -128,7 +146,7 @@ class DUTTaskRunner(QtCore.QThread):
         self.emit(self.updateDUTUI)
         
     def run(self):
-        logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
         while True:
             #check stop flag
             if self._stop_flag:
@@ -141,10 +159,10 @@ class DUTTaskRunner(QtCore.QThread):
         #emit thread edit signal
         #self.emit(self.taskRunnerExit)
         
-        logger.LOGGER.debug("DUT task runner thread for IP %s exit" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s exit" % self.DUT_instance.ip)
         
     def pause(self):
-        logger.LOGGER.debug("DUT task runner thread for IP %s stopping" % self.ip)
+        logger.LOGGER.debug("DUT task runner thread for IP %s stopping" % self.DUT_instance.ip)
         self._stop_flag = True
     
 class DUTMonitor(object):
@@ -169,13 +187,13 @@ class DUTMonitor(object):
         DUTNormal : "DUT normal",
     }
 
-    def __init__(self, staf_instance, ip):
+    def __init__(self, DUT_instance):
     
-        self.ip = ip
+        self.DUT_instance = DUT_instance
         self.status = self.DUTStatusUnknown
         
         #this staf handle is for checking DUT status, all use of this handle should be no blocking, not to freeze UI 
-        self.staf_handle = staf_instance.get_handle("%s_monitor"%self.ip)
+        self.staf_handle = get_staf_instance().get_handle("%s_monitor"%self.DUT_instance.ip)
         #create and register staf handle
         assert(self.staf_handle.register())
         #configure the staf handle
@@ -185,11 +203,11 @@ class DUTMonitor(object):
         '''
         return DUT status
         '''
-        if not self.staf_handle.ping(self.ip):
+        if not self.staf_handle.ping(self.DUT_instance.ip):
             self.status = self.DUTNotDetected
             return self.status
             
-        if self.staf_handle.check_if_DUT_locked(self.ip):
+        if self.staf_handle.check_if_DUT_locked(self.DUT_instance.ip):
             self.status = self.DUTLockedbyOthers
             return self.status
             
@@ -204,7 +222,8 @@ class DUTMonitor(object):
         return cls.PrettyStatus[status]
         
 class DUT(object):
-    def __init__(self, ip, name=""):
+    def __init__(self, workspace_log_path, ip, name=""):
+        self.workspace_log_path = workspace_log_path
         self.ip = ip
         self.name = name
         
@@ -225,11 +244,11 @@ class DUT(object):
     def add_monitor(self):
         #add monitor if needed
         if self.monitor is None:
-            self.monitor = DUTMonitor(get_staf_instance(), self.ip)
+            self.monitor = DUTMonitor(self)
             
     def add_runner(self):
         if self.task_runner is None:
-            self.task_runner = DUTTaskRunner(get_staf_instance(), self.ip)
+            self.task_runner = DUTTaskRunner(self)
             self.task_runner.task_queue = self.task_queue
         
     def refresh(self):

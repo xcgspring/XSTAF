@@ -193,9 +193,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testsuite = self.DUT_instance.testsuites[str(item.text())]
                 info = "TestSuite: %s\n" % testsuite.test_suite_file
                 info += "  Total test case: %d\n" % len(testsuite.testcases)
-                #info += "  Passed: %d\n" % testsuite.passed_count()
-                #info += "  Failed: %d\n" % testsuite.failed_count()
-                #info += "  NotRun: %d\n" % testsuite.not_run_count()
+
             elif item.parent().parent() is None:
                 self.actionRemoveTestSuite.setDisabled(True)
                 #print testcase info in test view
@@ -209,9 +207,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 info += "  Auto: %s\n" % testcase.auto
                 info += "  TimeOut: %s\n" % testcase.timeout
                 info += "  Description: %s\n" % testcase.description
-                #info += "  Status: %s\n" % testcase.status
-                #info += "  Log location: %s\n" % testcase.log_location
-                #info += "  Result: %s\n" % testcase.get_pretty_result()
+
             else:
                 self.actionRemoveTestSuite.setDisabled(True)
                 testsuite_name = str(item.parent().parent().text())
@@ -225,7 +221,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 info += "End: %s\n" % run.end
                 info += "  Status: %s\n" % run.status
                 info += "  Log location: %s\n" % run.log_location
-                info += "  Result: %s\n" % run.get_pretty_result()
+                info += "  Result: %s\n" % run.pretty_result
             
             self.TestInfoEdit.clear()
             self.TestInfoEdit.append(info)

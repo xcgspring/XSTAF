@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Wed Mar 11 09:26:31 2015
+# Created: Wed Mar 11 11:09:19 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -115,6 +115,10 @@ class Ui_XSTAFMainWindow(object):
         icon9.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/report_generate.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionGenerateReport.setIcon(icon9)
         self.actionGenerateReport.setObjectName(_fromUtf8("actionGenerateReport"))
+        self.actionTestSuiteGenerator = QtGui.QAction(XSTAFMainWindow)
+        self.actionTestSuiteGenerator.setObjectName(_fromUtf8("actionTestSuiteGenerator"))
+        self.actionHPQCSyncer = QtGui.QAction(XSTAFMainWindow)
+        self.actionHPQCSyncer.setObjectName(_fromUtf8("actionHPQCSyncer"))
         self.menuFile.addAction(self.actionSettings)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionCheckAndStartSTAF)
@@ -125,6 +129,8 @@ class Ui_XSTAFMainWindow(object):
         self.menuFile_2.addAction(self.actionOpenWorkSpace)
         self.menuFile_2.addAction(self.actionSaveWorkSpace)
         self.menuReport.addAction(self.actionGenerateReport)
+        self.menuReport.addAction(self.actionTestSuiteGenerator)
+        self.menuReport.addAction(self.actionHPQCSyncer)
         self.menubar.addAction(self.menuFile_2.menuAction())
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuDUTs.menuAction())
@@ -151,7 +157,7 @@ class Ui_XSTAFMainWindow(object):
         self.menuFile.setTitle(_translate("XSTAFMainWindow", "STAF", None))
         self.menuDUTs.setTitle(_translate("XSTAFMainWindow", "DUTs", None))
         self.menuFile_2.setTitle(_translate("XSTAFMainWindow", "File", None))
-        self.menuReport.setTitle(_translate("XSTAFMainWindow", "Report", None))
+        self.menuReport.setTitle(_translate("XSTAFMainWindow", "Tools", None))
         self.XSTAFLogDock.setWindowTitle(_translate("XSTAFMainWindow", "XSTAF Log", None))
         self.toolBar.setWindowTitle(_translate("XSTAFMainWindow", "toolBar", None))
         self.actionSettings.setText(_translate("XSTAFMainWindow", "settings", None))
@@ -168,5 +174,9 @@ class Ui_XSTAFMainWindow(object):
         self.actionSaveWorkSpace.setToolTip(_translate("XSTAFMainWindow", "saveWorkSpace", None))
         self.actionGenerateReport.setText(_translate("XSTAFMainWindow", "generateReport", None))
         self.actionGenerateReport.setToolTip(_translate("XSTAFMainWindow", "generateReport", None))
+        self.actionTestSuiteGenerator.setText(_translate("XSTAFMainWindow", "testSuiteGenerator", None))
+        self.actionTestSuiteGenerator.setToolTip(_translate("XSTAFMainWindow", "testSuiteGenerator", None))
+        self.actionHPQCSyncer.setText(_translate("XSTAFMainWindow", "HPQCSyncer", None))
+        self.actionHPQCSyncer.setToolTip(_translate("XSTAFMainWindow", "HPQCSyncer", None))
 
 import resources_rc
