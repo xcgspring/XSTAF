@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Wed Mar 11 09:12:57 2015
+# Created: Wed Mar 11 09:26:31 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,6 +37,7 @@ class Ui_DUTWindow(object):
         self.TestsTreeView = QtGui.QTreeView(self.centralwidget)
         self.TestsTreeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.TestsTreeView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.TestsTreeView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.TestsTreeView.setObjectName(_fromUtf8("TestsTreeView"))
         self.TestsTreeView.header().setVisible(False)
         self.gridLayout.addWidget(self.TestsTreeView, 0, 0, 1, 1)
@@ -60,6 +61,7 @@ class Ui_DUTWindow(object):
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.taskQueueListView = QtGui.QListView(self.dockWidgetContents)
         self.taskQueueListView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.taskQueueListView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.taskQueueListView.setObjectName(_fromUtf8("taskQueueListView"))
         self.gridLayout_2.addWidget(self.taskQueueListView, 0, 1, 1, 1)
         self.TaskQueueDock.setWidget(self.dockWidgetContents)

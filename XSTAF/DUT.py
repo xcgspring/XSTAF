@@ -82,7 +82,7 @@ class DUTTaskRunner(QtCore.QThread):
         QtCore.QThread.start(self)
         
     def run_task(self, work):
-        logger.LOGGER.debug("Start task, Name: %s" % work[1].name)
+        logger.LOGGER.debug("Start task, Name: %s" % work.name)
         
         run = Run()
         #start time
@@ -122,7 +122,7 @@ class DUTTaskRunner(QtCore.QThread):
         run.end = "%.3f" % time.time()
         
         #add this run to work, index using start time
-        self.work.runs[run.start] = run
+        work.runs[run.start] = run
         
         #emit update ui signal
         self.emit(self.updateDUTUI)

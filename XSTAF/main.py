@@ -157,6 +157,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                         
                     format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run[1].start)))
                     run_item = QtGui.QStandardItem(icon, QtCore.QString("Run begin at: %s" % format_time))
+                    run_id = run[0]
+                    run_item.setData(QtCore.QVariant(run_id))
                     testcase_item.appendRow(run_item)
                 #store test id in test case item
                 testcase_id = testcase[0]
@@ -194,7 +196,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 #info += "  Passed: %d\n" % testsuite.passed_count()
                 #info += "  Failed: %d\n" % testsuite.failed_count()
                 #info += "  NotRun: %d\n" % testsuite.not_run_count()
-            else:
+            elif item.parent().parent() is None:
                 self.actionRemoveTestSuite.setDisabled(True)
                 #print testcase info in test view
                 testsuite_name = str(item.parent().text())
@@ -210,6 +212,20 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 #info += "  Status: %s\n" % testcase.status
                 #info += "  Log location: %s\n" % testcase.log_location
                 #info += "  Result: %s\n" % testcase.get_pretty_result()
+            else:
+                self.actionRemoveTestSuite.setDisabled(True)
+                testsuite_name = str(item.parent().parent().text())
+                testcase_id = item.parent().data().toPyObject()
+                run_id = str(item.data().toPyObject())
+                testsuite = self.DUT_instance.testsuites[testsuite_name]
+                testcase = testsuite.testcases[testcase_id]
+                run = testcase.runs[run_id]
+                info = "TestRun: \n"
+                info += "Start: %s\n" % run.start
+                info += "End: %s\n" % run.end
+                info += "  Status: %s\n" % run.status
+                info += "  Log location: %s\n" % run.log_location
+                info += "  Result: %s\n" % run.get_pretty_result()
             
             self.TestInfoEdit.clear()
             self.TestInfoEdit.append(info)
@@ -218,13 +234,21 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         context_menu = QtGui.QMenu()
         index = self.TestsTreeView.indexAt(point)
         item = self.testsModel.itemFromIndex(index)
+        if item is None:
+            return
+            
         if item.parent() is None:
+            #test suite level
             context_menu.addAction(self.actionRemoveTestSuite)
             context_menu.addAction(self.actionAddtoTaskQueue)
             context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
-        else:
+        elif item.parent().parent() is None:
+            #test case level
             context_menu.addAction(self.actionAddtoTaskQueue)
             context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
+        else:
+            #run level
+            return
         
     def task_queue_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()
@@ -490,7 +514,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         elif(levelno>=logger.level_name("ERROR")):
             color_str = '<div style="color:red">%s</div>' # red
         elif(levelno>=logger.level_name("WARN")):
-            color_str = '<div style="color:yellow">%s</div>' # yellow
+            color_str = '<div style="color:orange">%s</div>' # orange
         elif(levelno>=logger.level_name("INFO")):
             color_str = '<div style="color:black">%s</div>' # black
         elif(levelno>=logger.level_name("DEBUG")):
@@ -516,9 +540,10 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     
     def open_work_space(self):
         #ask user if save workspace before open new workspace
-        save_current = ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
-        if save_current:
-            self.save_work_space()
+        if not STAFServer.workspace is None:
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
+            if save_current:
+                self.save_work_space()
     
         workspace_path = str(QtGui.QFileDialog.getExistingDirectory (self, "Open WorkSpace"))
         if os.path.isdir(workspace_path):

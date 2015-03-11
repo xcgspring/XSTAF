@@ -22,6 +22,8 @@ class Server(object):
         }
         
         self.workspace = None
+        #new workspace flag
+        self.new = False
 
     def update_settings(self, **kwargs):
         for arg in kwargs.items():
@@ -256,11 +258,11 @@ class _WorkSpace(object):
                     
                     runs_element = ET.SubElement(testcase_element, "Runs")
                     for run in testcase[1].runs.items():
+                        run_element = ET.SubElement(runs_element, "Run")
                         start_element = ET.SubElement(run_element, "Start")
                         start_element.text = run[1].start
                         end_element = ET.SubElement(run_element, "End")
                         end_element.text = run[1].end
-                        run_element = ET.SubElement(runs_element, "Run")
                         result_element = ET.SubElement(run_element, "Result")
                         result_element.text = run[1].get_pretty_result()
                         status_element = ET.SubElement(run_element, "Status")
@@ -269,7 +271,9 @@ class _WorkSpace(object):
                         log_element.text = run[1].log_location
                 
                 testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, DUT_IP, testsuite_name)
-                os.makedirs(os.path.dirname(testsuite_path))
+                testsuite_dir = os.path.dirname(testsuite_path)
+                if not os.path.isdir(testsuite_dir):
+                    os.makedirs()
                 ET.ElementTree(root_element).write(testsuite_path)
                 
         #check if need copy
