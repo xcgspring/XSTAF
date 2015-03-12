@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Thu Mar 12 10:41:11 2015
+# Created: Thu Mar 12 13:17:23 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,6 +35,7 @@ class Ui_XSTAFMainWindow(object):
         self.gridLayout_3 = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.DUTView = QtGui.QTableView(self.centralwidget)
+        self.DUTView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.DUTView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.DUTView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.DUTView.setObjectName(_fromUtf8("DUTView"))
@@ -66,7 +67,7 @@ class Ui_XSTAFMainWindow(object):
         self.XSTAFLogEdit.setObjectName(_fromUtf8("XSTAFLogEdit"))
         self.gridLayout.addWidget(self.XSTAFLogEdit, 0, 0, 1, 1)
         self.XSTAFLogDock.setWidget(self.dockWidgetContents_2)
-        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.XSTAFLogDock)
+        XSTAFMainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.XSTAFLogDock)
         self.toolBar = QtGui.QToolBar(XSTAFMainWindow)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         XSTAFMainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
@@ -119,6 +120,8 @@ class Ui_XSTAFMainWindow(object):
         self.actionTestSuiteGenerator.setObjectName(_fromUtf8("actionTestSuiteGenerator"))
         self.actionHPQCSyncer = QtGui.QAction(XSTAFMainWindow)
         self.actionHPQCSyncer.setObjectName(_fromUtf8("actionHPQCSyncer"))
+        self.actionOpenDUTView = QtGui.QAction(XSTAFMainWindow)
+        self.actionOpenDUTView.setObjectName(_fromUtf8("actionOpenDUTView"))
         self.menuFile.addAction(self.actionSettings)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionStartSTAF)
@@ -178,5 +181,7 @@ class Ui_XSTAFMainWindow(object):
         self.actionTestSuiteGenerator.setToolTip(_translate("XSTAFMainWindow", "testSuiteGenerator", None))
         self.actionHPQCSyncer.setText(_translate("XSTAFMainWindow", "HPQCSyncer", None))
         self.actionHPQCSyncer.setToolTip(_translate("XSTAFMainWindow", "HPQCSyncer", None))
+        self.actionOpenDUTView.setText(_translate("XSTAFMainWindow", "openDUTView", None))
+        self.actionOpenDUTView.setToolTip(_translate("XSTAFMainWindow", "openDUTView", None))
 
 import resources_rc

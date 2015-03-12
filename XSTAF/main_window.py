@@ -32,9 +32,11 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionRefresh, QtCore.SIGNAL("triggered(bool)"), self.refresh)
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
-
+        self.connect(self.actionOpenDUTView, QtCore.SIGNAL("triggered(bool)"), self.open_DUT_view)
+        
+        self.connect(self.DUTView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.DUT_view_right_clicked)
         #self.connect(self.DUTView, QtCore.SIGNAL("clicked(QModelIndex)"), self.DUT_clicked)
-        self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_double_clicked)
+        self.connect(self.DUTView, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.DUT_view_double_clicked)
 
         #flags
         self.staf_ready = False
@@ -198,16 +200,31 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
 #        self.infoEdit.append(QtCore.QString("DUT IP: %0 name: %1").arg(DUT_IP).arg(DUT_name))
 #    '''
 
-    def DUT_double_clicked(self, index):
-        logger.LOGGER.debug("Double Click: column: %s, raw: %s", index.column(), index.row())
-        DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(index.row(), 1)).text())
-        if DUT_IP not in self.DUTWindows:
-            DUT_window = DUTWindow(self, DUT_IP)
-            self.DUTWindows[DUT_IP] = DUT_window
-            DUT_window.show()
+    def open_DUT_view(self):
+        for selected_index in self.DUTView.selectedIndexes():
+            DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selected_index.row(), 1)).text())
+            if DUT_IP not in self.DUTWindows:
+                DUT_window = DUTWindow(self, DUT_IP)
+                self.DUTWindows[DUT_IP] = DUT_window
+                DUT_window.show()
+            else:
+                DUT_window = self.DUTWindows[DUT_IP]
+                DUT_window.setFocus()
+            
+    def DUT_view_right_clicked(self, point):
+        context_menu = QtGui.QMenu()
+        index = self.DUTView.indexAt(point)
+        item = self.DUTsModel.itemFromIndex(index)
+        if item is None:
+            return
         else:
-            DUT_window = self.DUTWindows[DUT_IP]
-            DUT_window.setFocus()
+            context_menu.addAction(self.actionOpenDUTView)
+            context_menu.addAction(self.actionRemoveDUT)
+            context_menu.exec_(self.DUTView.mapToGlobal(point))
+
+    def DUT_view_double_clicked(self, index):
+        logger.LOGGER.debug("Double Click: column: %s, raw: %s", index.column(), index.row())
+        self.open_DUT_view()
 
     def closeEvent(self, event):
         #we need terminate all threads before close
