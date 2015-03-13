@@ -8,8 +8,8 @@ from main_window import MainWindow
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    STAFServer = Server()
-    mainWin = MainWindow(STAFServer)
+    server = Server()
+    mainWin = MainWindow(server)
     mainWin.show()
-    mainWin.check_unsaved_work_space()
+    mainWin.check_unsaved_workspace()
     sys.exit(app.exec_())

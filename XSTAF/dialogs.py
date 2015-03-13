@@ -34,49 +34,38 @@ class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
         QtGui.QDialog.reject(self)
 
 class RefreshDUTThread(QtCore.QThread):
-    def __init__(self, ip, server):
+    def __init__(self, dut_instance):
         QtCore.QThread.__init__(self)
-        self.ip = ip
-        self.server = server
+        self.dut_instance = dut_instance
 
     def run(self):
-        DUT_instance = self.server.get_DUT(self.ip)
-        self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
-        #refresh DUT, will check DUT status, time cost
-        DUT_instance.refresh()
-
-        time.sleep(0.1)
+        #check DUT status, time cost
+        self.dut_instance.get_monitor_status()
+        #emit stop signal to exit refresh dialog
         self.emit(QtCore.SIGNAL("notify_stop"))
 
 class RefreshDUTDialog(QtGui.QDialog, Ui_refreshDialog):
-    def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+    def __init__(self, dut_window):
+        QtGui.QDialog.__init__(self, dut_window)
         self.setupUi(self)
 
-        self.parent = parent
         self.progressBar.setRange(0, 0)
-        self.refresh_thread = RefreshDUTThread(parent.ip, parent.server)
-
+        self.statusLabel.setText("Refreshing DUT: %s..." % dut_window.ip)
+        self.refresh_thread = RefreshDUTThread(dut_window.dut)
         #signal and slot
-        self.connect(self.refresh_thread, QtCore.SIGNAL("notify_status"), self.update_status)
         self.connect(self.refresh_thread, QtCore.SIGNAL("notify_stop"), self.accept)
-
         self.refresh_thread.start()
 
-    def update_status(self, status):
-        self.statusLabel.setText(status)
-
     def accept(self):
-        self.parent.refresh_without_checking_status()
         QtGui.QDialog.accept(self)
 
 class SettingsDialog(QtGui.QDialog, Ui_Settings):
-    def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+    def __init__(self, main_window):
+        QtGui.QDialog.__init__(self, main_window)
 
         self.setupUi(self)
-        self.parent = parent
-        self.server = parent.server
+        self.parent = main_window
+        self.server = main_window.server
 
         #init the settings
         self.STAFDirEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("STAFDir")))
@@ -101,22 +90,7 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
     def accept(self):
         STAFDir = str(self.STAFDirEdit.text())
         self.server.apply_settings(STAFDir=STAFDir)
-        staf_status = self.server.config_staf()
-        if not staf_status:
-            self.parent.staf_ready = True
-            #emit staf ready signal to update DUT ui
-            self.parent.emit(self.parent.STAFReady)
-            self.parent.actionStartSTAF.setEnabled(True)
-            self.parent.actionRefresh.setEnabled(True)
-        elif staf_status & 0b01000000:
-            #not start
-            self.parent.staf_ready = False
-            self.parent.actionStartSTAF.setEnabled(True)
-            self.parent.actionRefresh.setDisabled(True)
-        elif staf_status & 0b10000000:
-            self.parent.staf_ready = False
-            self.parent.actionStartSTAF.setDisabled(True)
-            self.parent.actionRefresh.setDisabled(True)
+        self.server.config_staf()
 
         logger.LOGGER.config(logging_file=str(self.loggingFileEdit.text()),\
                         logging_level_file=logger.level_name(str(self.loggingFileLevel.currentText())),\
@@ -130,17 +104,22 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         QtGui.QDialog.accept(self)
 
 class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
-    def __init__(self, parent):
+    def __init__(self, main_window):
         QtGui.QDialog.__init__(self)
         self.setupUi(self)
         self.DUTIP.setInputMask("000.000.000.000")
-        self.server = parent.server
+        self.server = main_window.server
 
     def accept(self):
         ip = str(self.DUTIP.text())
         name = str(self.DUTName.text())
-        logger.LOGGER.debug("Add DUT ip: %s name: %s", ip, name)
-        self.server.add_DUT(ip, name)
+
+        if self.server.has_workspace():
+            logger.LOGGER.debug("Add DUT ip: %s name: %s", ip, name)
+            workspace = self.server.get_workspace()
+            workspace.add_dut(ip, name)
+        else:
+            logger.LOGGER.debug("No workspace, cannot add DUT")
         QtGui.QDialog.accept(self)
 
 class RefreshAllThread(QtCore.QThread):
@@ -149,24 +128,28 @@ class RefreshAllThread(QtCore.QThread):
         self.server = server
 
     def run(self):
-        for DUT_instance in self.server.DUTs():
-            self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % DUT_instance.ip)
-            #refresh DUT, will check DUT status, time cost
-            DUT_instance.refresh()
-            #this signal will update DUT view
-            self.emit(QtCore.SIGNAL("notify_DUTsView"))
+        self.server.config_staf()
+        
+        if self.server.has_workspace():
+            workspace = self.server.get_workspace()
+            for dut in workspace.duts():
+                self.emit(QtCore.SIGNAL("notify_status"), "Refreshing DUT: %s..." % dut.ip)
+                #refresh DUT, will check DUT status, time cost
+                dut.get_monitor_status()
+                #this signal will update DUT view
+                self.emit(QtCore.SIGNAL("notify_DUTsView"))
 
         time.sleep(0.1)
         self.emit(QtCore.SIGNAL("notify_stop"))
 
 class RefreshAllDialog(QtGui.QDialog, Ui_refreshDialog):
-    def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+    def __init__(self, main_window):
+        QtGui.QDialog.__init__(self, main_window)
         self.setupUi(self)
 
-        self.parent = parent
+        self.parent = main_window
         self.progressBar.setRange(0, 0)
-        self.refresh_thread = RefreshAllThread(parent.server)
+        self.refresh_thread = RefreshAllThread(main_window.server)
 
         #signal and slot
         self.connect(self.refresh_thread, QtCore.SIGNAL("notify_status"), self.update_status)
@@ -179,4 +162,4 @@ class RefreshAllDialog(QtGui.QDialog, Ui_refreshDialog):
         self.statusLabel.setText(status)
 
     def update_DUTsView(self):
-        self.parent.refresh_without_checking_status()
+        self.parent.refresh_ui()

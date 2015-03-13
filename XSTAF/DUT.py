@@ -57,7 +57,7 @@ class CustomQueue(Queue.Queue):
         
 class DUTTaskRunner(QtCore.QThread):
     #signal to update DUT ui
-    updateDUTUI = QtCore.SIGNAL("updateDUTUI")
+    test_result_change = QtCore.SIGNAL("testResultChange")
     #signal thread exit
     #taskRunnerExit = QtCore.SIGNAL("taskRunnerExit")
     
@@ -167,10 +167,10 @@ class DUTTaskRunner(QtCore.QThread):
     
 class DUTMonitor(object):
     #DUT status
-    #Unknown Failure
-    UnknownFailure = 0b10000000
     #Invalid status, we cannot assign task to DUT under these status
-    DUTStatusUnknown = 0b10000001
+    DUTStatusUnknown = 0b10000000
+    #Unknown Failure
+    UnknownFailure = 0b10000001
     DUTNotDetected = 0b10000010
     #locked by others, we only can do limited operations
     DUTLockedbyOthers = 0b01000001
@@ -187,42 +187,38 @@ class DUTMonitor(object):
         DUTNormal : "DUT normal",
     }
 
-    def __init__(self, DUT_instance):
-    
-        self.DUT_instance = DUT_instance
-        self.status = self.DUTStatusUnknown
+    def __init__(self, dut):
+        self.dut = dut
+        self._status = self.DUTStatusUnknown
         
         #this staf handle is for checking DUT status, all use of this handle should be no blocking, not to freeze UI 
-        self.staf_handle = STAFInstance.get_handle("%s_monitor"%self.DUT_instance.ip)
+        self.staf_handle = STAFInstance.get_handle("%s_monitor"%self.dut.ip)
         #create and register staf handle
-        assert(self.staf_handle.register())
+        self.staf_handle.register()
         #configure the staf handle
-        assert(self.staf_handle.configure())
+        self.staf_handle.configure()
         
-    def DUT_status(self):
-        '''
-        return DUT status
-        '''
-        if not self.staf_handle.ping(self.DUT_instance.ip):
-            self.status = self.DUTNotDetected
-            return self.status
-            
-        if self.staf_handle.check_if_DUT_locked(self.DUT_instance.ip):
-            self.status = self.DUTLockedbyOthers
-            return self.status
-            
-        self.status = self.DUTNormal
-        return self.status
+    def check_status(self):
+        if not self.staf_handle.ping(self.dut.ip):
+            self._status = self.DUTNotDetected
+            return self._status
+        if self.staf_handle.check_if_DUT_locked(self.dut.ip):
+            self._status = self.DUTLockedbyOthers
+            return self._status
+        self._status = self.DUTNormal
+        return self._status
         
     @classmethod
-    def DUT_pretty_status(cls, status):
-        '''
-        return DUT pretty status
-        '''
+    def pretty_status(cls, status):
         return cls.PrettyStatus[status]
-        
-class DUT(object):
+
+class DUT(QtCore.QObject):
+
+    #DUT status change should update ui
+    status_change = QtCore.SIGNAL("DUTStatusChange")
+
     def __init__(self, workspace_log_path, ip, name=""):
+        QtCore.QObject.__init__(self)
         self.workspace_log_path = workspace_log_path
         self.ip = ip
         self.name = name
@@ -235,47 +231,91 @@ class DUT(object):
         self.task_queue = CustomQueue()
         
         #test suite list for manage test suite
-        self.testsuites = {}
+        self._testsuites = {}
         
-        #init status
         self.status = DUTMonitor.DUTStatusUnknown
-        self.pretty_status = DUTMonitor.DUT_pretty_status(self.status)
+        self.pretty_status = DUTMonitor.pretty_status(self.status)
         
+    ############################################
+    #monitor and task runner related methods
+    ############################################
     def add_monitor(self):
+        if STAFInstance.status & 0b10000000:
+            logger.LOGGER.error("Can not add DUT monitor, local STAF not ready")
+            return
+            
         #add monitor if needed
         if self.monitor is None:
             self.monitor = DUTMonitor(self)
-            
+    
+    def remove_monitor(self):
+        self.monitor = None
+        
+    def get_monitor_status(self):
+        if not self.monitor is None:
+            self.status = self.monitor.check_status()
+            self.pretty_status = DUTMonitor.pretty_status(self.status)
+        else:
+            self.status = DUTMonitor.DUTStatusUnknown
+            self.pretty_status = DUTMonitor.pretty_status(self.status)
+        
+        logger.LOGGER.debug("DUT IP: %s Name %s Status %s", self.ip, self.name, self.pretty_status)
+        self.emit(self.status_change)
+        
     def add_runner(self):
+        if STAFInstance.status & 0b10000000:
+            logger.LOGGER.error("Can not add DUT task runner, local STAF not ready")
+            return
+
+        if self.status & 0b11000000:
+            logger.LOGGER.error("Can not add DUT task runner, DUT not ready")
+            return
+            
         if self.task_runner is None:
             self.task_runner = DUTTaskRunner(self)
             self.task_runner.task_queue = self.task_queue
-        
-    def refresh(self):
-        #check DUT status
-        self.status = self.monitor.DUT_status()
-        self.pretty_status = self.monitor.DUT_pretty_status(self.status)
-        
-        #auto name DUT
-        if not self.name and not(self.status & 0b10000000) :
-            self.name = socket.gethostbyaddr(self.ip)[0]
-        
-    def start_task_runner(self):
+
+    def start_runner(self):
+        '''
+        start task runner
+        '''
         if not self.task_runner is None:
             self.task_runner.start()
         
-    def pause_task_runner(self):
+    def stop_runner(self):
+        '''
+        check DUT status
+        '''
         if not self.task_runner is None:
             self.task_runner.pause()
-        
+            
+    def remove_runner(self):
+        self.stop_runner()
+        self.runner = None
+
+    ############################################
+    #task suite management methods
+    ############################################
+    def has_testsuite(self, testsuite_name):
+        return testsuite_name in self._testsuites
+    
     def add_testsuite(self, testsuite_file):
         testsuite = TestSuite(testsuite_file)
-        self.testsuites[testsuite.name] = testsuite
-        return testsuite
+        self._testsuites[testsuite.name] = testsuite
         
     def remove_testsuite(self, testsuite_name):
-        del self.testsuites[testsuite_name]
+        del self._testsuites[testsuite_name]
         
+    def get_testsuite(self, testsuite_name):
+        return self._testsuites[testsuite_name]
+        
+    def testsuites(self):
+        for testsuite_item in self._testsuites.items():
+            yield testsuite_item[1]
+        
+    ############################################
+    #task queue methods
+    ############################################
     def clean_task_queue(self):
         self.task_queue.clear()
         
@@ -283,16 +323,13 @@ class DUT(object):
         return self.task_queue.list()
         
     def add_testcase_to_task_queue(self, testsuite_name, testcase_id):
-        testcase = self.testsuites[testsuite_name].testcases[testcase_id]
+        testcase = self._testsuites[testsuite_name].testcases[testcase_id]
         self.task_queue.put(testcase)
         
     def add_testsuite_to_task_queue(self, testsuite_name):
-        for testcase in self.testsuites[testsuite_name].testcases.items():
+        for testcase in self._testsuites[testsuite_name].testcases.items():
             self.task_queue.put(testcase[1])
         
     def remove_testcase_from_task_queue(self, id):
         self.task_queue.remove(id)
-        
-        
-        
         

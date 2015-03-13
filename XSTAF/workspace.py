@@ -7,7 +7,6 @@ import xml.etree.ElementTree as ET
 import logger
 from DUT import DUT
 
-
 class WorkSpace(object):
     '''
     a workspace could be a structured folder or zipped folder
@@ -29,7 +28,7 @@ class WorkSpace(object):
         #some settings
         self.settings = {}
         #DUT instance list for DUT management
-        self.DUTs = {}
+        self._duts = {}
 
         self.workspace_path = ""
 
@@ -44,8 +43,11 @@ class WorkSpace(object):
         else:
             return None
 
+    ############################################
+    #workspace related methods
+    ############################################
     @classmethod
-    def check_default_exist(cls):
+    def is_default_exist(cls):
         #check if default workspace already existing
         if os.path.isdir(cls.DefaultWorkspacePath):
             return True
@@ -62,9 +64,7 @@ class WorkSpace(object):
         self.clean_default()
         if not os.path.isdir(self.DefaultWorkspacePath):
             os.makedirs(self.DefaultWorkspacePath)
-
         self.workspace_path = self.DefaultWorkspacePath
-        return True
 
     def load(self, workspace_path):
         if os.path.isdir(workspace_path):
@@ -76,7 +76,7 @@ class WorkSpace(object):
             zipfile.ZipFile(workspace_path).extractall()
         else:
             logger.LOGGER.error("Invalid workspace: %s", workspace_path)
-            return False
+            raise ValueError("Invalid workspace: %s" % workspace_path)
 
         self.workspace_path = workspace_path
 
@@ -84,7 +84,7 @@ class WorkSpace(object):
         if not os.path.isfile(configure_file):
             #no configure file, just return
             logger.LOGGER.warning("No configure file in workspace: %s", self.workspace_path)
-            return True
+            return
 
         #read configures
         xml_tree = ET.parse(configure_file)
@@ -114,15 +114,20 @@ class WorkSpace(object):
                 if not os.path.isfile(testsuite_path):
                     logger.LOGGER.warn("testsuite not exist: %s", testsuite_path)
                     continue
-                self.DUTs[DUT_IP].add_testsuite(testsuite_path)
+                self._duts[DUT_IP].add_testsuite(testsuite_path)
 
-        return True
-
-    def save(self, workspace_path=""):
+    def save(self, workspace_path):
         '''
         save all configs and results
         and copy to new location if needed
         '''
+        if os.path.isdir(workspace_path):
+            #update workspace path
+            self.workspace_path = workspace_path
+        else:
+            logger.LOGGER.error("Target workspace path not exist, please create it first: %s", workspace_path)
+            raise ValueError("Target workspace path not exist, please create it first: %s" % workspace_path)
+        
         #function to format XML
         def indent(elem, level=0):
             i = "\n" + level*"  "
@@ -152,7 +157,7 @@ class WorkSpace(object):
             setting_element.text = setting_value
 
         #dump DUTs and test suites
-        for DUT_item in self.DUTs.items():
+        for DUT_item in self._duts.items():
             DUT_IP = DUT_item[0]
             DUT_instance = DUT_item[1]
             DUT_name = DUT_instance.name
@@ -168,7 +173,7 @@ class WorkSpace(object):
         ET.ElementTree(root_element).write(configure_file)
 
         #save testsuites and test results
-        for DUT_item in self.DUTs.items():
+        for DUT_item in self._duts.items():
             DUT_IP = DUT_item[0]
             DUT_instance = DUT_item[1]
             for testsuite in DUT_instance.testsuites.items():
@@ -211,42 +216,36 @@ class WorkSpace(object):
                 indent(root_element)
                 ET.ElementTree(root_element).write(testsuite_path)
 
-        #check if need copy
-        if os.path.isdir(workspace_path):
-            if (os.path.abspath(self.workspace_path).lower() != os.path.abspath(workspace_path).lower()):
-                #need copy
-                #clean target directory
-                shutil.rmtree(workspace_path)
-                #copy
-                shutil.copytree(self.workspace_path, workspace_path)
-                #update workspace path
-                self.workspace_path = workspace_path
-        else:
-            logger.LOGGER.warning("Target workspace path not exist, please create it first: %s", workspace_path)
-
-    def check_current_default(self):
+    def is_current_default(self):
         return self.workspace_path == self.DefaultWorkspacePath
 
     def export(self, package_path):
         pass
 
-
     def report(self):
         pass
 
+    ############################################
+    #DUT management methods
+    ############################################
+    def has_dut(self, ip):
+        return (ip in self._duts)
 
-    def has_DUT(self, ip):
-        return (ip in self.DUTs)
+    def add_dut(self, ip, name):
+        dut = DUT(os.path.join(self.workspace_path, self.TestLogFolder), ip, name)
+        dut.add_monitor()
+        self._duts[ip] = dut
 
-    def add_DUT(self, ip, name):
-        #add DUT
-        logger.LOGGER.debug("Add DUT: %s", ip)
-        self.DUTs[ip] = DUT(os.path.join(self.workspace_path, self.TestLogFolder), ip, name)
+    def remove_dut(self, ip):
+        dut = self._duts[ip]
+        #remove task runner
+        dut.remove_runner()
+        #remove dut from server DUT list
+        del self._duts[ip]
 
-    def remove_DUT(self, ip):
-        logger.LOGGER.debug("Remove DUT: %s", ip)
-        DUT_instance = self.DUTs[ip]
-        #stop DUT task runner thread
-        DUT_instance.pause_task_runner()
-        #remove it from server DUT list
-        del self.DUTs[ip]
+    def get_dut(self, ip):
+        return self._duts[ip]
+        
+    def duts(self):
+        for dut_item in self._duts.items():
+            yield dut_item[1]
