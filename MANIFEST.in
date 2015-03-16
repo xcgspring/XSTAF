@@ -1,0 +1,14 @@
+# Legal stuff
+include LICENSE
+
+# Miscellaneous other
+include MANIFEST.in
+include MANIFEST
+
+# Include all icons
+graft XSTAF/ui/icons
+
+# Include all docs
+global-include README*
+recursive-include doc *
+

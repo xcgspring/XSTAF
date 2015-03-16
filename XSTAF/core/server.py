@@ -1,9 +1,9 @@
 
 from PyQt4 import QtCore
 
-import logger
-from workspace import WorkSpace
-from staf import STAFInstance
+from XSTAF.core.logger import LOGGER
+from XSTAF.core.workspace import WorkSpace
+from XSTAF.core.staf import STAFInstance
 
 class Server(QtCore.QObject):
     '''
@@ -50,7 +50,7 @@ class Server(QtCore.QObject):
     #logger related methods
     ############################################
     def config_logger(self):
-        logger.LOGGER.config(logging_level_file = self.settings["LoggerLevelFile"],
+        LOGGER.config(logging_level_file = self.settings["LoggerLevelFile"],
                             logging_level_stream = self.settings["LoggerLevelStream"],
                             logging_file = self.settings["LogLocation"])
     

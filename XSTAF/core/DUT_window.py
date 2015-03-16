@@ -3,9 +3,9 @@ import os
 import time
 from PyQt4 import QtCore, QtGui
 
-import logger
-import dialogs
-from ui.ui_DUT import Ui_DUTWindow, _translate, _fromUtf8
+from XSTAF.core.logger import LOGGER
+from XSTAF.core.dialogs import RefreshDUTDialog
+from XSTAF.ui.ui_DUT import Ui_DUTWindow, _translate, _fromUtf8
 
 class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def __init__(self, main_window, ip):
@@ -69,18 +69,18 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         if os.path.isfile(test_suite_file):
             self.dut.add_testsuite(str(test_suite_file))
             self._refresh_test_view()
-            logger.LOGGER.debug("Add testsuite: %s", test_suite_file)
+            LOGGER.debug("Add testsuite: %s", test_suite_file)
 
     def remove_test_suite(self):
         for selected_index in self.TestsTreeView.selectedIndexes():
             item = self.testsModel.itemFromIndex(selected_index)
             if item.parent() is None:
-                logger.LOGGER.debug("Remove testsuite: %s", item.text())
+                LOGGER.debug("Remove testsuite: %s", item.text())
                 self.dut.remove_testsuite(str(item.text()))
                 self._refresh_test_view()
 
     def test_view_clicked(self, index):
-        #logger.LOGGER.debug("Click: column: %s, raw: %s", (index.column(), index.row()))
+        #LOGGER.debug("Click: column: %s, raw: %s", (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
         if not item is None:
             if item.parent() is None:
@@ -159,14 +159,14 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             if item.parent() is None:
                 #add test suite
                 testsuite_name = str(item.text())
-                logger.LOGGER.debug("Add testsuite to task queue: %s", testsuite_name)
+                LOGGER.debug("Add testsuite to task queue: %s", testsuite_name)
                 self.dut.add_testsuite_to_task_queue(testsuite_name)
             else:
                 #add test case
                 testsuite_name = str(item.parent().text())
                 testcase_name = str(item.text())
                 testcase_id = item.data().toPyObject()
-                logger.LOGGER.debug("Add testcase to task queue: %s, %s", testsuite_name, testcase_name)
+                LOGGER.debug("Add testcase to task queue: %s, %s", testsuite_name, testcase_name)
                 self.dut.add_testcase_to_task_queue(testsuite_name, testcase_id)
 
         self._refresh_task_queue_view()
@@ -177,7 +177,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             task_index = str(task_item.data().toString())
 
             self.dut.remove_testcase_from_task_queue(task_index)
-            logger.LOGGER.debug("Remove task: %s, Index: %s", task_item.text(), repr(task_index))
+            LOGGER.debug("Remove task: %s, Index: %s", task_item.text(), repr(task_index))
 
         self._refresh_task_queue_view()
 
@@ -192,7 +192,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setEnabled(True)
 
         self.task_runner_running = True
-        logger.LOGGER.debug("Start task runner")
+        LOGGER.debug("Start task runner")
 
     def pause_task_runner(self):
         self.dut.stop_runner()
@@ -201,10 +201,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.actionPauseRunner.setDisabled(True)
 
         self.task_runner_running = False
-        logger.LOGGER.debug("Stop task runner")
+        LOGGER.debug("Stop task runner")
 
     def refresh(self):
-        refresh_dialog = dialogs.RefreshDUTDialog(self)
+        refresh_dialog = RefreshDUTDialog(self)
         refresh_dialog.exec_()
 
     def _refresh_test_view(self):
@@ -232,8 +232,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     testcase_id = testcase_item.data().toPyObject()
                     expanded_testcases.append(testcase_id)
                 
-        #logger.LOGGER.debug("expanded test suite: %s" % repr(expanded_testsuites))
-        #logger.LOGGER.debug("expanded test case: %s" % repr(expanded_testcases))
+        #LOGGER.debug("expanded test suite: %s" % repr(expanded_testsuites))
+        #LOGGER.debug("expanded test case: %s" % repr(expanded_testcases))
         
         self.testsModel.clear()
         for testsuite in self.dut.testsuites():
@@ -253,7 +253,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     elif not run[1].result:
                         icon = passIcon
                     else:
-                        logger.LOGGER.warn("Encounter unexpected test result: %s", run[1].result)
+                        LOGGER.warn("Encounter unexpected test result: %s", run[1].result)
                         icon = QtGui.QIcon()
                     format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run[1].start)))
                     run_item = QtGui.QStandardItem(icon, QtCore.QString("Run begin at: %s" % format_time))

@@ -5,7 +5,7 @@ import time
 import socket
 import subprocess
 
-import logger
+from XSTAF.core.logger import LOGGER
 
 #server name
 ServerName = socket.getfqdn()
@@ -59,7 +59,7 @@ class STAF(object):
         #check if staf exist
         abs_staf_starter = os.path.join(self.STAFSettings["STAFDir"], self.staf_starter)
         if not os.path.isfile(abs_staf_starter):
-            logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
+            LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
             self.status = self.STAFNotDetect
             return False
             
@@ -72,7 +72,7 @@ class STAF(object):
         try:
             import PySTAF
         except ImportError:
-            logger.LOGGER.error("Cannot import PySTAF")
+            LOGGER.error("Cannot import PySTAF")
             self.status = self.CannotImportPySTAF
             return False
             
@@ -82,10 +82,10 @@ class STAF(object):
         except PySTAF.STAFException, e:
             if e.rc == 21:
                 #error value 21 indicate STAF not running
-                logger.LOGGER.warning("Error code 21, STAF not running")
+                LOGGER.warning("Error code 21, STAF not running")
                 self.status = self.STAFNotStart
             else:
-                logger.LOGGER.error("Error registering with STAF, RC: %d" % e.rc)
+                LOGGER.error("Error registering with STAF, RC: %d" % e.rc)
                 self.status = self.CannotRegisterHandle
             return False
             
@@ -93,7 +93,7 @@ class STAF(object):
         try:
             self.staf_handle.unregister()
         except PySTAF.STAFException, e:
-            logger.LOGGER.error("Error when unregister the test handle, RC: %d" % e.rc)
+            LOGGER.error("Error when unregister the test handle, RC: %d" % e.rc)
             self.status = self.CannotUnRegisterHandle
             return False
         
@@ -102,7 +102,7 @@ class STAF(object):
         
     def check(self):
         self._check_status()
-        logger.LOGGER.debug("STAF current status: %s, pretty status: %s" % (self.status, self.pretty_status))
+        LOGGER.debug("STAF current status: %s, pretty status: %s" % (self.status, self.pretty_status))
         
     def start(self):
         '''
@@ -112,7 +112,7 @@ class STAF(object):
         self.check()
         if self.status & 0b01000000:
             #by default we only have one staf process
-            logger.LOGGER.debug("Start staf process")
+            LOGGER.debug("Start staf process")
             p = subprocess.Popen(self.abs_staf_starter, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             time.sleep(2)
             self.check()
@@ -144,7 +144,7 @@ class STAFHandle(object):
         try:
             import PySTAF
         except ImportError:
-            logger.LOGGER.error("Cannot import PySTAF")
+            LOGGER.error("Cannot import PySTAF")
             return False
             
         try:
@@ -152,9 +152,9 @@ class STAFHandle(object):
         except PySTAF.STAFException, e:
             if e.rc == 21:
                 #error value 21 indicate STAF not running
-                logger.LOGGER.error("Error code 21, STAF not running, please start it and try again")
+                LOGGER.error("Error code 21, STAF not running, please start it and try again")
             else:
-                logger.LOGGER.error("Error registering with STAF, RC: %d" % e.rc)
+                LOGGER.error("Error registering with STAF, RC: %d" % e.rc)
             return False
             
         #get handle id here
@@ -173,8 +173,8 @@ class STAFHandle(object):
         #assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
         if (result.rc != 0):
-            logger.LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
-            logger.LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
+            LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
+            LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
             return False
         
         return result
@@ -253,7 +253,7 @@ class STAFHandle(object):
         result = self._staf_handle_submit(location, service, request)
 
         return_code = result.resultContext.getRootObject()["rc"]
-        logger.LOGGER.debug("Return code is: %s" % return_code)
+        LOGGER.debug("Return code is: %s" % return_code)
         if return_code != "0":
             return False
         else:
@@ -330,12 +330,12 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if result:
-            logger.LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result.result))
+            LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result.result))
             if int(result.result) < 5:
-                logger.LOGGER.debug("DUT is locked")
+                LOGGER.debug("DUT is locked")
                 return True
             else:
-                logger.LOGGER.debug("DUT is unlocked")
+                LOGGER.debug("DUT is unlocked")
                 return False
         else:
             #Cannot get trust level, could be trust level is less than 2
@@ -353,7 +353,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            logger.LOGGER.debug("Lock fail, request: %s" % request)
+            LOGGER.debug("Lock fail, request: %s" % request)
             return False
             
         location = '%s' % DUT
@@ -362,7 +362,7 @@ class STAFHandle(object):
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
-            logger.LOGGER.debug("Lock fail, request: %s" % request)
+            LOGGER.debug("Lock fail, request: %s" % request)
             return False
             
         return True

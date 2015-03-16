@@ -4,8 +4,8 @@ import shutil
 import zipfile
 import xml.etree.ElementTree as ET
 
-import logger
-from DUT import DUT
+from XSTAF.core.logger import LOGGER
+from XSTAF.core.DUT import DUT
 
 class WorkSpace(object):
     '''
@@ -74,7 +74,7 @@ class WorkSpace(object):
             #unzip it
             zipfile.ZipFile(workspace_path).extractall()
         else:
-            logger.LOGGER.error("Invalid workspace: %s", workspace_path)
+            LOGGER.error("Invalid workspace: %s", workspace_path)
             raise ValueError("Invalid workspace: %s" % workspace_path)
 
         self.workspace_path = workspace_path
@@ -82,7 +82,7 @@ class WorkSpace(object):
         configure_file = os.path.join(workspace_path, self.ConfigFile)
         if not os.path.isfile(configure_file):
             #no configure file, just return
-            logger.LOGGER.warning("No configure file in workspace: %s", self.workspace_path)
+            LOGGER.warning("No configure file in workspace: %s", self.workspace_path)
             return
 
         #read configures
@@ -111,7 +111,7 @@ class WorkSpace(object):
                 testsuite_name = testsuite_element.attrib["name"]
                 testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, dut_ip, testsuite_name)
                 if not os.path.isfile(testsuite_path):
-                    logger.LOGGER.warn("testsuite not exist: %s", testsuite_path)
+                    LOGGER.warn("testsuite not exist: %s", testsuite_path)
                     continue
                 self._duts[dut_ip].add_testsuite(testsuite_path)
 
@@ -124,7 +124,7 @@ class WorkSpace(object):
             #update workspace path
             self.workspace_path = workspace_path
         else:
-            logger.LOGGER.error("Target workspace path not exist, please create it first: %s", workspace_path)
+            LOGGER.error("Target workspace path not exist, please create it first: %s", workspace_path)
             raise ValueError("Target workspace path not exist, please create it first: %s" % workspace_path)
         
         #function to format XML

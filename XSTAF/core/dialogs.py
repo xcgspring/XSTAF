@@ -2,11 +2,11 @@
 import time
 from PyQt4 import QtCore, QtGui
 
-import logger
-from ui.ui_settingsDialog import Ui_Settings
-from ui.ui_addDUT import Ui_addDUT
-from ui.ui_refresh import Ui_refreshDialog
-from ui.ui_confirmDialog import Ui_confirmDialog
+from XSTAF.core.logger import LOGGER
+from XSTAF.ui.ui_settingsDialog import Ui_Settings
+from XSTAF.ui.ui_addDUT import Ui_addDUT
+from XSTAF.ui.ui_refresh import Ui_refreshDialog
+from XSTAF.ui.ui_confirmDialog import Ui_confirmDialog
 
 class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
     Confirmed = False
@@ -97,11 +97,11 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
                                     WorkspaceLocation=workspace_location)
         self.server.config()
 
-        logger.LOGGER.debug("Config logging_file: %s", logging_file)
-        logger.LOGGER.debug("Config logging_level_file: %s", logging_level_file)
-        logger.LOGGER.debug("Config logging_level_stream: %s", logging_level_stream)
-        logger.LOGGER.debug("Config staf dir: %s", staf_dir)
-        logger.LOGGER.debug("Config workspace dir: %s", workspace_location)
+        LOGGER.debug("Config logging_file: %s", logging_file)
+        LOGGER.debug("Config logging_level_file: %s", logging_level_file)
+        LOGGER.debug("Config logging_level_stream: %s", logging_level_stream)
+        LOGGER.debug("Config staf dir: %s", staf_dir)
+        LOGGER.debug("Config workspace dir: %s", workspace_location)
 
         QtGui.QDialog.accept(self)
 
@@ -117,11 +117,11 @@ class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
         name = str(self.DUTName.text())
 
         if self.server.has_workspace():
-            logger.LOGGER.debug("Add DUT ip: %s name: %s", ip, name)
+            LOGGER.debug("Add DUT ip: %s name: %s", ip, name)
             workspace = self.server.get_workspace()
             workspace.add_dut(ip, name)
         else:
-            logger.LOGGER.debug("No workspace, cannot add DUT")
+            LOGGER.debug("No workspace, cannot add DUT")
         QtGui.QDialog.accept(self)
 
 class RefreshAllThread(QtCore.QThread):

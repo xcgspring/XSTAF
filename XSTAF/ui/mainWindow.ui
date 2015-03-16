@@ -50,7 +50,6 @@
     <property name="title">
      <string>STAF</string>
     </property>
-    <addaction name="actionSettings"/>
     <addaction name="separator"/>
     <addaction name="actionStartSTAF"/>
     <addaction name="actionRefresh"/>
@@ -66,6 +65,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionSettings"/>
+    <addaction name="separator"/>
     <addaction name="actionNewWorkSpace"/>
     <addaction name="actionOpenWorkSpace"/>
     <addaction name="actionSaveWorkSpace"/>
@@ -74,9 +75,8 @@
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionGenerateReport"/>
+    <addaction name="actionReportGenerator"/>
     <addaction name="actionTestSuiteGenerator"/>
-    <addaction name="actionHPQCSyncer"/>
    </widget>
    <addaction name="menuFile_2"/>
    <addaction name="menuFile"/>
@@ -121,7 +121,7 @@
    <addaction name="actionStartSTAF"/>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
-   <addaction name="actionGenerateReport"/>
+   <addaction name="actionReportGenerator"/>
   </widget>
   <action name="actionSettings">
    <property name="icon">
@@ -207,19 +207,23 @@
     <string>saveWorkSpace</string>
    </property>
   </action>
-  <action name="actionGenerateReport">
+  <action name="actionReportGenerator">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/icons/report_generate.png</normaloff>:/icons/icons/report_generate.png</iconset>
    </property>
    <property name="text">
-    <string>generateReport</string>
+    <string>reportGenerator</string>
    </property>
    <property name="toolTip">
-    <string>generateReport</string>
+    <string>reportGenerator</string>
    </property>
   </action>
   <action name="actionTestSuiteGenerator">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/generateTestSuite.png</normaloff>:/icons/icons/generateTestSuite.png</iconset>
+   </property>
    <property name="text">
     <string>testSuiteGenerator</string>
    </property>

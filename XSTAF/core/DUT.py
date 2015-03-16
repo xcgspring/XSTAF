@@ -4,11 +4,11 @@ import Queue
 import uuid
 import time
 import socket
-import logger
 from PyQt4 import QtCore
 
-from test_manage import TestSuite, Run
-from staf import STAFInstance
+from XSTAF.core.logger import LOGGER
+from XSTAF.core.test_manage import TestSuite, Run
+from XSTAF.core.staf import STAFInstance
 
 class CustomQueue(Queue.Queue):
     #custom queue basing on dict
@@ -25,13 +25,13 @@ class CustomQueue(Queue.Queue):
         #sleep a little time to make index unique
         time.sleep(0.01)
         self.queue[index] = item
-        logger.LOGGER.debug("Add task, Index: %s, task: %s" % (index, repr(item)) )
+        LOGGER.debug("Add task, Index: %s, task: %s" % (index, repr(item)) )
 
     def _get(self):
         #find oldest index and pop the item
         indexs = self.queue.keys()
         indexs.sort()
-        logger.LOGGER.debug("Get task: %s" % indexs[0] )
+        LOGGER.debug("Get task: %s" % indexs[0] )
         return self.queue.pop(indexs[0])
         
     def clear(self):
@@ -91,7 +91,7 @@ class DUTTaskRunner(QtCore.QThread):
         self.staf_handle.create_directory(self.DUT_instance.ip, self.remote_log_tmp_location)
         
     def run_task(self, work):
-        logger.LOGGER.debug("Start task, Name: %s" % work.name)
+        LOGGER.debug("Start task, Name: %s" % work.name)
         
         run = Run()
         #start time
@@ -99,13 +99,13 @@ class DUTTaskRunner(QtCore.QThread):
         #init result
         run.result = run.Pass
         #lock DUT
-        logger.LOGGER.debug("    Step1: Lock DUT, DUT: %s" % self.DUT_instance.ip)
+        LOGGER.debug("    Step1: Lock DUT, DUT: %s" % self.DUT_instance.ip)
         if not self.staf_handle.lock_DUT(self.DUT_instance.ip):
             run.result = run.Fail
             run.status = "Lock DUT Fail\n"
         else:
             #run case
-            logger.LOGGER.debug("    Step2: Run command, command: %s" % work.command)
+            LOGGER.debug("    Step2: Run command, command: %s" % work.command)
             remote_log_file = os.path.join(self.remote_log_location, str(work.ID), "%s_%s.log"%(work.name, run.start) )
             if not self.staf_handle.start_process(self.DUT_instance.ip, work.command, remote_log_file):
                 run.result = run.Fail
@@ -115,16 +115,16 @@ class DUTTaskRunner(QtCore.QThread):
             local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID))
             if not os.path.isdir(local_log_location):
                 os.makedirs(local_log_location)
-            logger.LOGGER.debug("    Step3: Copy logs")
+            LOGGER.debug("    Step3: Copy logs")
             
             #copy stdout/stderr log
-            logger.LOGGER.debug("    Step3.1: Copy stdout/stderr logs")
+            LOGGER.debug("    Step3.1: Copy stdout/stderr logs")
             if not self.staf_handle.copy_log_file(self.DUT_instance.ip, remote_log_file, local_log_location):
                 run.result = run.Fail
                 run.status = run.status+"Copy stdout/stderr logs Fail\n"
                 
             #copy tmp logs in remote global log location, and delete them after copy done
-            logger.LOGGER.debug("    Step3.2: Copy tmp logs")
+            LOGGER.debug("    Step3.2: Copy tmp logs")
             if not self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.remote_log_tmp_location, local_log_location):
                 run.result = run.Fail
                 run.status = run.status+"Copy tmp logs Fail\n"
@@ -132,7 +132,7 @@ class DUTTaskRunner(QtCore.QThread):
             run.log_location = local_log_location
                 
         #release DUT
-        logger.LOGGER.debug("    Step4: Release DUT, DUT: %s" % self.DUT_instance.ip )
+        LOGGER.debug("    Step4: Release DUT, DUT: %s" % self.DUT_instance.ip )
         if not self.staf_handle.release_DUT(self.DUT_instance.ip):
             run.result = run.Fail
             run.status = run.status+"Release DUT Fail\n"
@@ -146,7 +146,7 @@ class DUTTaskRunner(QtCore.QThread):
         self.emit(self.test_result_change)
         
     def run(self):
-        logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
+        LOGGER.debug("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
         while True:
             #check stop flag
             if self._stop_flag:
@@ -157,10 +157,10 @@ class DUTTaskRunner(QtCore.QThread):
             self.emit(self.task_queue_change)
             self.run_task(work)
         
-        logger.LOGGER.debug("DUT task runner thread for IP %s exit" % self.DUT_instance.ip)
+        LOGGER.debug("DUT task runner thread for IP %s exit" % self.DUT_instance.ip)
         
     def pause(self):
-        logger.LOGGER.debug("DUT task runner thread for IP %s stopping" % self.DUT_instance.ip)
+        LOGGER.debug("DUT task runner thread for IP %s stopping" % self.DUT_instance.ip)
         self._stop_flag = True
     
 class DUTMonitor(object):
@@ -239,7 +239,7 @@ class DUT(QtCore.QObject):
     ############################################
     def add_monitor(self):
         if STAFInstance.status & 0b10000000:
-            logger.LOGGER.error("Can not add DUT monitor, local STAF not ready")
+            LOGGER.error("Can not add DUT monitor, local STAF not ready")
             return
             
         #add monitor if needed
@@ -257,16 +257,16 @@ class DUT(QtCore.QObject):
             self.status = DUTMonitor.DUTStatusUnknown
             self.pretty_status = DUTMonitor.pretty_status(self.status)
         
-        logger.LOGGER.debug("DUT IP: %s Name %s Status %s", self.ip, self.name, self.pretty_status)
+        LOGGER.debug("DUT IP: %s Name %s Status %s", self.ip, self.name, self.pretty_status)
         self.emit(self.status_change)
         
     def add_runner(self):
         if STAFInstance.status & 0b10000000:
-            logger.LOGGER.error("Can not add DUT task runner, local STAF not ready")
+            LOGGER.error("Can not add DUT task runner, local STAF not ready")
             return
 
         if self.status & 0b11000000:
-            logger.LOGGER.error("Can not add DUT task runner, DUT not ready")
+            LOGGER.error("Can not add DUT task runner, DUT not ready")
             return
             
         if self.task_runner is None:

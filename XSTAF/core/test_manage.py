@@ -5,7 +5,7 @@ import uuid
 import threading
 import xml.etree.ElementTree as ET
 
-import logger
+from XSTAF.core.logger import LOGGER
 
 class Run(object):
     #test case result
@@ -39,7 +39,7 @@ class Run(object):
                 value = self.Results[value]
             self._result = value
         else:
-            logger.LOGGER.warning("unacceptable result: %s" % repr(value))
+            LOGGER.warning("unacceptable result: %s" % repr(value))
 
     @property
     def pretty_result(self):
@@ -134,24 +134,3 @@ class TestSuite(object):
                 testcase.runs[run.start] = run
                 
             self.testcases[testcase.ID] = testcase
-
-    def passed_count(self):
-        count = 0
-        for testcase in self.testcases.items():
-            if testcase[1].result == testcase[1].Pass:
-                count +=1
-        return count
-        
-    def failed_count(self):
-        count = 0
-        for testcase in self.testcases.items():
-            if testcase[1].result == testcase[1].Fail:
-                count +=1
-        return count
-        
-    def not_run_count(self):
-        count = 0
-        for testcase in self.testcases.items():
-            if testcase[1].result == testcase[1].NotRun:
-                count +=1
-        return count

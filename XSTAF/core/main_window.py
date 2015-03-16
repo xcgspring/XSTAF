@@ -2,10 +2,10 @@
 import os
 from PyQt4 import QtCore, QtGui
 
-from ui.ui_mainWindow import Ui_XSTAFMainWindow
-import logger
-import dialogs
-from DUT_window import DUTWindow
+from XSTAF.ui.ui_mainWindow import Ui_XSTAFMainWindow
+from XSTAF.core.logger import LOGGER
+from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog
+from XSTAF.core.DUT_window import DUTWindow
 
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
 
@@ -60,7 +60,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.refresh_ui()
 
     def settings(self):
-        settings_dialog = dialogs.SettingsDialog(self)
+        settings_dialog = SettingsDialog(self)
         settings_dialog.exec_()
 
     def handle_staf_status_change(self, staf_status):
@@ -118,7 +118,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def check_unsaved_workspace(self):
         if self.server.is_default_workspace_exist():
             #ask user if load exist workspace or create a new one
-            load_default = dialogs.ConfirmDialog.confirm(self, "Detect unsaved workspace, load it or not?")
+            load_default = ConfirmDialog.confirm(self, "Detect unsaved workspace, load it or not?")
             if load_default:
                 self.server.add_workspace()
                 workspace = self.server.get_workspace()
@@ -128,7 +128,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def new_workspace(self):
         #ask user if save workspace before open new workspace
         if self.server.has_workspace():
-            save_current = dialogs.ConfirmDialog.confirm(self, "Save current workspace before create new one?")
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before create new one?")
             if save_current:
                 self.save_workspace()
 
@@ -138,7 +138,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def open_workspace(self):
         #ask user if save workspace before open new workspace
         if self.server.has_workspace():
-            save_current = dialogs.ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before opening new one?")
             if save_current:
                 self.save_workspace()
 
@@ -162,7 +162,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             workspace.save(workspace.workspace_path)
 
     def refresh(self):
-        refresh_dialog = dialogs.RefreshAllDialog(self)
+        refresh_dialog = RefreshAllDialog(self)
         refresh_dialog.exec_()
 
     def refresh_ui(self):
@@ -195,7 +195,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         if not self.server.has_workspace():
             return
 
-        addDUTDialog = dialogs.AddDUTDialog(self)
+        addDUTDialog = AddDUTDialog(self)
         addDUTDialog.exec_()
         self.refresh_ui()
 
@@ -244,7 +244,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
                 dut_instance.remove_runner()
 
             #check if need save workspace
-            save_current = dialogs.ConfirmDialog.confirm(self, "Save current workspace before close?")
+            save_current = ConfirmDialog.confirm(self, "Save current workspace before close?")
             if save_current:
                 self.save_workspace()
 
