@@ -3,7 +3,7 @@ import os
 from PyQt4 import QtCore, QtGui
 
 from XSTAF.ui.ui_mainWindow import Ui_XSTAFMainWindow
-from XSTAF.core.logger import LOGGER
+import XSTAF.core.logger as logger
 from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog
 from XSTAF.core.DUT_window import DUTWindow
 

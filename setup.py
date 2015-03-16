@@ -4,8 +4,8 @@ from distutils.core import setup
 setup(
 
     name = "XSTAF",
-    packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", "XSTAF.tools", "XSTAF.tools.report_generator"],
-    package_data = {"XSTAF.ui": "icons/*"},
+    packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", "XSTAF.tools"],
+    package_data = {"XSTAF.ui": ["icons/*"]},
     version = "0.0.1",
     description = "distribute auto execution framework basing on STAF",
     author = "xcgspring",
