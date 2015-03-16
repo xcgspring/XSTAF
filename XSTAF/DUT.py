@@ -58,8 +58,8 @@ class CustomQueue(Queue.Queue):
 class DUTTaskRunner(QtCore.QThread):
     #signal to update DUT ui
     test_result_change = QtCore.SIGNAL("testResultChange")
-    #signal thread exit
-    #taskRunnerExit = QtCore.SIGNAL("taskRunnerExit")
+    #task queue change
+    task_queue_change = QtCore.SIGNAL("taskQueueChange")
     
     def __init__(self, DUT_instance):
         QtCore.QThread.__init__(self)
@@ -143,7 +143,7 @@ class DUTTaskRunner(QtCore.QThread):
         work.runs[run.start] = run
         
         #emit update ui signal
-        self.emit(self.updateDUTUI)
+        self.emit(self.test_result_change)
         
     def run(self):
         logger.LOGGER.debug("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
@@ -154,10 +154,8 @@ class DUTTaskRunner(QtCore.QThread):
             
             #run task
             work = self.task_queue.get(block=True)
+            self.emit(self.task_queue_change)
             self.run_task(work)
-        
-        #emit thread edit signal
-        #self.emit(self.taskRunnerExit)
         
         logger.LOGGER.debug("DUT task runner thread for IP %s exit" % self.DUT_instance.ip)
         

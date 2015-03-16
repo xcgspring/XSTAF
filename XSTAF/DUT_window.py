@@ -56,6 +56,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def handle_dut_status_change(self):
         if not self.dut.status:
             self.dut.add_runner()
+            #connect runner signals to DUT view slots
+            self.connect(self.dut.task_runner, self.dut.task_runner.test_result_change, self._refresh_test_view)
+            self.connect(self.dut.task_runner, self.dut.task_runner.task_queue_change, self._refresh_task_queue_view)
         else:
             self.dut.remove_runner()
             self.task_runner_running = False
@@ -183,7 +186,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self._refresh_task_queue_view()
 
     def start_task_runner(self):
-        self.dut.start_task_runner()
+        self.dut.start_runner()
 
         self.actionStartRunner.setDisabled(True)
         self.actionPauseRunner.setEnabled(True)
@@ -192,13 +195,13 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         logger.LOGGER.debug("Start task runner")
 
     def pause_task_runner(self):
-        self.dut.pause_task_runner()
+        self.dut.stop_runner()
 
         self.actionStartRunner.setEnabled(True)
         self.actionPauseRunner.setDisabled(True)
 
         self.task_runner_running = False
-        logger.LOGGER.debug("Pause task runner")
+        logger.LOGGER.debug("Stop task runner")
 
     def refresh(self):
         refresh_dialog = dialogs.RefreshDUTDialog(self)
@@ -211,15 +214,38 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         failIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/fail.png")))
         passIcon = QtGui.QIcon()
         passIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/pass.png")))
-
+        
+        #keep node expanded info
+        #after refresh, should restore the expanded node
+        expanded_testsuites = []
+        expanded_testcases = []
+        for i in range(self.testsModel.rowCount()):
+            testsuite_item = self.testsModel.item(i)
+            testsuite_index = self.testsModel.indexFromItem(testsuite_item)
+            if self.TestsTreeView.isExpanded(testsuite_index):
+                testsuite_name = testsuite_item.text()
+                expanded_testsuites.append(testsuite_name)
+            for i in range(testsuite_item.rowCount()):
+                testcase_item = testsuite_item.child(i)
+                testcase_index = self.testsModel.indexFromItem(testcase_item)
+                if self.TestsTreeView.isExpanded(testcase_index):
+                    testcase_id = testcase_item.data().toPyObject()
+                    expanded_testcases.append(testcase_id)
+                
+        #logger.LOGGER.debug("expanded test suite: %s" % repr(expanded_testsuites))
+        #logger.LOGGER.debug("expanded test case: %s" % repr(expanded_testcases))
+        
         self.testsModel.clear()
         for testsuite in self.dut.testsuites():
-            testsuite_name = testsuite[0]
-            testsuite_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite_name))
-            for testcase in testsuite[1].testcases.items():
+            testsuite_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite.name))
+            self.testsModel.appendRow(testsuite_item)
+            if testsuite.name in expanded_testsuites:
+                testsuite_index = self.testsModel.indexFromItem(testsuite_item)
+                self.TestsTreeView.expand(testsuite_index)
+            
+            for testcase in testsuite.testcases.items():
                 testcase_item = QtGui.QStandardItem(QtCore.QString(testcase[1].name))
                 for run in testcase[1].runs.items():
-
                     if run[1].result & 0b10000000:
                         icon = notRunIcon
                     elif run[1].result & 0b00000001:
@@ -229,7 +255,6 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     else:
                         logger.LOGGER.warn("Encounter unexpected test result: %s", run[1].result)
                         icon = QtGui.QIcon()
-
                     format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run[1].start)))
                     run_item = QtGui.QStandardItem(icon, QtCore.QString("Run begin at: %s" % format_time))
                     run_id = run[0]
@@ -239,8 +264,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testcase_id = testcase[0]
                 testcase_item.setData(QtCore.QVariant(testcase_id))
                 testsuite_item.appendRow(testcase_item)
-
-            self.testsModel.appendRow(testsuite_item)
+                if testcase_id in expanded_testcases:
+                    testcase_index = self.testsModel.indexFromItem(testcase_item)
+                    self.TestsTreeView.expand(testcase_index)
 
     def _refresh_task_queue_view(self):
         task_queue = self.dut.list_all_tasks_in_task_queue()

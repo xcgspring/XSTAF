@@ -202,22 +202,23 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         if not self.server.has_workspace():
             return
 
+        workspace = self.server.get_workspace()
         for selectedIndex in self.DUTView.selectedIndexes():
-            DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selectedIndex.row(), 1)).text())
-            if self.server.has_DUT(DUT_IP):
-                self.server.remove_DUT(DUT_IP)
+            dut_ip = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selectedIndex.row(), 1)).text())
+            if workspace.has_dut(dut_ip):
+                workspace.remove_dut(dut_ip)
         self.refresh_ui()
 
     def open_DUT_view(self):
         for selected_index in self.DUTView.selectedIndexes():
-            DUT_IP = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selected_index.row(), 1)).text())
-            if DUT_IP not in self.DUTWindows:
-                DUT_window = DUTWindow(self, DUT_IP)
-                self.DUTWindows[DUT_IP] = DUT_window
-                DUT_window.show()
+            dut_ip = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selected_index.row(), 1)).text())
+            if dut_ip not in self.DUTWindows:
+                dut_window = DUTWindow(self, dut_ip)
+                self.DUTWindows[dut_ip] = dut_window
+                dut_window.show()
             else:
-                DUT_window = self.DUTWindows[DUT_IP]
-                DUT_window.setFocus()
+                dut_window = self.DUTWindows[dut_ip]
+                dut_window.setFocus()
 
     def DUT_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()

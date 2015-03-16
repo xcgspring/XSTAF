@@ -100,21 +100,21 @@ class WorkSpace(object):
                 self.settings[setting_name] = setting_value
 
         #load DUTs and test suites
-        DUTs_element = root_element.find("DUTs")
-        DUT_elements = DUTs_element.findall("DUT")
-        for DUT_element in DUT_elements:
-            DUT_IP = DUT_element.attrib["ip"]
-            DUT_name = DUT_element.attrib["name"]
-            self.add_DUT(DUT_IP, DUT_name)
-            testsuites_element = DUT_element.find("testsuites")
+        duts_element = root_element.find("DUTs")
+        dut_elements = duts_element.findall("DUT")
+        for dut_element in dut_elements:
+            dut_ip = dut_element.attrib["ip"]
+            dut_name = dut_element.attrib["name"]
+            self.add_dut(dut_ip, dut_name)
+            testsuites_element = dut_element.find("testsuites")
             testsuite_elements = testsuites_element.findall("testsuite")
             for testsuite_element in testsuite_elements:
                 testsuite_name = testsuite_element.attrib["name"]
-                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, DUT_IP, testsuite_name)
+                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, dut_ip, testsuite_name)
                 if not os.path.isfile(testsuite_path):
                     logger.LOGGER.warn("testsuite not exist: %s", testsuite_path)
                     continue
-                self._duts[DUT_IP].add_testsuite(testsuite_path)
+                self._duts[dut_ip].add_testsuite(testsuite_path)
 
     def save(self, workspace_path):
         '''
@@ -157,15 +157,11 @@ class WorkSpace(object):
             setting_element.text = setting_value
 
         #dump DUTs and test suites
-        for DUT_item in self._duts.items():
-            DUT_IP = DUT_item[0]
-            DUT_instance = DUT_item[1]
-            DUT_name = DUT_instance.name
-            DUT_element = ET.SubElement(DUTs_element, "DUT", attrib={"ip":DUT_IP, "name":DUT_name})
-            testsuites_element = ET.SubElement(DUT_element, "testsuites")
-            for testsuite in DUT_instance.testsuites.items():
-                testsuite_name = testsuite[0]
-                testsuite_element = ET.SubElement(testsuites_element, "testsuite", attrib={"name":testsuite_name})
+        for dut in self.duts():
+            dut_element = ET.SubElement(DUTs_element, "DUT", attrib={"ip":dut.ip, "name":dut.name})
+            testsuites_element = ET.SubElement(dut_element, "testsuites")
+            for testsuite in dut.testsuites():
+                ET.SubElement(testsuites_element, "testsuite", attrib={"name":testsuite.name})
 
         #write configure file
         configure_file = os.path.join(self.workspace_path, self.ConfigFile)
@@ -173,16 +169,11 @@ class WorkSpace(object):
         ET.ElementTree(root_element).write(configure_file)
 
         #save testsuites and test results
-        for DUT_item in self._duts.items():
-            DUT_IP = DUT_item[0]
-            DUT_instance = DUT_item[1]
-            for testsuite in DUT_instance.testsuites.items():
-                testsuite_name = testsuite[0]
-                testsuite_instance = testsuite[1]
-
+        for dut in self.duts():
+            for testsuite in dut.testsuites():
                 root_element = ET.Element("TestSuite")
                 testcases_element = ET.SubElement(root_element, "TestCases")
-                for testcase in testsuite_instance.testcases.items():
+                for testcase in testsuite.testcases.items():
                     testcase_element = ET.SubElement(testcases_element, "TestCase")
                     name_element = ET.SubElement(testcase_element, "Name")
                     name_element.text = testcase[1].name
@@ -203,13 +194,13 @@ class WorkSpace(object):
                         end_element = ET.SubElement(run_element, "End")
                         end_element.text = run[1].end
                         result_element = ET.SubElement(run_element, "Result")
-                        result_element.text = run[1].get_pretty_result()
+                        result_element.text = run[1].pretty_result
                         status_element = ET.SubElement(run_element, "Status")
                         status_element.text = run[1].status
                         log_element = ET.SubElement(run_element, "Log")
                         log_element.text = run[1].log_location
 
-                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, DUT_IP, testsuite_name)
+                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, dut.ip, testsuite.name)
                 testsuite_dir = os.path.dirname(testsuite_path)
                 if not os.path.isdir(testsuite_dir):
                     os.makedirs(testsuite_dir)
