@@ -31,16 +31,21 @@ class STAF(object):
                     CannotUnRegisterHandle : "Cannot unregister handle",
                     STAFNotStart : "STAF not start",
                     STAFOK : "STAF OK", }
+                    
+    #staf settings
+    STAFSettings = {"STAFDir" : "",
+                    }
     
     def __init__(self):
         self.staf_starter = "startSTAFProc.bat"
         self.handles = {}
         self.status = self.StatusUnKnown
-        
-    def config(self, **kwargs):
+    
+    @classmethod
+    def config(cls, **kwargs):
         for arg in kwargs.items():
-            if arg[0] in STAFSettings:
-                STAFSettings[arg[0]] = arg[1]
+            if arg[0] in cls.STAFSettings:
+                cls.STAFSettings[arg[0]] = arg[1]
         
     @property
     def pretty_status(self):
@@ -52,7 +57,7 @@ class STAF(object):
         check if staf process started
         '''
         #check if staf exist
-        abs_staf_starter = os.path.join(STAFSettings["STAFDir"], self.staf_starter)
+        abs_staf_starter = os.path.join(self.STAFSettings["STAFDir"], self.staf_starter)
         if not os.path.isfile(abs_staf_starter):
             logger.LOGGER.error("STAF starter not exist: %s" % abs_staf_starter)
             self.status = self.STAFNotDetect
@@ -62,7 +67,7 @@ class STAF(object):
             
         #check if staf process exist
         #import python lib
-        python_staf_lib_path = os.path.join(STAFSettings["STAFDir"], "bin")
+        python_staf_lib_path = os.path.join(self.STAFSettings["STAFDir"], "bin")
         sys.path.append(python_staf_lib_path)
         try:
             import PySTAF
@@ -116,14 +121,15 @@ class STAF(object):
         '''
         create and get STAF handle to control STAF service
         '''
-        return STAFHandle(handle_name)
+        return STAFHandle(handle_name, self.STAFSettings["STAFDir"])
         
 class STAFHandle(object):
     '''
     staf handle, every DUT thread will get a handle instance
     '''
-    def __init__(self, handle_name):
+    def __init__(self, handle_name, staf_dir):
         self.staf_handle_name = handle_name
+        self.staf_dir = staf_dir
         #staf id, 0 is an invalid id
         self.staf_handle_id = 0
         self.staf_handle = None
@@ -133,7 +139,7 @@ class STAFHandle(object):
         create a staf handle and register to staf process
         '''
         #import python lib
-        python_staf_lib_path = os.path.join(STAFSettings["STAFDir"], "bin")
+        python_staf_lib_path = os.path.join(self.staf_dir, "bin")
         sys.path.append(python_staf_lib_path)
         try:
             import PySTAF
@@ -374,8 +380,3 @@ class STAFHandle(object):
     
 #global staf instance
 STAFInstance = STAF()
-
-#staf settings
-STAFSettings = {"STAFDir" : "",
-                }
-

@@ -21,8 +21,8 @@ class CustomLogger(QtCore.QObject):
         self.logger = logging.getLogger(self.logger_name)
         
         #configs
-        self.configs = { "logging_level_file":logging.DEBUG,
-                    "logging_level_stream":logging.DEBUG, 
+        self.configs = { "logging_level_file": "DEBUG",
+                    "logging_level_stream": "DEBUG", 
                     "logging_stream": sys.stdout,
                     "logging_file":"XSTAF.log", 
                     "file_logging_mode":"w", 
@@ -46,8 +46,8 @@ class CustomLogger(QtCore.QObject):
             if key in self.configs:
                 self.configs[key] = value
         
-        logging_level_file=self.configs["logging_level_file"]
-        logging_level_stream=self.configs["logging_level_stream"]
+        logging_level_file=level_name(self.configs["logging_level_file"])
+        logging_level_stream=level_name(self.configs["logging_level_stream"])
         logging_stream=self.configs["logging_stream"]
         logging_file=self.configs["logging_file"]
         file_logging_mode=self.configs["file_logging_mode"]

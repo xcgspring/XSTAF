@@ -9,6 +9,7 @@ from main_window import MainWindow
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     server = Server()
+    server.config()
     mainWin = MainWindow(server)
     mainWin.show()
     mainWin.check_unsaved_workspace()

@@ -18,7 +18,14 @@ class Server(QtCore.QObject):
         QtCore.QObject.__init__(self)
         #settings
         self.settings = {
+            #logger
+            "LogLocation" : r"c:\XSTAF\XSTAF.log",
+            "LoggerLevelFile" : "DEBUG",
+            "LoggerLevelStream" : "INFO",
+            #STAF
             "STAFDir" : r"c:\staf",
+            #workspace
+            "WorkspaceLocation" : r"c:\XSTAF\workspaces",
         }
 
         self._workspace = None
@@ -33,7 +40,20 @@ class Server(QtCore.QObject):
             return self.settings[index]
         else:
             return None
+    
+    def config(self):
+        self.config_logger()
+        self.config_staf()
+        self.config_workspace()
         
+    ############################################
+    #logger related methods
+    ############################################
+    def config_logger(self):
+        logger.LOGGER.config(logging_level_file = self.settings["LoggerLevelFile"],
+                            logging_level_stream = self.settings["LoggerLevelStream"],
+                            logging_file = self.settings["LogLocation"])
+    
     ############################################
     #STAF related methods
     ############################################
@@ -52,6 +72,9 @@ class Server(QtCore.QObject):
     #workspace management methods
     #current only support one workspace, load another workspace will replace current workspace
     ############################################
+    def config_workspace(self):
+        WorkSpace.config(WorkspaceLocation = self.settings["WorkspaceLocation"])
+
     @staticmethod
     def is_default_workspace_exist():
         return WorkSpace.is_default_exist()

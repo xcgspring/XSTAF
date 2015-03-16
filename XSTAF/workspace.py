@@ -21,27 +21,23 @@ class WorkSpace(object):
     TestResultFolder = "test_results"
     TestLogFolder = "test_logs"
 
-    #default workspace location
-    DefaultWorkspacePath = r"c:\XSTAF\workspaces\.default"
+    #settings
+    settings = {"WorkspaceLocation" : r"c:\XSTAF\workspaces",
+                "DefaultWorkspace" : r".default",}
 
     def __init__(self):
-        #some settings
-        self.settings = {}
         #DUT instance list for DUT management
         self._duts = {}
 
         self.workspace_path = ""
-
-    def update_settings(self, **kwargs):
+        
+    @classmethod
+    def config(cls, **kwargs):
         for arg in kwargs.items():
-            if arg[0] in self.settings:
-                self.settings[arg[0]] = arg[1]
-
-    def get_settings(self, index):
-        if index in self.settings:
-            return self.settings[index]
-        else:
-            return None
+            key = arg[0]
+            value = arg[1]
+            if key in cls.settings:
+                cls.settings[key] = value
 
     ############################################
     #workspace related methods
@@ -49,7 +45,8 @@ class WorkSpace(object):
     @classmethod
     def is_default_exist(cls):
         #check if default workspace already existing
-        if os.path.isdir(cls.DefaultWorkspacePath):
+        default_workspace_path = os.path.join(cls.settings["WorkspaceLocation"], cls.settings["DefaultWorkspace"])
+        if os.path.isdir(default_workspace_path):
             return True
         else:
             return False
@@ -57,14 +54,16 @@ class WorkSpace(object):
     @classmethod
     def clean_default(cls):
         #clean default workspace
-        if os.path.isdir(cls.DefaultWorkspacePath):
-            shutil.rmtree(cls.DefaultWorkspacePath)
+        default_workspace_path = os.path.join(cls.settings["WorkspaceLocation"], cls.settings["DefaultWorkspace"])
+        if os.path.isdir(default_workspace_path):
+            shutil.rmtree(default_workspace_path)
 
     def new(self):
         self.clean_default()
-        if not os.path.isdir(self.DefaultWorkspacePath):
-            os.makedirs(self.DefaultWorkspacePath)
-        self.workspace_path = self.DefaultWorkspacePath
+        default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
+        if not os.path.isdir(default_workspace_path):
+            os.makedirs(default_workspace_path)
+        self.workspace_path = os.path.join(default_workspace_path)
 
     def load(self, workspace_path):
         if os.path.isdir(workspace_path):
@@ -208,7 +207,8 @@ class WorkSpace(object):
                 ET.ElementTree(root_element).write(testsuite_path)
 
     def is_current_default(self):
-        return self.workspace_path == self.DefaultWorkspacePath
+        default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
+        return self.workspace_path == default_workspace_path
 
     def export(self, package_path):
         pass

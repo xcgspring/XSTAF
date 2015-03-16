@@ -142,7 +142,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             if save_current:
                 self.save_workspace()
 
-        workspace_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Open WorkSpace"))
+        workspace_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Open WorkSpace", self.server.get_settings("WorkspaceLocation")))
         if os.path.isdir(workspace_path):
             self.server.add_workspace()
             workspace = self.server.get_workspace()
@@ -155,8 +155,9 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
 
         workspace = self.server.get_workspace()
         if workspace.is_current_default():
-            workspace_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Save WorkSpace"))
-            workspace.save(workspace_path)
+            workspace_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Save WorkSpace", self.server.get_settings("WorkspaceLocation")))
+            if workspace_path:
+                workspace.save(workspace_path)
         else:
             workspace.save(workspace.workspace_path)
 

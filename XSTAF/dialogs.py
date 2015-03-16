@@ -69,37 +69,39 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
 
         #init the settings
         self.STAFDirEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("STAFDir")))
-        self.loggingFileEdit.setText(QtCore.QString("%0").arg(logger.LOGGER.configs["logging_file"]))
+        self.loggingFileEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("LogLocation")))
+        self.WorkspaceLocation.setText(QtCore.QString("%0").arg(self.server.get_settings("WorkspaceLocation")))
+        
+        logging_level_file = self.server.get_settings("LoggerLevelFile")
+        logging_level_stream = self.server.get_settings("LoggerLevelStream")
 
-        indexs = {"CRITICAL": 0, \
-                "ERROR": 1, \
-                "WARNING": 2, \
-                "INFO": 3, \
-                "DEBUG": 4, }
+        for level in ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]:
+            self.loggingFileLevel.addItem(level)
+            self.loggingStreamLevel.addItem(level)
 
-        for key in indexs.keys():
-            self.loggingFileLevel.insertItem(indexs[key], QtCore.QString(key))
-            self.loggingStreamLevel.insertItem(indexs[key], QtCore.QString(key))
-
-        logging_level_file = logger.level_name(logger.LOGGER.configs["logging_level_file"])
-        logging_level_stream = logger.level_name(logger.LOGGER.configs["logging_level_stream"])
-
+        indexs = {"CRITICAL" : 0, "ERROR": 1, "WARNING": 2, "INFO": 3, "DEBUG": 4}
         self.loggingFileLevel.setCurrentIndex(indexs[logging_level_file])
         self.loggingStreamLevel.setCurrentIndex(indexs[logging_level_stream])
 
     def accept(self):
-        STAFDir = str(self.STAFDirEdit.text())
-        self.server.apply_settings(STAFDir=STAFDir)
-        self.server.config_staf()
+        logging_file = str(self.loggingFileEdit.text())
+        logging_level_file=str(self.loggingFileLevel.currentText())
+        logging_level_stream=str(self.loggingStreamLevel.currentText())
+        staf_dir = str(self.STAFDirEdit.text())
+        workspace_location = str(self.WorkspaceLocation.text())
+        
+        self.server.apply_settings(STAFDir=staf_dir, \
+                                    LogLocation=logging_file, \
+                                    LoggerLevelFile=logging_level_file, \
+                                    LoggerLevelStream=logging_level_stream, \
+                                    WorkspaceLocation=workspace_location)
+        self.server.config()
 
-        logger.LOGGER.config(logging_file=str(self.loggingFileEdit.text()),\
-                        logging_level_file=logger.level_name(str(self.loggingFileLevel.currentText())),\
-                        logging_level_stream=logger.level_name(str(self.loggingStreamLevel.currentText())))
-
-        logger.LOGGER.debug("Config staf dir: %s", STAFDir)
-        logger.LOGGER.debug("Config logging_file: %s", str(self.loggingFileEdit.text()))
-        logger.LOGGER.debug("Config logging_level_file: %s", str(self.loggingFileLevel.currentText()))
-        logger.LOGGER.debug("Config logging_level_stream: %s", str(self.loggingStreamLevel.currentText()))
+        logger.LOGGER.debug("Config logging_file: %s", logging_file)
+        logger.LOGGER.debug("Config logging_level_file: %s", logging_level_file)
+        logger.LOGGER.debug("Config logging_level_stream: %s", logging_level_stream)
+        logger.LOGGER.debug("Config staf dir: %s", staf_dir)
+        logger.LOGGER.debug("Config workspace dir: %s", workspace_location)
 
         QtGui.QDialog.accept(self)
 
