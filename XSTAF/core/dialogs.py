@@ -7,6 +7,7 @@ from XSTAF.ui.ui_settingsDialog import Ui_Settings
 from XSTAF.ui.ui_addDUT import Ui_addDUT
 from XSTAF.ui.ui_refresh import Ui_refreshDialog
 from XSTAF.ui.ui_confirmDialog import Ui_confirmDialog
+from XSTAF.ui.ui_toolManager import Ui_toolManagerDialog
 
 class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
     Confirmed = False
@@ -165,3 +166,50 @@ class RefreshAllDialog(QtGui.QDialog, Ui_refreshDialog):
 
     def update_DUTsView(self):
         self.parent.refresh_ui()
+
+class ToolManagerDialog(QtGui.QDialog, Ui_toolManagerDialog):
+    def __init__(self, main_window):
+        QtGui.QDialog.__init__(self, main_window)
+        self.setupUi(self)
+        self.parent = main_window
+        self.server = main_window.server
+        
+        #signal and slot
+        self.connect(self.downButton, QtCore.SIGNAL("clicked(bool)"), self.remove_tool)
+        self.connect(self.upButton, QtCore.SIGNAL("clicked(bool)"), self.add_tool)
+        #tool list view
+        self.loaded_tools_model = QtGui.QStandardItemModel(self.loadedToolsListView)
+        self.loadedToolsListView.setModel(self.loaded_tools_model)
+        
+        self.avaliable_tools_model = QtGui.QStandardItemModel(self.avaliableToolsListView)
+        self.avaliableToolsListView.setModel(self.avaliable_tools_model)
+        
+        #self.downButton.setDisabled(True)
+        #self.upButton.setDisabled(True)
+        
+        self._refresh_tool_view()
+        
+    def _refresh_tool_view(self):
+        self.loaded_tools_model.clear()
+        for tool_name, tool in self.server.loaded_tools():
+            tool_item = QtGui.QStandardItem(tool.icon(), QtCore.QString("%s" % tool_name))
+            self.loaded_tools_model.appendRow(tool_item)
+            
+        self.avaliable_tools_model.clear()
+        for tool_name, tool in self.server.available_tools():
+            tool_item = QtGui.QStandardItem(tool.icon(), QtCore.QString("%s" % tool_name))
+            self.avaliable_tools_model.appendRow(tool_item)
+        
+    def add_tool(self):
+        for selected_index in self.avaliableToolsListView.selectedIndexes():
+            tool_item = self.avaliable_tools_model.itemFromIndex(selected_index)
+            tool_name = str(tool_item.text())
+            self.server.add_tool(tool_name)
+        self._refresh_tool_view()
+        
+    def remove_tool(self):
+        for selected_index in self.loadedToolsListView.selectedIndexes():
+            tool_item = self.avaliable_tools_model.itemFromIndex(selected_index)
+            tool_name = str(tool_item.text())
+            self.server.remove_tool(tool_name)
+        self._refresh_tool_view()

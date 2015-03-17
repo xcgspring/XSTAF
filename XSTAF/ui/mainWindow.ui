@@ -46,7 +46,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuSTAF">
     <property name="title">
      <string>STAF</string>
     </property>
@@ -61,7 +61,7 @@
     <addaction name="actionAddDUT"/>
     <addaction name="actionRemoveDUT"/>
    </widget>
-   <widget class="QMenu" name="menuFile_2">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
@@ -71,17 +71,17 @@
     <addaction name="actionOpenWorkSpace"/>
     <addaction name="actionSaveWorkSpace"/>
    </widget>
-   <widget class="QMenu" name="menuReport">
+   <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionReportGenerator"/>
-    <addaction name="actionTestSuiteGenerator"/>
+    <addaction name="actionToolManager"/>
+    <addaction name="separator"/>
    </widget>
-   <addaction name="menuFile_2"/>
    <addaction name="menuFile"/>
+   <addaction name="menuSTAF"/>
    <addaction name="menuDUTs"/>
-   <addaction name="menuReport"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="XSTAFLogDock">
@@ -121,7 +121,7 @@
    <addaction name="actionStartSTAF"/>
    <addaction name="actionRefresh"/>
    <addaction name="separator"/>
-   <addaction name="actionReportGenerator"/>
+   <addaction name="actionToolManager"/>
   </widget>
   <action name="actionSettings">
    <property name="icon">
@@ -207,44 +207,24 @@
     <string>saveWorkSpace</string>
    </property>
   </action>
-  <action name="actionReportGenerator">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/icons/report_generate.png</normaloff>:/icons/icons/report_generate.png</iconset>
-   </property>
-   <property name="text">
-    <string>reportGenerator</string>
-   </property>
-   <property name="toolTip">
-    <string>reportGenerator</string>
-   </property>
-  </action>
-  <action name="actionTestSuiteGenerator">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/icons/generateTestSuite.png</normaloff>:/icons/icons/generateTestSuite.png</iconset>
-   </property>
-   <property name="text">
-    <string>testSuiteGenerator</string>
-   </property>
-   <property name="toolTip">
-    <string>testSuiteGenerator</string>
-   </property>
-  </action>
-  <action name="actionHPQCSyncer">
-   <property name="text">
-    <string>HPQCSyncer</string>
-   </property>
-   <property name="toolTip">
-    <string>HPQCSyncer</string>
-   </property>
-  </action>
   <action name="actionOpenDUTView">
    <property name="text">
     <string>openDUTView</string>
    </property>
    <property name="toolTip">
     <string>openDUTView</string>
+   </property>
+  </action>
+  <action name="actionToolManager">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/icons/toolManage.png</normaloff>:/icons/icons/toolManage.png</iconset>
+   </property>
+   <property name="text">
+    <string>toolManager</string>
+   </property>
+   <property name="toolTip">
+    <string>toolManager</string>
    </property>
   </action>
  </widget>

@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from XSTAF.ui.ui_mainWindow import Ui_XSTAFMainWindow
 import XSTAF.core.logger as logger
-from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog
+from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog, ToolManagerDialog
 from XSTAF.core.DUT_window import DUTWindow
 
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
@@ -40,6 +40,8 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
         self.connect(self.actionOpenDUTView, QtCore.SIGNAL("triggered(bool)"), self.open_DUT_view)
+        
+        self.connect(self.actionToolManager, QtCore.SIGNAL("triggered(bool)"), self.open_tool_manager)
 
         #signals and slots for DUT view
         self.connect(self.DUTView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.DUT_view_right_clicked)
@@ -58,6 +60,8 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
 
         #refresh ui
         self.refresh_ui()
+        #refresh tools menu
+        self.refresh_tools_menu()
 
     def settings(self):
         settings_dialog = SettingsDialog(self)
@@ -220,6 +224,28 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
             else:
                 dut_window = self.DUTWindows[dut_ip]
                 dut_window.setFocus()
+                
+    def open_tool_manager(self):
+        dialog = ToolManagerDialog(self)
+        dialog.exec_()
+        self.refresh_tools_menu()
+        
+    def refresh_tools_menu(self):
+        #update tools menu items
+        self.menuTools.clear()
+        self.menuTools.addAction(self.actionToolManager)
+        self.menuTools.addSeparator()
+        for tool_name, tool_class in self.server.loaded_tools():
+            tool_instance = tool_class(self)
+            #new action
+            action = QtGui.QAction(self)
+            action.setObjectName(tool_name)
+            icon = tool_instance.icon()
+            action.setIcon(icon)
+            #add action to menu
+            self.menuTools.addAction(action)
+            #connect action signal to tool launch function
+            self.connect(action, QtCore.SIGNAL("triggered(bool)"), tool_instance.launch)
 
     def DUT_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()

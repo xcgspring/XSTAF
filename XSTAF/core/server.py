@@ -4,6 +4,7 @@ from PyQt4 import QtCore
 from XSTAF.core.logger import LOGGER
 from XSTAF.core.workspace import WorkSpace
 from XSTAF.core.staf import STAFInstance
+from XSTAF.core.tool_manage import ToolManager
 
 class Server(QtCore.QObject):
     '''
@@ -26,9 +27,13 @@ class Server(QtCore.QObject):
             "STAFDir" : r"c:\staf",
             #workspace
             "WorkspaceLocation" : r"c:\XSTAF\workspaces",
+            #tools dir
+            "ToolsLocation" : r"tools",
+            "ToolsConfigureFile" : "config.pickle",
         }
 
         self._workspace = None
+        self.tool_manager = ToolManager()
 
     def apply_settings(self, **kwargs):
         for arg in kwargs.items():
@@ -45,6 +50,7 @@ class Server(QtCore.QObject):
         self.config_logger()
         self.config_staf()
         self.config_workspace()
+        self.config_tool()
         
     ############################################
     #logger related methods
@@ -94,4 +100,42 @@ class Server(QtCore.QObject):
         
     def get_workspace(self):
         return self._workspace
+    
+    ############################################
+    #tool management methods
+    ############################################
+    def config_tool(self):
+        self.tool_manager.apply_settings(ToolsLocation=self.settings["ToolsLocation"], 
+                                            ToolsConfigureFile=self.settings["ToolsConfigureFile"])
+        self.tool_manager.config()
+    
+    def loaded_tools(self):
+        #yield tools server current has
+        for tool_name in self.tool_manager.tool_name_list:
+            tool = self.tool_manager.get_tool(tool_name)
+            if not tool is None:
+                yield tool_name, tool
+
+    def available_tools(self):
+        #yield all available tools
+        for tool_name in self.tool_manager.available_tool_name_list:
+            tool = self.tool_manager.get_tool(tool_name)
+            if not tool is None:
+                yield tool_name, tool
+                
+    def add_tool(self, tool_name):
+        #add tool to server
+        if not tool_name in self.tool_manager.tool_name_list:
+            self.tool_manager.tool_name_list.append(tool_name)
+            self.tool_manager.save_config()
+    
+    def remove_tool(self, tool_name):
+        #remove tool from server
+        if tool_name in self.tool_manager.tool_name_list:
+            self.tool_manager.tool_name_list = [name for name in self.tool_manager.tool_name_list if name != tool_name]
+            self.tool_manager.save_config()
+    
+    def remove_all_tools(self):
+        self.tool_manager.tool_name_list = []
+        self.tool_manager.save_config()
     
