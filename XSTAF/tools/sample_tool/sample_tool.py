@@ -30,5 +30,5 @@ class Tool(object):
     
 class SampleTool(QtGui.QDialog, Ui_SampleDialog):
     def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtGui.QDialog.__init__(self)
         self.setupUi(self)

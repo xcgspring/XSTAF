@@ -2,6 +2,7 @@
 import os
 import sys
 import pickle
+import traceback
 
 from XSTAF.core.logger import LOGGER
 
@@ -42,15 +43,15 @@ class ToolManager(object):
         pickle_config_file = os.path.join(abs_tools_location, self.settings["ToolsConfigureFile"])
         if not os.path.isfile(pickle_config_file):
             LOGGER.warning("Can not find config file: %s", pickle_config_file)
-        
         self.pickle_config_file = pickle_config_file
         self.load_config()
 
     def get_tool(self, tool_name):
         try:
             tool = __import__(tool_name).Tool
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError) as e:
             LOGGER.info("Can not import tool: %s" % tool_name)
+            LOGGER.debug(traceback.format_exc())
             return None
         else:
             return tool
