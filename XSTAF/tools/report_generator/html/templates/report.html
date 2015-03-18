@@ -1,16 +1,70 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
     <head>
-        <title>{{ report_title }}</title>
+        <title>{{ data.title }}</title>
     </head>
     <body>
-        <h1>{{ report_title }}</h1>
-        <h2>Summary<h2>
-        {{ report_summary }}
-        <h2>Environment<h2>
+        <h1>{{ data.title }}</h1>
+        <h2>summary</h2>
+        <p>{{ data.summary }}</p>
+        <p>Total: {{ data.total }} Passed: {{ data.passed }} Failed: {{ data.failed }} Not Run: {{ data.NotRun }}</p>
         
-        <h2>Results<h2>
+        <h2>Environment</h2>
+        {% for dut_info in data.duts %}
+        <p>IP: {{ dut_info["ip"] }} Name: {{ dut_info["name"] }}</p>
+        {% endfor %}
         
-        <h2>Details<h2>
+        <h2>Results Overview</h2>
+        <table border="1">
+        <tr>
+            <th>TestSuite Name</th>
+            <th>TestSuite Results</th>
+            <th>TestSuite Environment</th>
+        </tr>
+        {% for testsuite in data.testsuites %}
+        <tr>
+            <td>testsuite.name</td>
+            <td>Passed: {{ testsuite.passed }} Failed: {{ testsuite.failed }} NotRun: {{ testsuite.NotRun }}</td>
+            <td>
+            {% for dut_info in testsuite.duts_info %}
+                IP: {{ dut_info["ip"] }} Name: {{ dut_info["name"] }}<br />
+            {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </table>
+        
+        <h2>Details</h2>
+        <h3>TestSuites details</h3>
+        {% for testsuite in data.testsuites %}
+            <h4><a name="{{ testsuite.name }}">{{ testsuite.name }}</a></h4>
+            {% for testcase in testsuite.testcases %}
+                <p>
+                <a href="{{ testsuite.name+testcase.name }}">{{ testcase.name }}</a>
+                {% for run in testcase.runs %}
+                    {% if run.result %}
+                        <img src ="pass.png" width="16" height="16" align="middle"> 
+                    {% endif %}
+                    {% if not run.result %}
+                        <img src ="fail.png" width="16" height="16" align="middle"> 
+                    {% endif %}
+                {% endfor %}
+                </p>
+            {% endfor %}
+        {% endfor %}
+        
+        <h3>TestCases details</h3>
+        {% for testsuite in data.testsuites %}
+            {% for testcase in testsuite.testcases %}
+                <h4><a name="{{ testsuite.name+testcase.name }}">{{ testcase.name }}</a></h4>
+                {% for run in testcase.runs %}
+                    <p>
+                    Run on IP: {{ run.dut_info["ip"] }} Name: {{ run.dut_info["name"] }}<br />
+                    Result: {{ run.pretty_result }}
+                    </p>
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+        
     </body>
 </html>

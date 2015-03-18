@@ -89,7 +89,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 #print testsuite info in test view
                 testsuite = self.dut.get_testsuite(str(item.text()))
                 info = "TestSuite: %s\n" % testsuite.test_suite_file
-                info += "  Total test case: %d\n" % len(testsuite.testcases)
+                info += "  Total test case: %d\n" % testsuite.testcase_number()
 
             elif item.parent().parent() is None:
                 self.actionRemoveTestSuite.setDisabled(True)
@@ -97,7 +97,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testsuite_name = str(item.parent().text())
                 testcase_id = item.data().toPyObject()
                 testsuite = self.dut.get_testsuite(testsuite_name)
-                testcase = testsuite.testcases[testcase_id]
+                testcase = testsuite.get_testcase(testcase_id)
                 info = "TestCase: %s\n" % testcase.name
                 info += "  ID: %s\n" % testcase.ID
                 info += "  Command: %s\n" % testcase.command
@@ -111,8 +111,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testcase_id = item.parent().data().toPyObject()
                 run_id = str(item.data().toPyObject())
                 testsuite = self.dut.get_testsuite(testsuite_name)
-                testcase = testsuite.testcases[testcase_id]
-                run = testcase.runs[run_id]
+                testcase = testsuite.get_testcase(testcase_id)
+                run = testcase.get_run(run_id)
                 info = "TestRun: \n"
                 info += "Start: %s\n" % run.start
                 info += "End: %s\n" % run.end

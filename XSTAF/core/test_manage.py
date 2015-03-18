@@ -62,13 +62,24 @@ class TestCase(object):
         self.timeout = 600
         self.description = ""
         
-        self.runs = {}
+        self._runs = {}
+        
+    def runs(self):
+        for run_id, run in self._runs.items():
+            yield run
+    
+    def add_run(self, run):
+        #we use task start time as id
+        self._runs[run.start] = run
+        
+    def get_run(self, id):
+        return self.runs[id]
             
 class TestSuite(object):
     def __init__(self, test_suite_file):
         self.test_suite_file = test_suite_file
         
-        self.testcases = {}
+        self._testcases = {}
         self._parse_and_build()
         
     def _parse_and_build(self):
@@ -99,7 +110,7 @@ class TestSuite(object):
             if not testcase_element.find("Description") is None:
                 testcase.description = testcase_element.attrib["name"]
             
-            self.testcases[testcase.ID] = testcase
+            self._testcases[testcase.ID] = testcase
             
     def _parse_test_suite(self, root_element):
         testcases_element = root_element.find("TestCases")
@@ -131,6 +142,16 @@ class TestSuite(object):
                 run.result = run_element.find("Result").text
                 run.status = run_element.find("Status").text
                 run.log_location = run_element.find("Log").text
-                testcase.runs[run.start] = run
+                testcase.add_run(run)
                 
-            self.testcases[testcase.ID] = testcase
+            self._testcases[testcase.ID] = testcase
+
+    def testcases(self):
+        for testcase_id, testcase in self._testcases.items():
+            yield testcase
+            
+    def testcase_number(self):
+        return len(self._testcases)
+        
+    def get_testcase(self, testcase_id):
+        return self._testcases[testcase_id]
