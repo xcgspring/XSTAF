@@ -236,16 +236,17 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.menuTools.addAction(self.actionToolManager)
         self.menuTools.addSeparator()
         for tool_name, tool_class in self.server.loaded_tools():
-            tool_instance = tool_class(self)
+            logger.LOGGER.info("loaded tool: %s", tool_name)
             #new action
             action = QtGui.QAction(self)
-            action.setObjectName(tool_name)
-            icon = tool_instance.icon()
+            action.setText(tool_name)
+            icon = tool_class.icon()
             action.setIcon(icon)
             #add action to menu
             self.menuTools.addAction(action)
             #connect action signal to tool launch function
-            self.connect(action, QtCore.SIGNAL("triggered(bool)"), tool_instance.launch)
+            tool_class.set_main_window(self)
+            self.connect(action, QtCore.SIGNAL("triggered(bool)"), tool_class.launch)
 
     def DUT_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()

@@ -50,7 +50,7 @@ class ToolManager(object):
         try:
             tool = __import__(tool_name).Tool
         except (ImportError, AttributeError):
-            LOGGER.warning("Can not import tool: %s" % tool_name)
+            LOGGER.info("Can not import tool: %s" % tool_name)
             return None
         else:
             return tool

@@ -1,24 +1,27 @@
 
 from XSTAF.core.logger import LOGGER
 from PyQt4 import QtCore, QtGui
-from ui.ui_sampleDialog import Ui_SampleDialog, _fromUtf8
+from ui.ui_sampleDialog import Ui_SampleDialog
 import ui.resources_rc
 
 class Tool(object):
     _description = "Sample Tool"
+    main_window = None
     
-    def __init__(self, main_window):
-        self.main_window = main_window
+    @classmethod
+    def set_main_window(cls, main_window):
+        cls.main_window = main_window
     
     @staticmethod
     def icon():
         tool_icon = QtGui.QIcon()
-        tool_icon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/sample.png")))
+        tool_icon.addPixmap(QtGui.QPixmap(":icons/icons/sample.png"))
         return tool_icon
-        
-    def launch(self):
-        LOGGER.debug("Launch sample tool")
-        tool_dialog = SampleTool(self.main_window)
+    
+    @classmethod
+    def launch(cls):
+        LOGGER.info("Launch sample tool")
+        tool_dialog = SampleTool(cls.main_window)
         tool_dialog.exec_()
         
     @classmethod

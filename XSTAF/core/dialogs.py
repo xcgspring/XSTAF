@@ -209,7 +209,7 @@ class ToolManagerDialog(QtGui.QDialog, Ui_toolManagerDialog):
         
     def remove_tool(self):
         for selected_index in self.loadedToolsListView.selectedIndexes():
-            tool_item = self.avaliable_tools_model.itemFromIndex(selected_index)
+            tool_item = self.loaded_tools_model.itemFromIndex(selected_index)
             tool_name = str(tool_item.text())
             self.server.remove_tool(tool_name)
         self._refresh_tool_view()
