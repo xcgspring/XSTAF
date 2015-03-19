@@ -73,7 +73,7 @@ class TestCase(object):
         self._runs[run.start] = run
         
     def get_run(self, id):
-        return self.runs[id]
+        return self._runs[id]
             
 class TestSuite(object):
     def __init__(self, test_suite_file):

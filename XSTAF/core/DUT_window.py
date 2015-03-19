@@ -51,14 +51,17 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.task_runner_running = False
 
         #refresh ui
-        self.refresh_ui()
+        self.handle_dut_status_change()
         
     def handle_dut_status_change(self):
         if not self.dut.status:
             self.dut.add_runner()
+            task_runner = self.dut.get_runner()
+            #check if runner running
+            self.task_runner_running = self.dut.is_runner_running()
             #connect runner signals to DUT view slots
-            self.connect(self.dut.task_runner, self.dut.task_runner.test_result_change, self._refresh_test_view)
-            self.connect(self.dut.task_runner, self.dut.task_runner.task_queue_change, self._refresh_task_queue_view)
+            self.connect(task_runner, task_runner.test_result_change, self._refresh_test_view)
+            self.connect(task_runner, task_runner.task_queue_change, self._refresh_task_queue_view)
         else:
             self.dut.remove_runner()
             self.task_runner_running = False
@@ -292,9 +295,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             
             if not self.dut.status:
                 if self.task_runner_running:
+                    self.actionStartRunner.setDisabled(True)
                     self.actionPauseRunner.setEnabled(True)
                 else:
                     self.actionStartRunner.setEnabled(True)
+                    self.actionPauseRunner.setDisabled(True)
             elif self.dut.status & 0b11000000:
                 #Cannot control DUT
                 self.actionStartRunner.setDisabled(True)
@@ -306,7 +311,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self._refresh_task_queue_view()
         #refresh Server DUTView
         self.parent.refresh_ui()
-
+        
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
         del self.parent.DUTWindows[self.ip]

@@ -74,17 +74,18 @@ class DUTTaskRunner(QtCore.QThread):
         #configure the staf handle
         assert(self.staf_handle.configure())
         
-        #stop flag, runner thread will check this flag to determine if need stop
-        self._stop_flag = False
-        
         #remote log location
         self.remote_log_location = r"c:\XSTAF"
         self.remote_log_tmp_location = r"c:\XSTAF\tmplogs"
         
     def start(self):
-        self._stop_flag = False
+        LOGGER.info("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
         self.prepare_DUT()
         QtCore.QThread.start(self)
+        
+    def terminate(self):
+        LOGGER.info("DUT task runner thread for IP %s terminate" % self.DUT_instance.ip)
+        QtCore.QThread.terminate(self)
         
     def prepare_DUT(self):
         #make some dirs
@@ -140,28 +141,17 @@ class DUTTaskRunner(QtCore.QThread):
         run.end = "%.3f" % time.time()
         
         #add this run to work, index using start time
-        work.runs[run.start] = run
+        work.add_run(run)
         
         #emit update ui signal
         self.emit(self.test_result_change)
         
     def run(self):
-        LOGGER.debug("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
         while True:
-            #check stop flag
-            if self._stop_flag:
-                break
-            
             #run task
             work = self.task_queue.get(block=True)
             self.emit(self.task_queue_change)
             self.run_task(work)
-        
-        LOGGER.debug("DUT task runner thread for IP %s exit" % self.DUT_instance.ip)
-        
-    def pause(self):
-        LOGGER.debug("DUT task runner thread for IP %s stopping" % self.DUT_instance.ip)
-        self._stop_flag = True
     
 class DUTMonitor(object):
     #DUT status
@@ -273,6 +263,9 @@ class DUT(QtCore.QObject):
             self.task_runner = DUTTaskRunner(self)
             self.task_runner.task_queue = self.task_queue
 
+    def get_runner(self):
+        return self.task_runner
+            
     def start_runner(self):
         '''
         start task runner
@@ -285,11 +278,17 @@ class DUT(QtCore.QObject):
         check DUT status
         '''
         if not self.task_runner is None:
-            self.task_runner.pause()
+            self.task_runner.terminate()
             
     def remove_runner(self):
         self.stop_runner()
         self.runner = None
+        
+    def is_runner_running(self):
+        if self.task_runner is None:
+            return False
+        else:
+            return self.task_runner.isRunning()
 
     ############################################
     #task suite management methods
@@ -321,12 +320,12 @@ class DUT(QtCore.QObject):
         return self.task_queue.list()
         
     def add_testcase_to_task_queue(self, testsuite_name, testcase_id):
-        testcase = self._testsuites[testsuite_name].testcases[testcase_id]
+        testcase = self.get_testsuite(testsuite_name).get_testcase(testcase_id)
         self.task_queue.put(testcase)
         
     def add_testsuite_to_task_queue(self, testsuite_name):
-        for testcase in self._testsuites[testsuite_name].testcases.items():
-            self.task_queue.put(testcase[1])
+        for testcase in self.get_testsuite(testsuite_name).testcases():
+            self.task_queue.put(testcase)
         
     def remove_testcase_from_task_queue(self, id):
         self.task_queue.remove(id)
