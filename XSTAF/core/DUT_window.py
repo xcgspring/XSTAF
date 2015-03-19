@@ -49,6 +49,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
         #runner status
         self.task_runner_running = False
+        self.task_runner_busy = False
 
         #refresh ui
         self.handle_dut_status_change()
@@ -60,11 +61,20 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             #check if runner running
             self.task_runner_running = self.dut.is_runner_running()
             #connect runner signals to DUT view slots
-            self.connect(task_runner, task_runner.test_result_change, self._refresh_test_view)
-            self.connect(task_runner, task_runner.task_queue_change, self._refresh_task_queue_view)
+            self.connect(task_runner, task_runner.test_result_change, self.refresh_ui)
+            self.connect(task_runner, task_runner.runner_busy, self.handle_runner_busy)
+            self.connect(task_runner, task_runner.runner_idle, self.handle_runner_idle)
         else:
             self.dut.remove_runner()
             self.task_runner_running = False
+        self.refresh_ui()
+        
+    def handle_runner_busy(self):
+        self.task_runner_busy = True
+        self.refresh_ui()
+    
+    def handle_runner_idle(self):
+        self.task_runner_busy = False
         self.refresh_ui()
 
     def add_test_suite(self):
@@ -172,7 +182,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 LOGGER.debug("Add testcase to task queue: %s, %s", testsuite_name, testcase_name)
                 self.dut.add_testcase_to_task_queue(testsuite_name, testcase_id)
 
-        self._refresh_task_queue_view()
+        self.refresh_ui()
 
     def remove_test_from_task_queue(self):
         for selected_index in self.taskQueueListView.selectedIndexes():
@@ -182,11 +192,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             self.dut.remove_testcase_from_task_queue(task_index)
             LOGGER.debug("Remove task: %s, Index: %s", task_item.text(), repr(task_index))
 
-        self._refresh_task_queue_view()
+        self.refresh_ui()
 
     def clear_task_queue(self):
         self.dut.clean_task_queue()
-        self._refresh_task_queue_view()
+        self.refresh_ui()
 
     def start_task_runner(self):
         self.dut.start_runner()
@@ -211,12 +221,16 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         refresh_dialog.exec_()
 
     def _refresh_test_view(self):
-        notRunIcon = QtGui.QIcon()
-        notRunIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/not-run.png")))
-        failIcon = QtGui.QIcon()
-        failIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/fail.png")))
-        passIcon = QtGui.QIcon()
-        passIcon.addPixmap(QtGui.QPixmap(_fromUtf8(":icons/icons/pass.png")))
+        not_run_icon = QtGui.QIcon()
+        not_run_icon.addPixmap(QtGui.QPixmap(":icons/icons/not-run.png"))
+        fail_icon = QtGui.QIcon()
+        fail_icon.addPixmap(QtGui.QPixmap(":icons/icons/fail.png"))
+        pass_icon = QtGui.QIcon()
+        pass_icon.addPixmap(QtGui.QPixmap(":icons/icons/pass.png"))
+        under_process_icon = QtGui.QIcon()
+        under_process_icon.addPixmap(QtGui.QPixmap(":icons/icons/under_process.png"))
+        wait_process_icon = QtGui.QIcon()
+        wait_process_icon.addPixmap(QtGui.QPixmap(":icons/icons/wait_process.png"))
         
         #keep node expanded info
         #after refresh, should restore the expanded node
@@ -247,14 +261,21 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 self.TestsTreeView.expand(testsuite_index)
             
             for testcase in testsuite.testcases():
-                testcase_item = QtGui.QStandardItem(QtCore.QString(testcase.name))
+                if self.dut.is_in_queue(testcase):
+                    icon = wait_process_icon
+                elif testcase is self.dut.last_task_in_queue() and self.task_runner_busy:
+                    icon = under_process_icon
+                else:
+                    icon = not_run_icon
+                testcase_item = QtGui.QStandardItem(icon, QtCore.QString(testcase.name))
+                
                 for run in testcase.runs():
                     if run.result & 0b10000000:
-                        icon = notRunIcon
+                        icon = not_run_icon
                     elif run.result & 0b00000001:
-                        icon = failIcon
+                        icon = fail_icon
                     elif not run.result:
-                        icon = passIcon
+                        icon = pass_icon
                     else:
                         LOGGER.warn("Encounter unexpected test result: %s", run.result)
                         icon = QtGui.QIcon()
@@ -272,15 +293,26 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     self.TestsTreeView.expand(testcase_index)
 
     def _refresh_task_queue_view(self):
-        task_queue = self.dut.list_all_tasks_in_task_queue()
-        task_indexs = task_queue.keys()
+        under_process_icon = QtGui.QIcon()
+        under_process_icon.addPixmap(QtGui.QPixmap(":icons/icons/under_process.png"))
+        wait_process_icon = QtGui.QIcon()
+        wait_process_icon.addPixmap(QtGui.QPixmap(":icons/icons/wait_process.png"))
+        
+        self.taskQueueModel.clear()
+        #under run tasks
+        last_task = self.dut.last_task_in_queue()
+        if not last_task is None and self.task_runner_busy:
+            task_item = QtGui.QStandardItem(under_process_icon, QtCore.QString("Name: %0").arg(last_task.name))
+            self.taskQueueModel.appendRow(task_item)
+        #waiting tasks
+        tasks = self.dut.list_all_tasks_in_task_queue()
+        task_indexs = tasks.keys()
         task_indexs.sort()
         task_indexs.reverse()
-        self.taskQueueModel.clear()
         for task_index in task_indexs:
-            task = task_queue[task_index]
+            task = tasks[task_index]
             format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(task_index)))
-            task_item = QtGui.QStandardItem(QtCore.QString("ID: %0 Name: %1 Time: %2").arg(task_index).arg(task.name).arg(format_time))
+            task_item = QtGui.QStandardItem(wait_process_icon, QtCore.QString("ID: %0 Name: %1 Time: %2").arg(task_index).arg(task.name).arg(format_time))
             #store the task_index in item data
             task_item.setData(QtCore.QVariant(task_index))
 

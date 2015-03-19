@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>icons/under_process.png</file>
+    <file>icons/wait_process.png</file>
     <file>icons/down.png</file>
     <file>icons/up.png</file>
     <file>icons/toolManage.png</file>

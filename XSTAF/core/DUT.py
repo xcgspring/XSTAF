@@ -15,6 +15,7 @@ class CustomQueue(Queue.Queue):
 
     def _init(self, maxsize):
         self.queue = {}
+        self._last_task = None
 
     def _qsize(self, len=len):
         return len(self.queue)
@@ -32,7 +33,12 @@ class CustomQueue(Queue.Queue):
         indexs = self.queue.keys()
         indexs.sort()
         LOGGER.debug("Get task: %s" % indexs[0] )
-        return self.queue.pop(indexs[0])
+        self._last_task = self.queue.pop(indexs[0])
+        return self._last_task
+        
+    def last_task(self):
+        #last task is under process, other task are waiting
+        return self._last_task
         
     def clear(self):
         self.not_empty.acquire()
@@ -55,11 +61,23 @@ class CustomQueue(Queue.Queue):
             self.not_full.notify()
         self.mutex.release()
         
+    def __contains__(self, task):
+        self.mutex.acquire()
+        for index, in_task in self.queue.items():
+            if task is in_task:
+                self.mutex.release()
+                return True
+        self.mutex.release()
+        return False
+
+        
 class DUTTaskRunner(QtCore.QThread):
     #signal to update DUT ui
     test_result_change = QtCore.SIGNAL("testResultChange")
     #task queue change
-    task_queue_change = QtCore.SIGNAL("taskQueueChange")
+    runner_busy = QtCore.SIGNAL("runnerBusy")
+    #task queue idle
+    runner_idle = QtCore.SIGNAL("runnerIdle")
     
     def __init__(self, DUT_instance):
         QtCore.QThread.__init__(self)
@@ -148,9 +166,10 @@ class DUTTaskRunner(QtCore.QThread):
         
     def run(self):
         while True:
+            self.emit(self.runner_idle)
             #run task
             work = self.task_queue.get(block=True)
-            self.emit(self.task_queue_change)
+            self.emit(self.runner_busy)
             self.run_task(work)
     
 class DUTMonitor(object):
@@ -329,4 +348,10 @@ class DUT(QtCore.QObject):
         
     def remove_testcase_from_task_queue(self, id):
         self.task_queue.remove(id)
+        
+    def is_in_queue(self, testcase):
+        return testcase in self.task_queue
+        
+    def last_task_in_queue(self):
+        return self.task_queue.last_task()
         
