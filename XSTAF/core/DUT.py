@@ -326,8 +326,10 @@ class DUT(QtCore.QObject):
         return self._testsuites[testsuite_name]
         
     def testsuites(self):
-        for testsuite_item in self._testsuites.items():
-            yield testsuite_item[1]
+        testsuite_names = self._testsuites.keys()
+        testsuite_names.sort()
+        for testsuite_name in testsuite_names:
+            yield self._testsuites[testsuite_name]
             
     def remove_testresult(self, testsuite_name, testcase_id, run_id):
         testsuite = self.get_testsuite(testsuite_name)

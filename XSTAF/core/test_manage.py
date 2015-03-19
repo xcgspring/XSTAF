@@ -65,8 +65,10 @@ class TestCase(object):
         self._runs = {}
         
     def runs(self):
-        for run_id, run in self._runs.items():
-            yield run
+        run_ids = self._runs.keys()
+        run_ids.sort()
+        for run_id in run_ids:
+            yield self._runs[run_id]
     
     def add_run(self, run):
         #we use task start time as id
@@ -160,8 +162,10 @@ class TestSuite(object):
             self._testcases[testcase.ID] = testcase
 
     def testcases(self):
-        for testcase_id, testcase in self._testcases.items():
-            yield testcase
+        testcase_ids = self._testcases.keys()
+        testcase_ids.sort()
+        for testcase_id in testcase_ids:
+            yield self._testcases[testcase_id]
             
     def testcase_number(self):
         return len(self._testcases)
