@@ -23,7 +23,7 @@
         </tr>
         {% for testsuite in data.testsuites %}
         <tr>
-            <td>testsuite.name</td>
+            <td>{{ testsuite.name }}</td>
             <td>Passed: {{ testsuite.passed }} Failed: {{ testsuite.failed }} NotRun: {{ testsuite.NotRun }}</td>
             <td>
             {% for dut_info in testsuite.duts_info %}
@@ -40,7 +40,7 @@
             <h4><a name="{{ testsuite.name }}">{{ testsuite.name }}</a></h4>
             {% for testcase in testsuite.testcases %}
                 <p>
-                <a href="{{ testsuite.name+testcase.name }}">{{ testcase.name }}</a>
+                <a href="{{ '#'+testsuite.name+'_'+testcase.name }}">{{ testcase.name }}</a>
                 {% for run in testcase.runs %}
                     {% if run.result %}
                         <img src ="pass.png" width="16" height="16" align="middle"> 
@@ -56,7 +56,7 @@
         <h3>TestCases details</h3>
         {% for testsuite in data.testsuites %}
             {% for testcase in testsuite.testcases %}
-                <h4><a name="{{ testsuite.name+testcase.name }}">{{ testcase.name }}</a></h4>
+                <h4><a name="{{ testsuite.name+'_'+testcase.name }}">{{ testcase.name }}</a></h4>
                 {% for run in testcase.runs %}
                     <p>
                     Run on IP: {{ run.dut_info["ip"] }} Name: {{ run.dut_info["name"] }}<br />

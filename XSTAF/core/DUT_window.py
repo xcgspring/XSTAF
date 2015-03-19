@@ -243,25 +243,25 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testsuite_index = self.testsModel.indexFromItem(testsuite_item)
                 self.TestsTreeView.expand(testsuite_index)
             
-            for testcase in testsuite.testcases.items():
-                testcase_item = QtGui.QStandardItem(QtCore.QString(testcase[1].name))
-                for run in testcase[1].runs.items():
-                    if run[1].result & 0b10000000:
+            for testcase in testsuite.testcases():
+                testcase_item = QtGui.QStandardItem(QtCore.QString(testcase.name))
+                for run in testcase.runs():
+                    if run.result & 0b10000000:
                         icon = notRunIcon
-                    elif run[1].result & 0b00000001:
+                    elif run.result & 0b00000001:
                         icon = failIcon
-                    elif not run[1].result:
+                    elif not run.result:
                         icon = passIcon
                     else:
-                        LOGGER.warn("Encounter unexpected test result: %s", run[1].result)
+                        LOGGER.warn("Encounter unexpected test result: %s", run.result)
                         icon = QtGui.QIcon()
-                    format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run[1].start)))
+                    format_time = time.strftime("%d %b %H:%M:%S", time.localtime(float(run.start)))
                     run_item = QtGui.QStandardItem(icon, QtCore.QString("Run begin at: %s" % format_time))
-                    run_id = run[0]
+                    run_id = run.start
                     run_item.setData(QtCore.QVariant(run_id))
                     testcase_item.appendRow(run_item)
                 #store test id in test case item
-                testcase_id = testcase[0]
+                testcase_id = testcase.ID
                 testcase_item.setData(QtCore.QVariant(testcase_id))
                 testsuite_item.appendRow(testcase_item)
                 if testcase_id in expanded_testcases:

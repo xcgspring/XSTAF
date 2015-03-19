@@ -46,9 +46,12 @@ class ToolManager(object):
         self.pickle_config_file = pickle_config_file
         self.load_config()
 
-    def get_tool(self, tool_name):
+    def get_tool(self, tool_module_name):
         try:
-            tool = __import__(tool_name).Tool
+            tool_module = __import__(tool_module_name)
+            #want to reload the tool if tool is updated
+            tool_module = reload(tool_module)
+            tool = tool_module.Tool
         except (ImportError, AttributeError) as e:
             LOGGER.info("Can not import tool: %s" % tool_name)
             LOGGER.debug(traceback.format_exc())

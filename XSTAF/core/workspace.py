@@ -172,32 +172,32 @@ class WorkSpace(object):
             for testsuite in dut.testsuites():
                 root_element = ET.Element("TestSuite")
                 testcases_element = ET.SubElement(root_element, "TestCases")
-                for testcase in testsuite.testcases.items():
+                for testcase in testsuite.testcases():
                     testcase_element = ET.SubElement(testcases_element, "TestCase")
                     name_element = ET.SubElement(testcase_element, "Name")
-                    name_element.text = testcase[1].name
+                    name_element.text = testcase.name
                     command_element = ET.SubElement(testcase_element, "Command")
-                    command_element.text = testcase[1].command
+                    command_element.text = testcase.command
                     auto_element = ET.SubElement(testcase_element, "Auto")
-                    auto_element.text = str(testcase[1].auto)
+                    auto_element.text = str(testcase.auto)
                     timeout_element = ET.SubElement(testcase_element, "Timeout")
-                    timeout_element.text = str(testcase[1].timeout)
+                    timeout_element.text = str(testcase.timeout)
                     description_element = ET.SubElement(testcase_element, "Description")
-                    description_element.text = testcase[1].description
+                    description_element.text = testcase.description
 
                     runs_element = ET.SubElement(testcase_element, "Runs")
-                    for run in testcase[1].runs.items():
+                    for run in testcase.runs():
                         run_element = ET.SubElement(runs_element, "Run")
                         start_element = ET.SubElement(run_element, "Start")
-                        start_element.text = run[1].start
+                        start_element.text = run.start
                         end_element = ET.SubElement(run_element, "End")
-                        end_element.text = run[1].end
+                        end_element.text = run.end
                         result_element = ET.SubElement(run_element, "Result")
-                        result_element.text = run[1].pretty_result
+                        result_element.text = run.pretty_result
                         status_element = ET.SubElement(run_element, "Status")
-                        status_element.text = run[1].status
+                        status_element.text = run.status
                         log_element = ET.SubElement(run_element, "Log")
-                        log_element.text = run[1].log_location
+                        log_element.text = run.log_location
 
                 testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, dut.ip, testsuite.name)
                 testsuite_dir = os.path.dirname(testsuite_path)

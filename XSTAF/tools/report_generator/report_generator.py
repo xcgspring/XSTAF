@@ -1,3 +1,5 @@
+import os
+
 from XSTAF.core.logger import LOGGER
 from PyQt4 import QtCore, QtGui
 from ui.ui_reportGenerator import Ui_TestReportDialog
@@ -34,7 +36,7 @@ class _DataRun(object):
     '''
     def __init__(self, run, dut_info):
         self.run = run
-        self.dut_info
+        self._dut_info = dut_info
         
     @property
     def result(self):
@@ -52,7 +54,7 @@ class _DataRun(object):
         
     @property
     def dut_info(self):
-        return self.dut_info
+        return self._dut_info
         
 class _DataTestCase(object):
     '''
@@ -68,19 +70,19 @@ class _DataTestCase(object):
         self.data_runs = {}
         for run in testcase.runs():
             data_run = _DataRun(run, dut_info)
-            self.data_runs[run.start+dut_info[ip]] = data_run
+            self.data_runs[run.start+dut_info["ip"]] = data_run
             
         #one testsuite could run multiple duts
         self.duts_info = []
         self.duts_info.append(dut_info)
         
     @classmethod
-    def set_pass_fail_policy(cls, pass_first)
+    def set_pass_fail_policy(cls, pass_first):
         cls.PassFirst = pass_first
         
     @property
     def runs(self):
-        for id, data_run in self.data_runs.items():
+        for data_id, data_run in self.data_runs.items():
             yield data_run
     
     @property
@@ -176,7 +178,7 @@ class _Data(object):
         for dut in self.workspace.duts():
             dut_info = {}
             dut_info["ip"] = dut.ip
-            dut_name["name"] = dut.name
+            dut_info["name"] = dut.name
             for testsuite in dut.testsuites():
                 if testsuite.name in self.data_testsuites:
                     self.data_testsuites[testsuite.name].merge(testsuite, dut_info)
@@ -200,7 +202,7 @@ class _Data(object):
         for dut in self.workspace.duts():
             dut_info = {}
             dut_info["ip"] = dut.ip
-            dut_name["name"] = dut.name
+            dut_info["name"] = dut.name
             yield dut_info
     
     @property
@@ -261,7 +263,7 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
     
     def accept(self):
         if not self.workspace is None:
-            data = _Data(self.wrokspace)
+            data = _Data(self.workspace)
 
             if self.passFirstRadioButton.isChecked():
                 passFirst = True
@@ -270,7 +272,7 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
             _DataTestCase.set_pass_fail_policy(passFirst)
             
             title = str(self.titleEdit.text())
-            summary = str(self.summaryTextEdit.text())
+            summary = str(self.summaryTextEdit.toPlainText())
             data.config(summary=summary)
             if title:
                 data.config(title=title)
