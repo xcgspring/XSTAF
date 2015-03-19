@@ -52,7 +52,7 @@ class TestCase(object):
     def __init__(self):
         #make a unique ID for each test case instance
         self.mutex.acquire()
-        self.ID = uuid.uuid1()
+        self._ID = uuid.uuid1()
         time.sleep(0.01)
         self.mutex.release()
         
@@ -77,6 +77,14 @@ class TestCase(object):
         
     def remove_run(self, id):
         del self._runs[id]
+        
+    @property
+    def ID(self):
+        return self._ID
+        
+    @ID.setter
+    def ID(self, id):
+        self._ID = id
             
 class TestSuite(object):
     def __init__(self, test_suite_file):
@@ -102,6 +110,7 @@ class TestSuite(object):
         for testcase_element in testcase_elements:
             testcase = TestCase()
             testcase.name = testcase_element.find("Description").text
+            #pyanvil case do not have a global id, use system gen id
             #testcase.ID = testcase.name
             executable = testcase_element.find("Executable").text
             parameters = testcase_element.find("Parameters").text
@@ -120,6 +129,7 @@ class TestSuite(object):
         testcase_elements = testcases_element.findall("TestCase")
         for testcase_element in testcase_elements:
             testcase = TestCase()
+            testcase.ID = uuid.UUID(testcase_element.find("ID").text)
             testcase.name = testcase_element.find("Name").text
             testcase.command = testcase_element.find("Command").text
             

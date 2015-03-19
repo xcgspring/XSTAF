@@ -174,6 +174,8 @@ class WorkSpace(object):
                 testcases_element = ET.SubElement(root_element, "TestCases")
                 for testcase in testsuite.testcases():
                     testcase_element = ET.SubElement(testcases_element, "TestCase")
+                    id_element = ET.SubElement(testcase_element, "ID")
+                    id_element.text = str(testcase.ID)
                     name_element = ET.SubElement(testcase_element, "Name")
                     name_element.text = testcase.name
                     command_element = ET.SubElement(testcase_element, "Command")
