@@ -328,6 +328,11 @@ class DUT(QtCore.QObject):
     def testsuites(self):
         for testsuite_item in self._testsuites.items():
             yield testsuite_item[1]
+            
+    def remove_testresult(self, testsuite_name, testcase_id, run_id):
+        testsuite = self.get_testsuite(testsuite_name)
+        testcase = testsuite.get_testcase(testcase_id)
+        testcase.remove_run(run_id)
         
     ############################################
     #task queue methods

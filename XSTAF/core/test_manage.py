@@ -74,6 +74,9 @@ class TestCase(object):
         
     def get_run(self, id):
         return self._runs[id]
+        
+    def remove_run(self, id):
+        del self._runs[id]
             
 class TestSuite(object):
     def __init__(self, test_suite_file):

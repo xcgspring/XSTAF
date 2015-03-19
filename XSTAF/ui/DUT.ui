@@ -58,6 +58,7 @@
      <string>Run</string>
     </property>
     <addaction name="actionStartRunner"/>
+    <addaction name="actionPauseRunner"/>
    </widget>
    <addaction name="menuTestSuite"/>
    <addaction name="menuRun"/>
@@ -213,6 +214,14 @@
    </property>
    <property name="toolTip">
     <string>clearTaskQueue</string>
+   </property>
+  </action>
+  <action name="actionRemoveResult">
+   <property name="text">
+    <string>removeResult</string>
+   </property>
+   <property name="toolTip">
+    <string>removeResult</string>
    </property>
   </action>
  </widget>

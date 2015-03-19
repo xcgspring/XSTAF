@@ -35,6 +35,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.actionClearTaskQueue, QtCore.SIGNAL("triggered(bool)"), self.clear_task_queue)
         self.connect(self.actionStartRunner, QtCore.SIGNAL("triggered(bool)"), self.start_task_runner)
         self.connect(self.actionPauseRunner, QtCore.SIGNAL("triggered(bool)"), self.pause_task_runner)
+        self.connect(self.actionRemoveResult, QtCore.SIGNAL("triggered(bool)"), self.remove_test_result)
 
         #for test tree view and task queue view
         self.connect(self.TestsTreeView, QtCore.SIGNAL("clicked(QModelIndex)"), self.test_view_clicked)
@@ -91,6 +92,16 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 LOGGER.debug("Remove testsuite: %s", item.text())
                 self.dut.remove_testsuite(str(item.text()))
                 self._refresh_test_view()
+                
+    def remove_test_result(self):
+        for selected_index in self.TestsTreeView.selectedIndexes():
+            item = self.testsModel.itemFromIndex(selected_index)
+            LOGGER.debug("Remove test result: %s", item.text())
+            testsuite_name = str(item.parent().parent().text())
+            testcase_id = item.parent().data().toPyObject()
+            run_id = str(item.data().toPyObject())
+            self.dut.remove_testresult(testsuite_name, testcase_id, run_id)
+            self._refresh_test_view()
 
     def test_view_clicked(self, index):
         #LOGGER.debug("Click: column: %s, raw: %s", (index.column(), index.row()))
@@ -154,6 +165,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
         else:
             #run level
+            context_menu.addAction(self.actionRemoveResult)
+            context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
             return
 
     def task_queue_view_right_clicked(self, point):
