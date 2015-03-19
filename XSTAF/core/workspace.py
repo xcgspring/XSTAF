@@ -127,6 +127,13 @@ class WorkSpace(object):
             LOGGER.error("Target workspace path not exist, please create it first: %s", workspace_path)
             raise ValueError("Target workspace path not exist, please create it first: %s" % workspace_path)
         
+        #clean workspace dir
+        try:
+            shutil.rmtree(self.workspace_path)
+            os.makedirs(self.workspace_path)
+        except Exception:
+            LOGGER.warning("Clean workspace fail: %s", self.workspace_path)
+        
         #function to format XML
         def indent(elem, level=0):
             i = "\n" + level*"  "

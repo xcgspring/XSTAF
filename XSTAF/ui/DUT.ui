@@ -115,7 +115,14 @@
    <widget class="QWidget" name="dockWidgetContents_4">
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="0" column="0">
-      <widget class="QTextEdit" name="TestInfoEdit"/>
+      <widget class="QTableView" name="testInfoTableView">
+       <attribute name="horizontalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+      </widget>
      </item>
     </layout>
    </widget>

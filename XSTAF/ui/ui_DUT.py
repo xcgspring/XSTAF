@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Thu Mar 19 15:43:54 2015
+# Created: Thu Mar 19 16:55:49 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -75,9 +75,11 @@ class Ui_DUTWindow(object):
         self.dockWidgetContents_4.setObjectName(_fromUtf8("dockWidgetContents_4"))
         self.gridLayout_5 = QtGui.QGridLayout(self.dockWidgetContents_4)
         self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
-        self.TestInfoEdit = QtGui.QTextEdit(self.dockWidgetContents_4)
-        self.TestInfoEdit.setObjectName(_fromUtf8("TestInfoEdit"))
-        self.gridLayout_5.addWidget(self.TestInfoEdit, 0, 0, 1, 1)
+        self.testInfoTableView = QtGui.QTableView(self.dockWidgetContents_4)
+        self.testInfoTableView.setObjectName(_fromUtf8("testInfoTableView"))
+        self.testInfoTableView.horizontalHeader().setVisible(False)
+        self.testInfoTableView.verticalHeader().setVisible(False)
+        self.gridLayout_5.addWidget(self.testInfoTableView, 0, 0, 1, 1)
         self.TestInfoDock.setWidget(self.dockWidgetContents_4)
         DUTWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.TestInfoDock)
         self.actionAddTestSuite = QtGui.QAction(DUTWindow)

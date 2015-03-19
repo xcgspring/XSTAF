@@ -22,6 +22,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.TestsTreeView.setModel(self.testsModel)
         self.taskQueueModel = QtGui.QStandardItemModel(self.taskQueueListView)
         self.taskQueueListView.setModel(self.taskQueueModel)
+        self.testInfoModel = QtGui.QStandardItemModel(self.testInfoTableView)
+        self.testInfoTableView.setModel(self.testInfoModel)
 
         ##########################################
         #signals and slots
@@ -107,13 +109,19 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #LOGGER.debug("Click: column: %s, raw: %s", (index.column(), index.row()))
         item = self.testsModel.itemFromIndex(index)
         if not item is None:
+            self.testInfoModel.clear()
             if item.parent() is None:
                 #click on testsuite
                 self.actionRemoveTestSuite.setEnabled(True)
                 #print testsuite info in test view
                 testsuite = self.dut.get_testsuite(str(item.text()))
-                info = "TestSuite: %s\n" % testsuite.test_suite_file
-                info += "  Total test case: %d\n" % testsuite.testcase_number()
+                
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("TestSuite"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite.test_suite_file))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Test Case Number"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testsuite.testcase_number()))
+                self.testInfoModel.appendRow([name_item, value_item])
 
             elif item.parent().parent() is None:
                 self.actionRemoveTestSuite.setDisabled(True)
@@ -122,12 +130,22 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testcase_id = item.data().toPyObject()
                 testsuite = self.dut.get_testsuite(testsuite_name)
                 testcase = testsuite.get_testcase(testcase_id)
-                info = "TestCase: %s\n" % testcase.name
-                info += "  ID: %s\n" % testcase.ID
-                info += "  Command: %s\n" % testcase.command
-                info += "  Auto: %s\n" % testcase.auto
-                info += "  TimeOut: %s\n" % testcase.timeout
-                info += "  Description: %s\n" % testcase.description
+                
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("TestCase"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase.name))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("TestID"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(str(testcase.ID)))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Command"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase.command))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Auto"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase.auto))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Description"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(testcase.description))
+                self.testInfoModel.appendRow([name_item, value_item])
 
             else:
                 self.actionRemoveTestSuite.setDisabled(True)
@@ -137,15 +155,22 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 testsuite = self.dut.get_testsuite(testsuite_name)
                 testcase = testsuite.get_testcase(testcase_id)
                 run = testcase.get_run(run_id)
-                info = "TestRun: \n"
-                info += "Start: %s\n" % run.start
-                info += "End: %s\n" % run.end
-                info += "  Status: %s\n" % run.status
-                info += "  Log location: %s\n" % run.log_location
-                info += "  Result: %s\n" % run.pretty_result
-
-            self.TestInfoEdit.clear()
-            self.TestInfoEdit.append(info)
+                
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Start"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(run.start))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("End"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(run.end))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Status"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(run.status))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Log location"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(run.log_location))
+                self.testInfoModel.appendRow([name_item, value_item])
+                name_item = QtGui.QStandardItem(QtCore.QString("%0").arg("Result"))
+                value_item = QtGui.QStandardItem(QtCore.QString("%0").arg(run.pretty_result))
+                self.testInfoModel.appendRow([name_item, value_item])
 
     def test_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()
