@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 
 from XSTAF.ui.ui_mainWindow import Ui_XSTAFMainWindow
 import XSTAF.core.logger as logger
-from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog, ToolManagerDialog
+from XSTAF.core.dialogs import SettingsDialog, ConfirmDialog, RefreshAllDialog, AddDUTDialog, ToolManagerDialog, ChangeDUTInfoDialog
 from XSTAF.core.DUT_window import DUTWindow
 
 class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
@@ -40,6 +40,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         self.connect(self.actionAddDUT, QtCore.SIGNAL("triggered(bool)"), self.add_DUT)
         self.connect(self.actionRemoveDUT, QtCore.SIGNAL("triggered(bool)"), self.remove_DUT)
         self.connect(self.actionOpenDUTView, QtCore.SIGNAL("triggered(bool)"), self.open_DUT_view)
+        self.connect(self.actionChangeDUTInfo, QtCore.SIGNAL("triggered(bool)"), self.change_DUT_info)
         
         self.connect(self.actionToolManager, QtCore.SIGNAL("triggered(bool)"), self.open_tool_manager)
 
@@ -225,6 +226,13 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
                 dut_window = self.DUTWindows[dut_ip]
                 dut_window.setFocus()
                 
+    def change_DUT_info(self):
+        for selected_index in self.DUTView.selectedIndexes():
+            dut_ip = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selected_index.row(), 1)).text())
+        dialog = ChangeDUTInfoDialog(self, dut_ip)
+        dialog.exec_()
+        self.refresh_ui()
+                
     def open_tool_manager(self):
         dialog = ToolManagerDialog(self)
         dialog.exec_()
@@ -257,6 +265,7 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
         else:
             context_menu.addAction(self.actionOpenDUTView)
             context_menu.addAction(self.actionRemoveDUT)
+            context_menu.addAction(self.actionChangeDUTInfo)
             context_menu.exec_(self.DUTView.mapToGlobal(point))
 
     def DUT_view_double_clicked(self, index):

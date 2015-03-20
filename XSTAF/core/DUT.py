@@ -116,9 +116,9 @@ class DUTTaskRunner(QtCore.QThread):
         else:
             #init DUT
             LOGGER.debug("    Step1: init DUT")
-            self.staf_handle.delete_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
             self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_log_location"))
             self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+            self.staf_handle.clean_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
             
             #run case
             LOGGER.debug("    Step2: Run command, command: %s" % work.command)
@@ -221,7 +221,7 @@ class DUT(QtCore.QObject):
     #DUT status change should update ui
     status_change = QtCore.SIGNAL("DUTStatusChange")
     #settings
-    self.settings = {"remote_log_location" : r"c:\XSTAF",
+    settings = {"remote_log_location" : r"c:\XSTAF",
                      "remote_tmp_files_location" : r"c:\XSTAF\tmpfiles",
                     }
 
@@ -329,6 +329,10 @@ class DUT(QtCore.QObject):
     
     def add_testsuite(self, testsuite_file):
         testsuite = TestSuite(testsuite_file)
+        self._testsuites[testsuite.name] = testsuite
+
+    def add_testsuite_object(self, testsuite):
+        #used to move testsuite object from one dut to another
         self._testsuites[testsuite.name] = testsuite
         
     def remove_testsuite(self, testsuite_name):

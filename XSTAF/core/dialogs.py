@@ -8,6 +8,7 @@ from XSTAF.ui.ui_addDUT import Ui_addDUT
 from XSTAF.ui.ui_refresh import Ui_refreshDialog
 from XSTAF.ui.ui_confirmDialog import Ui_confirmDialog
 from XSTAF.ui.ui_toolManager import Ui_toolManagerDialog
+from XSTAF.ui.ui_changeDUT import Ui_changeDUT
 
 class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
     Confirmed = False
@@ -115,7 +116,11 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         LOGGER.debug("Config logging_level_stream: %s", logging_level_stream)
         LOGGER.debug("Config staf dir: %s", staf_dir)
         LOGGER.debug("Config workspace dir: %s", workspace_location)
-
+        LOGGER.debug("Config tool location: %s", tool_location)
+        LOGGER.debug("Config tool config file: %s", tool_config_file)
+        LOGGER.debug("Config dut log location: %s", remote_log_location)
+        LOGGER.debug("Config dut tmp files location: %s", remote_tmp_files_location)
+        
         QtGui.QDialog.accept(self)
 
 class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
@@ -136,6 +141,25 @@ class AddDUTDialog(QtGui.QDialog, Ui_addDUT):
         else:
             LOGGER.debug("No workspace, cannot add DUT")
         QtGui.QDialog.accept(self)
+        
+class ChangeDUTInfoDialog(QtGui.QDialog, Ui_changeDUT):
+    def __init__(self, main_window, orginal_ip):
+        QtGui.QDialog.__init__(self)
+        self.setupUi(self)
+        self.DUTIP.setInputMask("000.000.000.000")
+        self.server = main_window.server
+        self.orginal_ip = orginal_ip
+        self.orginalDUTInfo.setText(QtCore.QString("Change DUT info for DUT %0").arg(self.orginal_ip))
+
+    def accept(self):
+        changed_ip = str(self.DUTIP.text())
+        changed_name = str(self.DUTName.text())
+
+        LOGGER.debug("Change DUT info")
+        workspace = self.server.get_workspace()
+        workspace.change_dut_info(self.orginal_ip, changed_ip, changed_name)
+
+        QtGui.QDialog.accept(self)
 
 class RefreshAllThread(QtCore.QThread):
     def __init__(self, server):
@@ -143,7 +167,7 @@ class RefreshAllThread(QtCore.QThread):
         self.server = server
 
     def run(self):
-        self.server.config_staf()
+        self.server.check_staf()
         
         if self.server.has_workspace():
             workspace = self.server.get_workspace()

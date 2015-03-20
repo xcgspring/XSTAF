@@ -374,6 +374,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 #Cannot control DUT
                 self.actionStartRunner.setDisabled(True)
                 self.actionPauseRunner.setDisabled(True)
+        else:
+            #Cannot control DUT
+            self.actionRefresh.setDisabled(True)
+            self.actionStartRunner.setDisabled(True)
+            self.actionPauseRunner.setDisabled(True)
 
         #refresh test view
         self._refresh_test_view()

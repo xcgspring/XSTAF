@@ -227,6 +227,14 @@
     <string>toolManager</string>
    </property>
   </action>
+  <action name="actionChangeDUTInfo">
+   <property name="text">
+    <string>changeDUTInfo</string>
+   </property>
+   <property name="toolTip">
+    <string>changeDUTInfo</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>

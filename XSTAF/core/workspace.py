@@ -233,8 +233,8 @@ class WorkSpace(object):
 
     def add_dut(self, ip, name):
         dut = DUT(os.path.join(self.workspace_path, self.TestLogFolder), ip, name)
-        dut.add_monitor()
         self._duts[ip] = dut
+        return dut
 
     def remove_dut(self, ip):
         dut = self._duts[ip]
@@ -249,3 +249,18 @@ class WorkSpace(object):
     def duts(self):
         for dut_item in self._duts.items():
             yield dut_item[1]
+
+    def change_dut_info(self, original_ip, changed_ip, changed_name):
+        #change dut info process like below
+        #1. create a new dut object
+        new_dut = self.add_dut(changed_ip, changed_name)
+        
+        #2. load testsuites from old dut object
+        original_dut = self._duts[original_ip]
+        for testsuite in original_dut.testsuites():
+            new_dut.add_testsuite_object(testsuite)
+            
+        #3. delete old dut
+        self.remove_dut(original_ip)
+        
+        

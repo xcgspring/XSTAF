@@ -79,6 +79,10 @@ class Server(QtCore.QObject):
         self.emit(self.staf_status_change, STAFInstance.status)
         return STAFInstance.status
 
+    def check_staf(self):
+        STAFInstance.check()
+        self.emit(self.staf_status_change, STAFInstance.status)
+        return STAFInstance.status
     ############################################
     #workspace management methods
     #current only support one workspace, load another workspace will replace current workspace

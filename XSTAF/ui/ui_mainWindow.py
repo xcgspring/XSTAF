@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Fri Mar 20 13:40:15 2015
+# Created: Fri Mar 20 14:36:11 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -118,6 +118,8 @@ class Ui_XSTAFMainWindow(object):
         icon9.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/icons/toolManage.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionToolManager.setIcon(icon9)
         self.actionToolManager.setObjectName(_fromUtf8("actionToolManager"))
+        self.actionChangeDUTInfo = QtGui.QAction(XSTAFMainWindow)
+        self.actionChangeDUTInfo.setObjectName(_fromUtf8("actionChangeDUTInfo"))
         self.menuSTAF.addSeparator()
         self.menuSTAF.addAction(self.actionStartSTAF)
         self.menuSTAF.addAction(self.actionRefresh)
@@ -175,5 +177,7 @@ class Ui_XSTAFMainWindow(object):
         self.actionOpenDUTView.setToolTip(_translate("XSTAFMainWindow", "openDUTView", None))
         self.actionToolManager.setText(_translate("XSTAFMainWindow", "toolManager", None))
         self.actionToolManager.setToolTip(_translate("XSTAFMainWindow", "toolManager", None))
+        self.actionChangeDUTInfo.setText(_translate("XSTAFMainWindow", "changeDUTInfo", None))
+        self.actionChangeDUTInfo.setToolTip(_translate("XSTAFMainWindow", "changeDUTInfo", None))
 
 import resources_rc
