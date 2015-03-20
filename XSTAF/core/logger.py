@@ -1,4 +1,5 @@
 
+import os
 import sys
 import types
 import logging
@@ -76,6 +77,10 @@ class CustomLogger(QtCore.QObject):
             #replace stream handle emit to custom emit
             stream_handler.emit = types.MethodType(custom_emit, stream_handler)
             
+        #check if logging file location exist
+        logging_file_location = os.path.dirname(logging_file)
+        if not os.path.isdir(logging_file_location):
+            os.makedirs(logging_file_location)
         file_handler = logging.FileHandler(logging_file, mode=file_logging_mode)
         file_handler.setLevel(logging_level_file)
         formatter = logging.Formatter(formatter_string)

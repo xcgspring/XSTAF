@@ -5,6 +5,7 @@ from XSTAF.core.logger import LOGGER
 from XSTAF.core.workspace import WorkSpace
 from XSTAF.core.staf import STAFInstance
 from XSTAF.core.tool_manage import ToolManager
+from XSTAF.core.DUT import DUT
 
 class Server(QtCore.QObject):
     '''
@@ -30,6 +31,9 @@ class Server(QtCore.QObject):
             #tools dir
             "ToolsLocation" : r"tools",
             "ToolsConfigureFile" : "config.pickle",
+            #DUT
+            "remote_log_location" : r"c:\XSTAF",
+            "remote_tmp_files_location" : r"c:\XSTAF\tmpfiles",
         }
 
         self._workspace = None
@@ -51,6 +55,7 @@ class Server(QtCore.QObject):
         self.config_staf()
         self.config_workspace()
         self.config_tool()
+        self.config_dut()
         
     ############################################
     #logger related methods
@@ -139,3 +144,8 @@ class Server(QtCore.QObject):
         self.tool_manager.tool_name_list = []
         self.tool_manager.save_config()
     
+    ############################################
+    #DUT management methods
+    ############################################
+    def config_dut(self):
+        DUT.config(remote_log_location=self.settings["remote_log_location"], remote_tmp_files_location=self.settings["remote_tmp_files_location"])

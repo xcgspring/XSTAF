@@ -205,6 +205,12 @@ class STAFHandle(object):
         request = 'CREATE DIRECTORY %s FULLPATH' % directory
         assert(self._staf_handle_submit(location, service, request))
     
+    def delete_directory(self, DUT, directory):
+        location = '%s' % DUT
+        service = 'FS'
+        request = 'DELETE ENTRY %s RECURSE CONFIRM ' % directory
+        assert(self._staf_handle_submit(location, service, request))
+    
     def copy_log_file(self, DUT, remote_file, local_location):
         #before copy file to local, need give DUT trust level 4
         location = 'local'

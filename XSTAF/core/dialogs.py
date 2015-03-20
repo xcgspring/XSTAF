@@ -72,6 +72,10 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         self.STAFDirEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("STAFDir")))
         self.loggingFileEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("LogLocation")))
         self.WorkspaceLocation.setText(QtCore.QString("%0").arg(self.server.get_settings("WorkspaceLocation")))
+        self.toolLocationEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("ToolsLocation")))
+        self.toolConfigureFileEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("ToolsConfigureFile")))
+        self.dutLogLocationEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("remote_log_location")))
+        self.dutTmpFilesLocationEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("remote_tmp_files_location")))
         
         logging_level_file = self.server.get_settings("LoggerLevelFile")
         logging_level_stream = self.server.get_settings("LoggerLevelStream")
@@ -90,12 +94,20 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         logging_level_stream=str(self.loggingStreamLevel.currentText())
         staf_dir = str(self.STAFDirEdit.text())
         workspace_location = str(self.WorkspaceLocation.text())
+        tool_location = str(self.toolLocationEdit.text())
+        tool_config_file = str(self.toolConfigureFileEdit.text())
+        dut_log_location = str(self.dutLogLocationEdit.text())
+        dut_tmp_files_location = str(self.dutTmpFilesLocationEdit.text())
         
         self.server.apply_settings(STAFDir=staf_dir, \
                                     LogLocation=logging_file, \
                                     LoggerLevelFile=logging_level_file, \
                                     LoggerLevelStream=logging_level_stream, \
-                                    WorkspaceLocation=workspace_location)
+                                    WorkspaceLocation=workspace_location, \
+                                    ToolsLocation=tool_location, \
+                                    ToolsConfigureFile=tool_config_file, \
+                                    remote_log_location=dut_log_location, \
+                                    remote_tmp_files_location=dut_tmp_files_location)
         self.server.config()
 
         LOGGER.debug("Config logging_file: %s", logging_file)

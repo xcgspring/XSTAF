@@ -92,22 +92,13 @@ class DUTTaskRunner(QtCore.QThread):
         #configure the staf handle
         assert(self.staf_handle.configure())
         
-        #remote log location
-        self.remote_log_location = r"c:\XSTAF"
-        self.remote_log_tmp_location = r"c:\XSTAF\tmplogs"
-        
     def start(self):
         LOGGER.info("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
-        self.prepare_DUT()
         QtCore.QThread.start(self)
         
     def terminate(self):
         LOGGER.info("DUT task runner thread for IP %s terminate" % self.DUT_instance.ip)
         QtCore.QThread.terminate(self)
-        
-    def prepare_DUT(self):
-        #make some dirs
-        self.staf_handle.create_directory(self.DUT_instance.ip, self.remote_log_tmp_location)
         
     def run_task(self, work):
         LOGGER.debug("Start task, Name: %s" % work.name)
@@ -118,20 +109,26 @@ class DUTTaskRunner(QtCore.QThread):
         #init result
         run.result = run.Pass
         #lock DUT
-        LOGGER.debug("    Step1: Lock DUT, DUT: %s" % self.DUT_instance.ip)
+        LOGGER.debug("    Step0: Lock DUT, DUT: %s" % self.DUT_instance.ip)
         if not self.staf_handle.lock_DUT(self.DUT_instance.ip):
             run.result = run.Fail
             run.status = "Lock DUT Fail\n"
         else:
+            #init DUT
+            LOGGER.debug("    Step1: init DUT")
+            self.staf_handle.delete_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+            self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_log_location"))
+            self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+            
             #run case
             LOGGER.debug("    Step2: Run command, command: %s" % work.command)
-            remote_log_file = os.path.join(self.remote_log_location, str(work.ID), "%s_%s.log"%(work.name, run.start) )
+            remote_log_file = os.path.join(self.DUT_instance.get_settings("remote_log_location"), str(work.ID), "%s_%s.log"%(work.name, run.start) )
             if not self.staf_handle.start_process(self.DUT_instance.ip, work.command, remote_log_file):
                 run.result = run.Fail
                 run.status = "Test Run Fail\n"
                 
             #copy log
-            local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID))
+            local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID), run.start)
             if not os.path.isdir(local_log_location):
                 os.makedirs(local_log_location)
             LOGGER.debug("    Step3: Copy logs")
@@ -144,7 +141,7 @@ class DUTTaskRunner(QtCore.QThread):
                 
             #copy tmp logs in remote global log location, and delete them after copy done
             LOGGER.debug("    Step3.2: Copy tmp logs")
-            if not self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.remote_log_tmp_location, local_log_location):
+            if not self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"), local_log_location):
                 run.result = run.Fail
                 run.status = run.status+"Copy tmp logs Fail\n"
 
@@ -223,6 +220,10 @@ class DUT(QtCore.QObject):
 
     #DUT status change should update ui
     status_change = QtCore.SIGNAL("DUTStatusChange")
+    #settings
+    self.settings = {"remote_log_location" : r"c:\XSTAF",
+                     "remote_tmp_files_location" : r"c:\XSTAF\tmpfiles",
+                    }
 
     def __init__(self, workspace_log_path, ip, name=""):
         QtCore.QObject.__init__(self)
@@ -242,6 +243,17 @@ class DUT(QtCore.QObject):
         
         self.status = DUTMonitor.DUTStatusUnknown
         self.pretty_status = DUTMonitor.pretty_status(self.status)
+        
+    @classmethod
+    def config(cls, **kwargs):
+        for arg in kwargs.items():
+            key = arg[0]
+            value = arg[1]
+            if key in cls.settings:
+                cls.settings[key] = value
+        
+    def get_settings(self, key):
+        return self.settings[key]
         
     ############################################
     #monitor and task runner related methods
