@@ -229,6 +229,9 @@ class MainWindow(QtGui.QMainWindow, Ui_XSTAFMainWindow):
     def change_DUT_info(self):
         for selected_index in self.DUTView.selectedIndexes():
             dut_ip = str(self.DUTsModel.itemFromIndex(self.DUTsModel.index(selected_index.row(), 1)).text())
+        #close dut window
+        if dut_ip in self.DUTWindows:
+            self.DUTWindows[dut_ip].close()
         dialog = ChangeDUTInfoDialog(self, dut_ip)
         dialog.exec_()
         self.refresh_ui()

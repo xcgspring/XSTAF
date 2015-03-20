@@ -118,8 +118,8 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         LOGGER.debug("Config workspace dir: %s", workspace_location)
         LOGGER.debug("Config tool location: %s", tool_location)
         LOGGER.debug("Config tool config file: %s", tool_config_file)
-        LOGGER.debug("Config dut log location: %s", remote_log_location)
-        LOGGER.debug("Config dut tmp files location: %s", remote_tmp_files_location)
+        LOGGER.debug("Config dut log location: %s", dut_log_location)
+        LOGGER.debug("Config dut tmp files location: %s", dut_tmp_files_location)
         
         QtGui.QDialog.accept(self)
 
