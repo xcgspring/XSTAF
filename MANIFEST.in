@@ -8,6 +8,9 @@ include MANIFEST
 # Include all icons
 graft XSTAF/ui/icons
 
+# Include all tools
+graft XSTAF/tools
+
 # Include all docs
 global-include README*
 recursive-include doc *

@@ -1,11 +1,13 @@
 
 from distutils.core import setup
+import py2exe
 
 setup(
 
     name = "XSTAF",
-    packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", "XSTAF.tools"],
-    package_data = {"XSTAF.ui": ["icons/*"]},
+    packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", "XSTAF.tools", "XSTAF.tools.report_generator", "XSTAF.tools.report_generator.html"],
+    package_data = {"XSTAF.ui": ["icons/*"], 
+                    "XSTAF.tools.report_generator.html": ["templates/*"]},
     version = "0.0.1",
     description = "distribute auto execution framework basing on STAF",
     author = "xcgspring",
@@ -26,6 +28,8 @@ setup(
         "Topic :: Software Development :: Quality Assurance",
         "Topic :: Software Development :: Testing",
         ],
-    long_description = ''' '''
-    
+    long_description = ''' ''',
+    windows=['XSTAF/main.py'],
+    zipfile="Libs/libs.zip",
+    options={"py2exe": {"skip_archive": True}},
 )
