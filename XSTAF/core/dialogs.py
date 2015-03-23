@@ -9,6 +9,7 @@ from XSTAF.ui.ui_refresh import Ui_refreshDialog
 from XSTAF.ui.ui_confirmDialog import Ui_confirmDialog
 from XSTAF.ui.ui_toolManager import Ui_toolManagerDialog
 from XSTAF.ui.ui_changeDUT import Ui_changeDUT
+from XSTAF.ui.ui_resultEditor import Ui_ResultEditorDialog
 
 class ConfirmDialog(QtGui.QDialog, Ui_confirmDialog):
     Confirmed = False
@@ -249,3 +250,19 @@ class ToolManagerDialog(QtGui.QDialog, Ui_toolManagerDialog):
             tool_name = str(tool_item.text())
             self.server.remove_tool(tool_name)
         self._refresh_tool_view()
+        
+class ResultEditorDialog(QtGui.QDialog, Ui_ResultEditorDialog):
+    def __init__(self, dut_window, run):
+        QtGui.QDialog.__init__(self, dut_window)
+        self.setupUi(self)
+        self.run = run
+        self.passRadioButton.toggle()
+        
+    def accept(self):
+        if self.passRadioButton.isChecked():
+            self.run.result = self.run.Pass
+        else:
+            self.run.result = self.run.Fail
+        
+        self.run.status = str(self.commentsTextEdit.toPlainText())
+        QtGui.QDialog.accept(self)

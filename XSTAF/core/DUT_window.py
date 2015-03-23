@@ -4,7 +4,7 @@ import time
 from PyQt4 import QtCore, QtGui
 
 from XSTAF.core.logger import LOGGER
-from XSTAF.core.dialogs import RefreshDUTDialog
+from XSTAF.core.dialogs import RefreshDUTDialog, ResultEditorDialog
 from XSTAF.ui.ui_DUT import Ui_DUTWindow, _translate, _fromUtf8
 
 class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
@@ -64,12 +64,19 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             #check if runner running
             self.task_runner_running = self.dut.is_runner_running()
             #connect runner signals to DUT view slots
-            self.connect(task_runner, task_runner.test_result_change, self.refresh_ui)
+            self.connect(task_runner, task_runner.test_result_change, self.handle_test_result_change)
             self.connect(task_runner, task_runner.runner_busy, self.handle_runner_busy)
             self.connect(task_runner, task_runner.runner_idle, self.handle_runner_idle)
         else:
             self.dut.remove_runner()
             self.task_runner_running = False
+        self.refresh_ui()
+        
+    def handle_test_result_change(self, auto, run):
+        if not auto:
+            result_editor_dialog = ResultEditorDialog(self, run)
+            result_editor_dialog.exec_()
+        
         self.refresh_ui()
         
     def handle_runner_busy(self):

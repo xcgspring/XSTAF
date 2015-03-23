@@ -193,7 +193,7 @@ class DUTTaskRunner(QtCore.QThread):
                 
             run.end = "%.3f" % time.time()
             #emit test result change signal, if manual case, ui should prompt user to change test result manually
-            self.emit(self.test_result_change, work.auto)
+            self.emit(self.test_result_change, work.auto, run)
             
 class DUTMonitor(object):
     #DUT status
