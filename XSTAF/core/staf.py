@@ -12,6 +12,9 @@ ServerName = socket.getfqdn()
 #staf monitor name
 MonitorName = "DUTSTATUS"
 
+class STAFError(Exception):
+    pass
+
 class STAF(object):
     '''
     STAF class
@@ -133,6 +136,8 @@ class STAFHandle(object):
         #staf id, 0 is an invalid id
         self.staf_handle_id = 0
         self.staf_handle = None
+        #staf process workload name
+        self.workload_name = "XSTAF"
         
     def register(self):
         ''' 
@@ -172,10 +177,15 @@ class STAFHandle(object):
     def _staf_handle_submit(self, location, service, request):
         #assert(not (self.staf_handle is None), "Need create staf handle first")
         result = self.staf_handle.submit(location, service, request)
-        if (result.rc != 0):
+        if result.rc == 16:
+            #during reboot, STAF may return 16
+            #we will keep send the command until timeout
+            LOGGER.warning("Submitting request encounter error 16, please check if your DUT still alive")
+        elif result.rc != 0:
             LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
             LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
-            return False
+            #break the process
+            raise STAFError("Error submitting request")
         
         return result
         
@@ -203,43 +213,42 @@ class STAFHandle(object):
         location = '%s' % DUT
         service = 'FS'
         request = 'CREATE DIRECTORY %s FULLPATH' % directory
-        assert(self._staf_handle_submit(location, service, request))
+        self._staf_handle_submit(location, service, request)
     
     def clean_directory(self, DUT, directory):
         location = '%s' % DUT
         service = 'FS'
         request = 'DELETE ENTRY %s CHILDREN RECURSE CONFIRM IGNOREERRORS' % directory
-        assert(self._staf_handle_submit(location, service, request))
+        self._staf_handle_submit(location, service, request)
     
     def copy_log_file(self, DUT, remote_file, local_location):
         #before copy file to local, need give DUT trust level 4
         location = 'local'
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 4' % DUT
-        assert(self._staf_handle_submit(location, service, request))
+        self._staf_handle_submit(location, service, request)
         #copy
         location = '%s' % DUT
         service = 'FS'
         request = 'COPY FILE %s TODIRECTORY  %s TOMACHINE %s' % (remote_file, local_location, ServerName)
-        return self._staf_handle_submit(location, service, request)
+        self._staf_handle_submit(location, service, request)
         
     def copy_tmp_log_directory(self, DUT, remote_log_directory, local_location):
         #before copy file to local, need give DUT trust level 4
         location = 'local'
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 4' % DUT
-        assert(self._staf_handle_submit(location, service, request))
+        self._staf_handle_submit(location, service, request)
         #copy
         location = '%s' % DUT
         service = 'FS'
         request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s' % (remote_log_directory, local_location, ServerName)
-        assert(self._staf_handle_submit(location, service, request))
+        self._staf_handle_submit(location, service, request)
         #delete remote log
         location = '%s' % DUT
         service = 'FS'
         request = 'DELETE ENTRY %s CHILDREN RECURSE CONFIRM ' % remote_log_directory
-        assert(self._staf_handle_submit(location, service, request))
-        return True
+        self._staf_handle_submit(location, service, request)
     
     ########################################
     #
@@ -254,26 +263,52 @@ class STAFHandle(object):
         '''
         location = '%s' % DUT
         service = 'Process'
-        request = 'START COMMAND %s wait stdout %s stderrTostdout' % (command, log_file)
+        request = 'START COMMAND %s async workload %s stdout %s stderrTostdout' % (command, self.workload_name, log_file)
         
         result = self._staf_handle_submit(location, service, request)
 
-        return_code = result.resultContext.getRootObject()["rc"]
-        LOGGER.debug("Return code is: %s" % return_code)
-        if return_code != "0":
-            return False
-        else:
-            return True
+        handle = result.resultContext
+        LOGGER.info("Task started, with staf handle : %s" % handle)
+
+    def query_process_status(self, DUT):
+        '''
+        query process status
+        '''
+        location = '%s' % DUT
+        service = 'Process'
+        request = 'LIST workload %s' % self.workload_name
         
-    def stop_process(self, DUT, process):
+        result = self._staf_handle_submit(location, service, request)
+        #check return code, process not end if rc is None
+        #every time we start/stop a process, we will free it, to make sure we only have one process info in status
+        rc = result.resultContext.getRootObject()[0]["rc"]
+        if rc is None:
+            #process not end
+            return None
+        else:
+            #check end time
+            end_time = result.resultContext.getRootObject()[0]["endTimestamp"]
+            return rc, end_time
+            
+    def free_process_status(self, DUT):
+        '''
+        free process info, we need to free process info before start new process
+        '''
+        location = '%s' % DUT
+        service = 'Process'
+        request = 'free workload %s' % self.workload_name
+        
+        self._staf_handle_submit(location, service, request)
+        
+    def stop_process(self, DUT):
         '''
         stop a process
         '''
         location = '%s' % DUT
         service = 'Process'
-        request = 'STOP ALL'
+        request = 'STOP workload %s' % self.workload_name
         
-        return self._staf_handle_submit(location, service, request)
+        self._staf_handle_submit(location, service, request)
         
     ########################################
     #
@@ -381,7 +416,7 @@ class STAFHandle(object):
         service = 'TRUST'
         request = 'SET DEFAULT LEVEL 5'
         
-        return self._staf_handle_submit(location, service, request)
+        self._staf_handle_submit(location, service, request)
     
     
 #global staf instance

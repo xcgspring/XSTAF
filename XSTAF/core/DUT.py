@@ -4,6 +4,7 @@ import Queue
 import uuid
 import time
 import socket
+import traceback
 from PyQt4 import QtCore
 
 from XSTAF.core.logger import LOGGER
@@ -92,6 +93,9 @@ class DUTTaskRunner(QtCore.QThread):
         #configure the staf handle
         assert(self.staf_handle.configure())
         
+        #task cancel flag
+        self.cancel_task = False
+        
     def start(self):
         LOGGER.info("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
         QtCore.QThread.start(self)
@@ -100,75 +104,97 @@ class DUTTaskRunner(QtCore.QThread):
         LOGGER.info("DUT task runner thread for IP %s terminate" % self.DUT_instance.ip)
         QtCore.QThread.terminate(self)
         
-    def run_task(self, work):
-        LOGGER.debug("Start task, Name: %s" % work.name)
+    def cancel_task(self):
+        self.cancel_task = True
         
-        run = Run()
-        #start time
-        run.start = "%.3f" % time.time()
-        #init result
-        run.result = run.Pass
+    def run_task(self, work, run):
         #lock DUT
-        LOGGER.debug("    Step0: Lock DUT, DUT: %s" % self.DUT_instance.ip)
-        if not self.staf_handle.lock_DUT(self.DUT_instance.ip):
-            run.result = run.Fail
-            run.status = "Lock DUT Fail\n"
-        else:
-            #init DUT
-            LOGGER.debug("    Step1: init DUT")
-            self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_log_location"))
-            self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
-            self.staf_handle.clean_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+        LOGGER.debug("    Step1: Lock DUT, DUT: %s" % self.DUT_instance.ip)
+        self.staf_handle.lock_DUT(self.DUT_instance.ip)
+        #clean previous process info
+        LOGGER.debug("    Step2: free process info")
+        self.staf_handle.free_process_status(self.DUT_instance.ip)
+        #create some directories
+        LOGGER.debug("    Step3: create log directory and tmp files location")
+        self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_log_location"))
+        self.staf_handle.create_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+        self.staf_handle.clean_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"))
+        #run case
+        LOGGER.debug("    Step4: Run command, command: %s" % work.command)
+        remote_log_file = os.path.join(self.DUT_instance.get_settings("remote_log_location"), str(work.ID), "%s_%s.log"%(work.name, run.start))
+        self.staf_handle.start_process(self.DUT_instance.ip, work.command, remote_log_file)
+        
+        while True:
+            #wait until process end or time out
+            #check time out
+            current_time = time.time()
+            if current_time - float(run.start) > work.timeout:
+                #stop the process
+                self.staf_handle.stop_process(self.DUT_instance.ip)
+                LOGGER.info("Time out encounter")
+                run.result = run.Fail
+                break
             
-            #run case
-            LOGGER.debug("    Step2: Run command, command: %s" % work.command)
-            remote_log_file = os.path.join(self.DUT_instance.get_settings("remote_log_location"), str(work.ID), "%s_%s.log"%(work.name, run.start) )
-            if not self.staf_handle.start_process(self.DUT_instance.ip, work.command, remote_log_file):
-                run.result = run.Fail
-                run.status = "Test Run Fail\n"
+            #check if user manually cancel the test
+            if self.cancel_task:
+                #stop the process
+                self.staf_handle.stop_process(self.DUT_instance.ip)
+                LOGGER.info("User manually cancel task")
+                run.result = run.NotRun
+                break
                 
-            #copy log
-            local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID), run.start)
-            if not os.path.isdir(local_log_location):
-                os.makedirs(local_log_location)
-            LOGGER.debug("    Step3: Copy logs")
-            
-            #copy stdout/stderr log
-            LOGGER.debug("    Step3.1: Copy stdout/stderr logs")
-            if not self.staf_handle.copy_log_file(self.DUT_instance.ip, remote_log_file, local_log_location):
-                run.result = run.Fail
-                run.status = run.status+"Copy stdout/stderr logs Fail\n"
+            #check process status
+            result = self.staf_handle.query_process_status(self.DUT_instance.ip)
+            if not result is None:
+                LOGGER.info("Process end, result: %s, end time: %s" % result)
+                if int(result[0]) == 0:
+                    run.result = run.Pass
+                else:
+                    run.result = run.Fail
+                break
                 
-            #copy tmp logs in remote global log location, and delete them after copy done
-            LOGGER.debug("    Step3.2: Copy tmp logs")
-            if not self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"), local_log_location):
-                run.result = run.Fail
-                run.status = run.status+"Copy tmp logs Fail\n"
-
-            run.log_location = local_log_location
-                
+            #check the status every 1s
+            time.sleep(1)
+        
+        #copy log
+        local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID), run.start)
+        if not os.path.isdir(local_log_location):
+            os.makedirs(local_log_location)
+        #copy stdout/stderr log
+        LOGGER.debug("    Step5: Copy stdout/stderr logs")
+        self.staf_handle.copy_log_file(self.DUT_instance.ip, remote_log_file, local_log_location)
+        #copy tmp logs in remote global log location, and delete them after copy done
+        LOGGER.debug("    Step6: Copy tmp logs")
+        self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"), local_log_location)
+        run.log_location = local_log_location
         #release DUT
-        LOGGER.debug("    Step4: Release DUT, DUT: %s" % self.DUT_instance.ip )
-        if not self.staf_handle.release_DUT(self.DUT_instance.ip):
-            run.result = run.Fail
-            run.status = run.status+"Release DUT Fail\n"
-
-        run.end = "%.3f" % time.time()
-        
-        #add this run to work, index using start time
-        work.add_run(run)
-        
-        #emit update ui signal
-        self.emit(self.test_result_change)
+        LOGGER.debug("    Step7: Release DUT, DUT: %s" % self.DUT_instance.ip )
+        self.staf_handle.release_DUT(self.DUT_instance.ip)
         
     def run(self):
         while True:
             self.emit(self.runner_idle)
-            #run task
+            #get task from task queue
             work = self.task_queue.get(block=True)
+            
+            LOGGER.debug("Start task, Name: %s" % work.name)
             self.emit(self.runner_busy)
-            self.run_task(work)
-    
+            run = Run()
+            run.start = "%.3f" % time.time()
+            work.add_run(run)
+            #set cancel task to false
+            self.cancel_task = False
+            
+            try:
+                self.run_task(work, run)
+            except:
+                LOGGER.info(traceback.format_exc())
+                run.result = run.Fail
+                
+            run.end = "%.3f" % time.time()
+            #emit test result change signal, if manual case, ui should prompt user to change test result manually
+            self.emit(self.test_result_change, work.auto)
+            
 class DUTMonitor(object):
     #DUT status
     #Invalid status, we cannot assign task to DUT under these status
@@ -305,9 +331,6 @@ class DUT(QtCore.QObject):
             self.task_runner.start()
         
     def stop_runner(self):
-        '''
-        check DUT status
-        '''
         if not self.task_runner is None:
             self.task_runner.terminate()
             
@@ -320,6 +343,10 @@ class DUT(QtCore.QObject):
             return False
         else:
             return self.task_runner.isRunning()
+            
+    def cancel_task(self):
+        if not self.task_runner is None:
+            self.task_runner.cancel_task()
 
     ############################################
     #task suite management methods
