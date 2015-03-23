@@ -179,7 +179,7 @@ class STAFHandle(object):
         staf request submit function, most staf command will use this function to send
         '''
         #assert(not (self.staf_handle is None), "Need create staf handle first")
-        when True:
+        while True:
             result = self.staf_handle.submit(location, service, request)
             if result.rc == 16:
                 #during reboot, STAF may return 16

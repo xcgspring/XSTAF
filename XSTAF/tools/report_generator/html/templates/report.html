@@ -43,10 +43,10 @@
                 <a href="{{ '#'+testsuite.name+'_'+testcase.name }}">{{ testcase.name }}</a>
                 {% for run in testcase.runs %}
                     {% if run.result %}
-                        <img src ="pass.png" width="16" height="16" align="middle"> 
+                        <img src ="static/pass.png" width="16" height="16" align="middle"> 
                     {% endif %}
                     {% if not run.result %}
-                        <img src ="fail.png" width="16" height="16" align="middle"> 
+                        <img src ="static/fail.png" width="16" height="16" align="middle"> 
                     {% endif %}
                 {% endfor %}
                 </p>
