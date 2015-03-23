@@ -175,19 +175,27 @@ class STAFHandle(object):
         return True
         
     def _staf_handle_submit(self, location, service, request):
+        '''
+        staf request submit function, most staf command will use this function to send
+        '''
         #assert(not (self.staf_handle is None), "Need create staf handle first")
-        result = self.staf_handle.submit(location, service, request)
-        if result.rc == 16:
-            #during reboot, STAF may return 16
-            #we will keep send the command until timeout
-            LOGGER.warning("Submitting request encounter error 16, please check if your DUT still alive")
-        elif result.rc != 0:
-            LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
-            LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
-            #break the process
-            raise STAFError("Error submitting request")
-        
-        return result
+        when True:
+            result = self.staf_handle.submit(location, service, request)
+            if result.rc == 16:
+                #during reboot, STAF may return 16
+                #we will keep send the command until timeout
+                LOGGER.warning("Submitting request encounter error 16, please check if your DUT still alive")
+            elif result.rc != 0:
+                LOGGER.error("Error submitting request, RC: %d, Result: %s" % (result.rc, result.result))
+                LOGGER.error("Location: %s, Service: %s, Request: %s" % (location, service, request))
+                #break the process
+                raise STAFError("Error submitting request")
+            else:
+                #successful
+                return result
+            
+            #sleep 20s if remote is not ready
+            time.sleep(20)
         
     ########################################
     #
@@ -200,7 +208,12 @@ class STAFHandle(object):
         service = 'Ping'
         request = 'Ping machine %s' % DUT
         
-        return self._staf_handle_submit(location, service, request)
+        result = self.staf_handle.submit(location, service, request)
+        if result.rc == 0 :
+            return True
+        else:
+            LOGGER.warning("Ping DUT %s fail, RC: %d, Result: %s" % (DUT, result.rc, result.result))
+            return False
         
     ########################################
     #
@@ -369,7 +382,7 @@ class STAFHandle(object):
         service = 'TRUST'
         request = 'GET MACHINE %s' % ServerName
         
-        result = self._staf_handle_submit(location, service, request)
+        result = self.staf_handle.submit(location, service, request)
         if result:
             LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result.result))
             if int(result.result) < 5:
