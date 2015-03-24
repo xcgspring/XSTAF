@@ -243,7 +243,7 @@ class WorkSpace(object):
 
     def split(self, output_path):
         #split will create a standalone workspace for each dut in current workspace
-        for dut in duts:
+        for dut in self.duts():
             new_workspace = WorkSpace()
             new_workspace.new(os.path.join(output_path, dut.ip))
             new_workspace._duts[dut.ip] = dut

@@ -34,13 +34,15 @@ setup(
                 "XSTAF.tools", "XSTAF.tools.report_generator", "XSTAF.tools.report_generator.ui", 
                 "XSTAF.tools.report_generator.html", "XSTAF.tools.report_generator.csv",
                 "XSTAF.tools.testsuite_generator", "XSTAF.tools.testsuite_generator.ui",
-                "XSTAF.tools.workspace_merger", "XSTAF.tools.workspace_merger.ui",],
+                "XSTAF.tools.workspace_merger", "XSTAF.tools.workspace_merger.ui",
+                "XSTAF.tools.workspace_spliter", "XSTAF.tools.workspace_spliter.ui",],
     package_data = {"XSTAF.ui": ["icons/*"], 
                     "XSTAF.tools.report_generator.ui" : ["icons/*"],
                     "XSTAF.tools.report_generator.html": ["templates/*"],
                     "XSTAF.tools.report_generator.html": ["templates/static/*"],
                     "XSTAF.tools.testsuite_generator.ui" : ["icons/*"],
-                    "XSTAF.tools.workspace_merger.ui" : ["icons/*"],},
+                    "XSTAF.tools.workspace_merger.ui" : ["icons/*"],
+                    "XSTAF.tools.workspace_spliter.ui" : ["icons/*"],},
     version = "0.0.1",
     description = "distribute auto execution framework basing on STAF",
     author = "xcgspring",
@@ -74,5 +76,6 @@ setup(
                                 "tools/report_generator/html/templates/*", 
                                 "tools/report_generator/html/templates/static/*",
                                 "tools/testsuite_generator/ui/icons/*",
-                                "tools/workspace_merger/ui/icons/*",])
+                                "tools/workspace_merger/ui/icons/*",
+                                "tools/workspace_spliter/ui/icons/*",])
 )
