@@ -67,6 +67,7 @@ class _DataTestCase(object):
     
     def __init__(self, testcase, dut_info):
         self.name = testcase.name
+        self.description = testcase.description
         self.data_runs = {}
         for run in testcase.runs():
             data_run = _DataRun(run, dut_info)
@@ -247,6 +248,7 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
         
         self.passFirstRadioButton.toggle()
         self.htmlCheckBox.toggle()
+        self.csvCheckBox.toggle()
         #current not support excel report generate
         self.excelCheckBox.setDisabled(True)
         
@@ -255,6 +257,8 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
         self.workspace = self.server.get_workspace()
         if self.workspace is None:
             LOGGER.warning("Current no workspace loaded, could not generate report")
+        else:
+            self.reportLineEdit.setText(self.workspace.workspace_path)
     
     def get_report_location(self):
         if not self.workspace is None:
@@ -287,13 +291,11 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
                 LOGGER.info("generate html report: %s in %s" % (title+".html", report_location))
                 from html.html_generator import HtmlGenerator
                 HtmlGenerator(data).generate(report_location, title+".html")
-                
-            '''
-            if self.excelCheckBox.isChecked():
+
+            if self.csvCheckBox.isChecked():
                 #generate excel report
-                LOGGER.info("generate excel report: %s in %s" % (title+".html", report_location))
-                from excel.excel_generator import ExcelGenerator
-                ExcelGenerator(data).generate(report_location, title+".html")
-            '''
+                LOGGER.info("generate csv report in: %s" % (os.path.join(report_location, title)))
+                from csv.csv_generator import CSVGenerator
+                CSVGenerator(data).generate(os.path.join(report_location, title))
             
         QtGui.QDialog.accept(self)

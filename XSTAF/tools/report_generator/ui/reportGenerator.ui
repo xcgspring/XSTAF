@@ -126,7 +126,7 @@
       <string>Format setting:</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QCheckBox" name="excelCheckBox">
         <property name="text">
          <string>Excel (Require MS Excel installed)</string>
@@ -137,6 +137,13 @@
        <widget class="QCheckBox" name="htmlCheckBox">
         <property name="text">
          <string>HTML (Require jinja2 installed)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="csvCheckBox">
+        <property name="text">
+         <string>CSV</string>
         </property>
        </widget>
       </item>

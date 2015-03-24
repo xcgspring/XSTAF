@@ -31,7 +31,8 @@ setup(
 
     name = "XSTAF",
     packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", 
-                "XSTAF.tools", "XSTAF.tools.report_generator", "XSTAF.tools.report_generator.ui", "XSTAF.tools.report_generator.html"],
+                "XSTAF.tools", "XSTAF.tools.report_generator", "XSTAF.tools.report_generator.ui", 
+                "XSTAF.tools.report_generator.html", "XSTAF.tools.report_generator.csv"],
     package_data = {"XSTAF.ui": ["icons/*"], 
                     "XSTAF.tools.report_generator.ui" : ["icons/*"],
                     "XSTAF.tools.report_generator.html": ["templates/*"],

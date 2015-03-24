@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'reportGenerator.ui'
 #
-# Created: Wed Mar 18 13:49:59 2015
+# Created: Tue Mar 24 08:35:00 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -97,10 +97,13 @@ class Ui_TestReportDialog(object):
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
         self.excelCheckBox = QtGui.QCheckBox(self.formatSettingsGroupBox)
         self.excelCheckBox.setObjectName(_fromUtf8("excelCheckBox"))
-        self.gridLayout_4.addWidget(self.excelCheckBox, 1, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.excelCheckBox, 2, 0, 1, 1)
         self.htmlCheckBox = QtGui.QCheckBox(self.formatSettingsGroupBox)
         self.htmlCheckBox.setObjectName(_fromUtf8("htmlCheckBox"))
         self.gridLayout_4.addWidget(self.htmlCheckBox, 0, 0, 1, 1)
+        self.csvCheckBox = QtGui.QCheckBox(self.formatSettingsGroupBox)
+        self.csvCheckBox.setObjectName(_fromUtf8("csvCheckBox"))
+        self.gridLayout_4.addWidget(self.csvCheckBox, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.formatSettingsGroupBox, 1, 1, 1, 1)
 
         self.retranslateUi(TestReportDialog)
@@ -121,5 +124,6 @@ class Ui_TestReportDialog(object):
         self.formatSettingsGroupBox.setTitle(_translate("TestReportDialog", "Format setting:", None))
         self.excelCheckBox.setText(_translate("TestReportDialog", "Excel (Require MS Excel installed)", None))
         self.htmlCheckBox.setText(_translate("TestReportDialog", "HTML (Require jinja2 installed)", None))
+        self.csvCheckBox.setText(_translate("TestReportDialog", "CSV", None))
 
 import resources_rc
