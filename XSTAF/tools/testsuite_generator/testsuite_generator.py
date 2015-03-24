@@ -122,6 +122,7 @@ class CSVParser(object):
                 description_element.text = description
                 data_element = ET.SubElement(testcase_element, "Data")
                 data_element.text = data
+                runs_element = ET.SubElement(testcase_element, "Runs")
         indent(root_element)
         ET.ElementTree(root_element).write(output_file)
     
@@ -167,6 +168,7 @@ class PyAnvilParser(object):
             description_element.text = description
             data_element = ET.SubElement(testcase_element, "Data")
             data_element.text = data
+            runs_element = ET.SubElement(testcase_element, "Runs")
             
         indent(root_element)
         ET.ElementTree(root_element).write(output_file)
