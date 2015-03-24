@@ -58,12 +58,17 @@ class WorkSpace(object):
         if os.path.isdir(default_workspace_path):
             shutil.rmtree(default_workspace_path)
 
-    def new(self):
-        self.clean_default()
-        default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
-        if not os.path.isdir(default_workspace_path):
-            os.makedirs(default_workspace_path)
-        self.workspace_path = os.path.join(default_workspace_path)
+    def new(self, workspace_path=""):
+        if not workspace_path:
+            self.clean_default()
+            default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
+            if not os.path.isdir(default_workspace_path):
+                os.makedirs(default_workspace_path)
+            self.workspace_path = os.path.join(default_workspace_path)
+        else:
+            if not os.path.isdir(workspace_path):
+                os.makedirs(workspace_path)
+            self.load(workspace_path)
 
     def load(self, workspace_path):
         if os.path.isdir(workspace_path):
@@ -222,8 +227,33 @@ class WorkSpace(object):
     def export(self, package_path):
         pass
 
-    def report(self):
-        pass
+    def merge(self, *to_be_merged_workspaces):
+        #if all duts in two workspaces are not same, merge is simple
+        #just add duts and copy all logs from merged workspace
+        for to_be_merged_workspace in to_be_merged_workspaces:
+            #add duts
+            self._duts.update(to_be_merged_workspace._duts)
+            #copy all logs
+            source_log_path = os.path.join(to_be_merged_workspace.workspace_path, self.TestLogFolder)
+            if os.path.isdir(source_log_path):
+                for item in os.listdir(source_log_path):
+                    target = os.path.join(self.workspace_path, self.TestLogFolder, item)
+                    source = os.path.join(source_log_path, item)
+                    shutil.copytree(source, target)
+
+    def split(self, output_path):
+        #split will create a standalone workspace for each dut in current workspace
+        for dut in duts:
+            new_workspace = WorkSpace()
+            new_workspace.new(os.path.join(output_path, dut.ip))
+            new_workspace._duts[dut.ip] = dut
+            #copy logs
+            log_path = os.path.join(self.workspace_path, self.TestLogFolder, dut.ip)
+            if os.path.isdir(log_path):
+                target = os.path.join(new_workspace.workspace_path, self.TestLogFolder, dut.ip)
+                shutil.copytree(log_path, target)
+                
+            new_workspace.save(new_workspace.workspace_path)
 
     ############################################
     #DUT management methods

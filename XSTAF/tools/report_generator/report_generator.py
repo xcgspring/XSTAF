@@ -1,5 +1,5 @@
 import os
-
+import traceback
 from XSTAF.core.logger import LOGGER
 from PyQt4 import QtCore, QtGui
 from ui.ui_reportGenerator import Ui_TestReportDialog
@@ -21,9 +21,12 @@ class Tool(object):
     
     @classmethod
     def launch(cls):
-        LOGGER.info("Launch report generator tool")
-        tool_dialog = ReportGenerator(cls.main_window)
-        tool_dialog.exec_()
+        try:
+            LOGGER.info("Launch report generator tool")
+            tool_dialog = ReportGenerator(cls.main_window)
+            tool_dialog.exec_()
+        except:
+            LOGGER.error(traceback.format_exc())
         
     @classmethod
     def description(cls):

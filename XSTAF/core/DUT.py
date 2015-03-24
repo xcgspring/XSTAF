@@ -157,7 +157,7 @@ class DUTTaskRunner(QtCore.QThread):
             time.sleep(1)
         
         #copy log
-        local_log_location = os.path.join(self.DUT_instance.workspace_log_path, str(work.ID), run.start)
+        local_log_location = os.path.join(self.DUT_instance.workspace_log_path, self.DUT_instance.ip, str(work.ID), run.start)
         if not os.path.isdir(local_log_location):
             os.makedirs(local_log_location)
         #copy stdout/stderr log
@@ -166,7 +166,7 @@ class DUTTaskRunner(QtCore.QThread):
         #copy tmp logs in remote global log location, and delete them after copy done
         LOGGER.debug("    Step6: Copy tmp logs")
         self.staf_handle.copy_tmp_log_directory(self.DUT_instance.ip, self.DUT_instance.get_settings("remote_tmp_files_location"), local_log_location)
-        run.log_location = local_log_location
+        #run.log_location = local_log_location
         #release DUT
         LOGGER.debug("    Step7: Release DUT, DUT: %s" % self.DUT_instance.ip )
         self.staf_handle.release_DUT(self.DUT_instance.ip)

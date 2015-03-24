@@ -1,0 +1,1 @@
+from workspace_merger import Tool

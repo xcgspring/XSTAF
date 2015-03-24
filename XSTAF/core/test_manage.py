@@ -25,7 +25,7 @@ class Run(object):
         self.start = ""
         self.end = ""
         self.status = ""
-        self.log_location = ""
+
         self._result = self.NotRun
         
     @property
