@@ -14,4 +14,4 @@ class CSVGenerator(object):
             abs_output_report_file = os.path.join(output_report_location, testsuite.name+".csv")
             with open(abs_output_report_file, 'w') as f:
                 for testcase in testsuite.testcases:
-                    f.write("%s,%s,%s\n" % (testcase.name, testcase.result, testcase.description))
+                    f.write("%s,%s,%s\n" % (testcase.name, testcase.result, testcase.data))

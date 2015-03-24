@@ -61,6 +61,7 @@ class TestCase(object):
         self.auto = False
         self.timeout = 600
         self.description = ""
+        self.data = ""
         
         self._runs = {}
         
@@ -111,7 +112,7 @@ class TestSuite(object):
         testcase_elements = root_element.findall("TestList/ToolCase")
         for testcase_element in testcase_elements:
             testcase = TestCase()
-            testcase.name = testcase_element.find("Description").text
+            testcase.data = testcase_element.attrib["name"]
             #pyanvil case do not have a global id, use system gen id
             #testcase.ID = testcase.name
             executable = testcase_element.find("Executable").text
@@ -122,7 +123,7 @@ class TestSuite(object):
             if not testcase_element.find("Timeout") is None:
                 testcase.timeout = int(testcase_element.find("Timeout").text)
             if not testcase_element.find("Description") is None:
-                testcase.description = testcase_element.attrib["name"]
+                testcase.name = testcase_element.find("Description").text
             
             self._testcases[testcase.ID] = testcase
             
@@ -146,6 +147,8 @@ class TestSuite(object):
                 testcase.timeout = int(testcase_element.find("Timeout").text)
             if not testcase_element.find("Description") is None:
                 testcase.description = testcase_element.find("Description").text
+            if not testcase_element.find("Data") is None:
+                testcase.description = testcase_element.find("Data").text
                 
             #test run results
             runs_element = testcase_element.find("Runs")

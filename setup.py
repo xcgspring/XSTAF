@@ -32,11 +32,13 @@ setup(
     name = "XSTAF",
     packages = ["XSTAF", "XSTAF.core", "XSTAF.ui", 
                 "XSTAF.tools", "XSTAF.tools.report_generator", "XSTAF.tools.report_generator.ui", 
-                "XSTAF.tools.report_generator.html", "XSTAF.tools.report_generator.csv"],
+                "XSTAF.tools.report_generator.html", "XSTAF.tools.report_generator.csv",
+                "XSTAF.tools.testsuite_generator", "XSTAF.tools.testsuite_generator.ui"],
     package_data = {"XSTAF.ui": ["icons/*"], 
                     "XSTAF.tools.report_generator.ui" : ["icons/*"],
                     "XSTAF.tools.report_generator.html": ["templates/*"],
-                    "XSTAF.tools.report_generator.html": ["templates/static/*"]},
+                    "XSTAF.tools.report_generator.html": ["templates/static/*"],
+                    "XSTAF.tools.testsuite_generator.ui" : ["icons/*"],},
     version = "0.0.1",
     description = "distribute auto execution framework basing on STAF",
     author = "xcgspring",
@@ -68,5 +70,6 @@ setup(
                                 ["ui/icons/*", 
                                 "tools/report_generator/ui/icons/*", 
                                 "tools/report_generator/html/templates/*", 
-                                "tools/report_generator/html/templates/static/*"])
+                                "tools/report_generator/html/templates/static/*",
+                                "tools/testsuite_generator/ui/icons/*",])
 )

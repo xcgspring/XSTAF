@@ -67,7 +67,7 @@ class _DataTestCase(object):
     
     def __init__(self, testcase, dut_info):
         self.name = testcase.name
-        self.description = testcase.description
+        self.data = testcase.data
         self.data_runs = {}
         for run in testcase.runs():
             data_run = _DataRun(run, dut_info)
