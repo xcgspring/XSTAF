@@ -1,5 +1,7 @@
 
 from setuptools import setup, find_packages
+import py2exe
+
 setup(
 
     name = "XSTAF",
@@ -32,4 +34,10 @@ setup(
         "Topic :: Software Development :: Testing",
         ],
     long_description = ''' ''',
+    
+    windows=['XSTAF/main.py'],
+    zipfile="Libs/libs.zip",
+    options={"py2exe": {"packages": ['jinja2', 'XSTAF.tools'],
+                        "skip_archive": True, 
+                        "includes": ["sip"],}},
 )
