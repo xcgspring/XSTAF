@@ -7,8 +7,9 @@ import subprocess
 
 from XSTAF.core.logger import LOGGER
 
-#server name
-ServerName = socket.getfqdn()
+#server name, server name maybe not correct, we should use ip address get from misc service
+#ServerName = socket.getfqdn()
+
 #staf monitor name
 MonitorName = "DUTSTATUS"
 
@@ -214,6 +215,20 @@ class STAFHandle(object):
         else:
             LOGGER.warning("Ping DUT %s fail, RC: %d, Result: %s" % (DUT, result.rc, result.result))
             return False
+
+    ########################################
+    #
+    # Misc Service
+    #     used to detect if true server ip
+    #
+    ########################################
+    def get_server_ip(self, DUT):
+        location = '%s' % DUT
+        service = 'Misc'
+        request = 'whoami'
+        
+        result = self._staf_handle_submit(location, service, request)
+        return result.resultContext.getRootObject()["physicalID"]
         
     ########################################
     #
@@ -240,10 +255,12 @@ class STAFHandle(object):
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 4' % DUT
         self._staf_handle_submit(location, service, request)
+        #get server ip
+        server_ip = self.get_server_ip(DUT)
         #copy
         location = '%s' % DUT
         service = 'FS'
-        request = 'COPY FILE %s TODIRECTORY  %s TOMACHINE %s' % (remote_file, local_location, ServerName)
+        request = 'COPY FILE %s TODIRECTORY  %s TOMACHINE %s' % (remote_file, local_location, server_ip)
         self._staf_handle_submit(location, service, request)
         
     def copy_tmp_log_directory(self, DUT, remote_log_directory, local_location):
@@ -252,10 +269,12 @@ class STAFHandle(object):
         service = 'TRUST'
         request = 'SET MACHINE %s LEVEL 4' % DUT
         self._staf_handle_submit(location, service, request)
+        #get server ip
+        server_ip = self.get_server_ip(DUT)
         #copy
         location = '%s' % DUT
         service = 'FS'
-        request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s' % (remote_log_directory, local_location, ServerName)
+        request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s' % (remote_log_directory, local_location, server_ip)
         self._staf_handle_submit(location, service, request)
         #delete remote log
         location = '%s' % DUT
@@ -378,13 +397,16 @@ class STAFHandle(object):
         check if DUT locked
         if trust level for server is less than 5, server cannot change DUT trust level 
         '''
+        #get server ip
+        server_ip = self.get_server_ip(DUT)
+        
         location = '%s' % DUT
         service = 'TRUST'
-        request = 'GET MACHINE %s' % ServerName
+        request = 'GET MACHINE %s' % server_ip
         
         result = self.staf_handle.submit(location, service, request)
         if result:
-            LOGGER.debug("Trust level for machine: %s is %s" % (ServerName, result.result))
+            LOGGER.debug("Trust level for machine: %s is %s" % (server_ip, result.result))
             if int(result.result) < 5:
                 LOGGER.debug("DUT is locked")
                 return True
@@ -401,9 +423,12 @@ class STAFHandle(object):
         set DUT trust level for server to 5
         then set DUT default trust level to 3
         '''
+        #get server ip
+        server_ip = self.get_server_ip(DUT)
+        
         location = '%s' % DUT
         service = 'TRUST'
-        request = 'SET MACHINE %s LEVEL 5' % ServerName
+        request = 'SET MACHINE %s LEVEL 5' % server_ip
         
         result = self._staf_handle_submit(location, service, request)
         if not result:
