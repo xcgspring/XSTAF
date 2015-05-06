@@ -15,6 +15,8 @@ XSTAF is an execution framework providing a bunch of features for testers' conve
 - XSTAF provide a tool plugin mechanism, runtime data is exposed so user can develop plugins to control XSTAF runtime data
 - XSTAF provide some basic tools, like test report generator, test suite generator to handle common met tasks
 
+XSTAF's competition is other test manage and execution frameworks, like robot, spoon, testNG, or other test back-end of CI system.
+
 XSTAF top view
 ========================
 

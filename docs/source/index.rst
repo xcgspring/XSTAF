@@ -16,7 +16,7 @@ Contents:
    XSTAF_workspace
    XSTAF_test_management
    XSTAF_tool_management
-   Practices
+   Use_XSTAF
    Appendices
 
 Indices and tables
