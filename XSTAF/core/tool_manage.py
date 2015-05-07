@@ -47,7 +47,7 @@ class ToolManager(object):
             tool_module = reload(tool_module)
             tool = tool_module.Tool
         except (ImportError, AttributeError) as e:
-            LOGGER.info("Can not import tool: %s" % tool_name)
+            LOGGER.info("Can not import tool: %s" % tool_module_name)
             LOGGER.debug(traceback.format_exc())
             return None
         else:

@@ -111,7 +111,7 @@ class _DataTestCase(object):
         self.duts_info.append(dut_info)
         for run in testcase.runs():
             data_run = _DataRun(run, dut_info)
-            self.data_runs[run.start+dut_info[ip]] = data_run
+            self.data_runs[run.start+dut_info["ip"]] = data_run
 
 class _DataTestSuite(object):
     '''
