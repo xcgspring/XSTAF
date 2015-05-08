@@ -144,12 +144,20 @@ If you DUT status is normal, then you can start task queue of this DUT, test cas
 generate test report
 --------------------------------
 
-
+XSTAF has a built-in test report tool, to generate html report for one workspace.
+You can just use this test report tool, or write a your own customized report tool.
 
 XSTAF Trouble shooting 
 =========================
 
+XSTAF could have bugs since it's a new tool, not have been used and test thoroughly.
+
 XSTAF logger
 ----------------------
 
+XSTAF provide a logger, with it you can see what is happening inside the XSTAF when bug happens.
+If you are a python developer, you maybe can fix it yourself and push the fix to github. Or you can just report a bug to me.
+
+.. image:: _static/XSTAF_logger.png
+   :scale: 80 %
 
