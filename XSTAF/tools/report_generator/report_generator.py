@@ -66,7 +66,8 @@ class _DataTestCase(object):
     #pass/fail policy, will affect all _DataTestCase instance
     #set this flag to True, one pass run will set testcase to pass
     #set this flag to False, one fail run will set testcase to fail
-    PassFirst = True
+    passFirstSameDUT = True
+    passFirstDifferentDUT = True
     
     def __init__(self, testcase, dut_info):
         self.name = testcase.name
@@ -81,8 +82,9 @@ class _DataTestCase(object):
         self.duts_info.append(dut_info)
         
     @classmethod
-    def set_pass_fail_policy(cls, pass_first):
-        cls.PassFirst = pass_first
+    def set_pass_fail_policy(cls, passFirstSameDUT, passFirstDifferentDUT):
+        cls.passFirstSameDUT = passFirstSameDUT
+        cls.passFirstDifferentDUT = passFirstDifferentDUT
         
     @property
     def runs(self):
@@ -249,10 +251,12 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
         
         self.server = parent.server
         
-        self.passFirstRadioButton.toggle()
+        self.passFirstRadioButton1.toggle()
+        self.passFirstRadioButton2.toggle()
         self.htmlCheckBox.toggle()
-        self.csvCheckBox.toggle()
+        
         #current not support excel report generate
+        self.csvCheckBox.setDisabled()
         self.excelCheckBox.setDisabled(True)
         
         self.connect(self.searchToolButton, QtCore.SIGNAL("clicked(bool)"), self.get_report_location)
@@ -272,11 +276,15 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
         if not self.workspace is None:
             data = _Data(self.workspace)
 
-            if self.passFirstRadioButton.isChecked():
-                passFirst = True
+            if self.passFirstRadioButton1.isChecked():
+                passFirstSameDUT = True
             else:
-                passFirst = False
-            _DataTestCase.set_pass_fail_policy(passFirst)
+                passFirstSameDUT = False
+            if self.passFirstRadioButton2.isChecked():
+                passFirstDifferentDUT = True
+            else:
+                passFirstDifferentDUT = False
+            _DataTestCase.set_pass_fail_policy(passFirstSameDUT, passFirstDifferentDUT)
             
             title = str(self.titleEdit.text())
             summary = str(self.summaryTextEdit.toPlainText())
