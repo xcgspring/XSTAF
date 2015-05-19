@@ -7,7 +7,6 @@ setup(
     package_data = {"XSTAF.ui": ["icons/*"], 
                     "XSTAF.tools.report_generator.ui" : ["icons/*"],
                     "XSTAF.tools.report_generator.html": ["templates/*"],
-                    "XSTAF.tools.report_generator.html": ["templates/static/*"],
                     "XSTAF.tools.testsuite_generator.ui" : ["icons/*"],
                     "XSTAF.tools.workspace_merger.ui" : ["icons/*"],
                     "XSTAF.tools.workspace_spliter.ui" : ["icons/*"],},

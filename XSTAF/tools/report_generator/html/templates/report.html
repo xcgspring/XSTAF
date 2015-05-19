@@ -22,14 +22,28 @@
                             line-height: 1.6em;
                             float: right;   }
             h1, h2, h3  {   color: gray;    
-                            font-weight: normal;    
-                            }
+                            font-weight: normal;    }
             h1      {   font-size: 180%; }
             h2      {   font-size: 150%;
                         text-decoration: underline; }
             h3      {   font-size: 130%;
                         text-decoration: underline; }
             p       {   color: maroon;  }
+            table   {   margin-left: 20px;
+                        margin-right: 20px;
+                        border: thin solid black;
+                        caption-side: bottom;
+                        border-collapse: collapse;  }
+            td, th  {   border: thin dotted black;
+                        padding: 5px;   }
+            caption {   font-style: italic;
+                        padding-top: 8px;   }
+            th      {   background-color: #cc6600;  }
+            .cellcolor  {   background-color: #fcba7a;  }
+            .Pass   {   background-color: green;  }
+            .Fail   {   background-color: red;  }
+            .NotRun     {   background-color: gray;  }
+            .Mixed  {   background-color: yellow;  }
         </style>
     </head>
     <body>
@@ -65,15 +79,26 @@
                 <th>TestSuite Environment</th>
             </tr>
             {% for testsuite in data.testsuites %}
-            <tr>
-                <td>{{ testsuite.name }}</td>
-                <td>Passed: {{ testsuite.passed }} Failed: {{ testsuite.failed }} NotRun: {{ testsuite.NotRun }}</td>
-                <td>
-                {% for dut_info in testsuite.duts_info %}
-                    IP: {{ dut_info["ip"] }} Name: {{ dut_info["name"] }}<br />
-                {% endfor %}
-                </td>
-            </tr>
+                {% if loop.index is even %}
+                    <tr class="cellcolor">
+                        <td>{{ testsuite.name }}</td>
+                        <td>Passed: {{ testsuite.passed }} Failed: {{ testsuite.failed }} NotRun: {{ testsuite.NotRun }}</td>
+                        <td>
+                        {% for dut_info in testsuite.duts_info %}
+                            IP: {{ dut_info["ip"] }} Name: {{ dut_info["name"] }}<br />
+                        {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>{{ testsuite.name }}</td>
+                    <td>Passed: {{ testsuite.passed }} Failed: {{ testsuite.failed }} NotRun: {{ testsuite.NotRun }}</td>
+                    <td>
+                    {% for dut_info in testsuite.duts_info %}
+                        IP: {{ dut_info["ip"] }} Name: {{ dut_info["name"] }}<br />
+                    {% endfor %}
+                    </td>
+                </tr>
             {% endfor %}
             </table>
             
@@ -81,19 +106,43 @@
             <h3><a name="Details.TestSuites details">TestSuites details</a></h3>
             {% for testsuite in data.testsuites %}
                 <h4><a name="{{ testsuite.name }}">{{ testsuite.name }}</a></h4>
+                <table border="1">
+                    <tr>
+                        <th>TestCase Name</th>
+                        {% for dut_info in data.duts %}
+                            <th>{{ dut_info["name"] }}:{{ dut_info["ip"] }}</th>
+                        {% endfor %}
+                        <th>Final Result</th>
+                    </tr>
                 {% for testcase in testsuite.testcases %}
-                    <p>
-                    <a href="{{ '#'+testsuite.name+'_'+testcase.name }}">{{ testcase.name }}</a>
-                    {% for run in testcase.runs %}
-                        {% if run.result %}
-                            <img src ="static/pass.png" width="16" height="16" align="middle"> 
+                    <tr>
+                        <td><a href="{{ '#'+testsuite.name+'_'+testcase.name }}">{{ testcase.name }}</a></td>
+                        {% for result in testcase.results_for_all_duts %}
+                            {% if result == "Pass" %}
+                            <td class="Pass"></td>
+                            {% elif result == "Fail" %}
+                            <td class="Fail"></td>
+                            {% elif result == "NotRun" %}
+                            <td class="NotRun"></td>
+                            {% elif result == "Mixed" %}
+                            <td class="Mixed"></td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if testcase.result == "Pass" %}
+                        <td class="Pass"></td>
+                        {% elif testcase.result == "Fail" %}
+                        <td class="Fail"></td>
+                        {% elif testcase.result == "NotRun" %}
+                        <td class="NotRun"></td>
+                        {% else %}
+                        <td></td>
                         {% endif %}
-                        {% if not run.result %}
-                            <img src ="static/fail.png" width="16" height="16" align="middle"> 
-                        {% endif %}
-                    {% endfor %}
-                    </p>
+                    </tr>
                 {% endfor %}
+                </table>
             {% endfor %}
             
             <h3><a name="Details.TestCases details">TestCases details</a></h3>
