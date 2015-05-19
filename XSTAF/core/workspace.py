@@ -125,19 +125,11 @@ class WorkSpace(object):
         save all configs and results
         and copy to new location if needed
         '''
-        if os.path.isdir(workspace_path):
-            #update workspace path
-            self.workspace_path = workspace_path
-        else:
-            LOGGER.error("Target workspace path not exist, please create it first: %s", workspace_path)
-            raise ValueError("Target workspace path not exist, please create it first: %s" % workspace_path)
-        
-        #clean workspace dir
-        try:
-            shutil.rmtree(self.workspace_path)
+        #update workspace path
+        self.workspace_path = workspace_path
+        if not os.path.isdir(workspace_path):
+            LOGGER.warning("Target workspace path not exist, try to create it first")
             os.makedirs(self.workspace_path)
-        except Exception:
-            LOGGER.warning("Clean workspace fail: %s", self.workspace_path)
         
         #function to format XML
         def indent(elem, level=0):
