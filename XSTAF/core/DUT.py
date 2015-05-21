@@ -193,6 +193,7 @@ class DUTTaskRunner(QtCore.QThread):
                 
             run.end = "%.3f" % time.time()
             #emit test result change signal, if manual case, ui should prompt user to change test result manually
+            LOGGER.debug("emit test result change signal")
             self.emit(self.test_result_change, work.auto, run)
             
 class DUTMonitor(object):
@@ -251,9 +252,9 @@ class DUT(QtCore.QObject):
                      "remote_tmp_files_location" : r"c:\XSTAF\tmpfiles",
                     }
 
-    def __init__(self, workspace_log_path, ip, name=""):
+    def __init__(self, workspace, ip, name=""):
         QtCore.QObject.__init__(self)
-        self.workspace_log_path = workspace_log_path
+        self.workspace = workspace
         self.ip = ip
         self.name = name
         
@@ -280,6 +281,10 @@ class DUT(QtCore.QObject):
         
     def get_settings(self, key):
         return self.settings[key]
+        
+    @property
+    def workspace_log_path(self):
+        return os.path.join(self.workspace.workspace_path, self.workspace.TestLogFolder)
         
     ############################################
     #monitor and task runner related methods

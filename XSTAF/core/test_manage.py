@@ -159,7 +159,8 @@ class TestSuite(object):
                 run.end = run_element.find("End").text
                 run.result = run_element.find("Result").text
                 run.status = run_element.find("Status").text
-                run.log_location = run_element.find("Log").text
+                if run.status is None:
+                    run.status = ""
                 testcase.add_run(run)
                 
             self._testcases[testcase.ID] = testcase

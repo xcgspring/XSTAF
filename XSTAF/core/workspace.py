@@ -64,7 +64,7 @@ class WorkSpace(object):
             default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
             if not os.path.isdir(default_workspace_path):
                 os.makedirs(default_workspace_path)
-            self.workspace_path = os.path.join(default_workspace_path)
+            self.workspace_path = default_workspace_path
         else:
             if not os.path.isdir(workspace_path):
                 os.makedirs(workspace_path)
@@ -125,11 +125,26 @@ class WorkSpace(object):
         save all configs and results
         and copy to new location if needed
         '''
-        #update workspace path
-        self.workspace_path = workspace_path
-        if not os.path.isdir(workspace_path):
-            LOGGER.warning("Target workspace path not exist, try to create it first")
-            os.makedirs(self.workspace_path)
+        if self.workspace_path == workspace_path:
+            need_clean_target = False
+            need_copy_logs = False
+        else:
+            need_clean_target = True
+            need_copy_logs = True
+
+        #remove target workspace
+        if need_clean_target and os.path.isdir(workspace_path):
+            LOGGER.debug("Try to remove target workspace: %s", workspace_path)
+            try:
+                shutil.rmtree(workspace_path)
+            except:
+                LOGGER.warning("Clean target workspace fail, continue")
+            finally:
+                try:
+                    os.makedirs(workspace_path)
+                except:
+                    LOGGER.error("Cannot create target workspace: %s", workspace_path)
+                    raise Exception("Cannot create target workspace: %s" % workspace_path)
         
         #function to format XML
         def indent(elem, level=0):
@@ -167,7 +182,7 @@ class WorkSpace(object):
                 ET.SubElement(testsuites_element, "testsuite", attrib={"name":testsuite.name})
 
         #write configure file
-        configure_file = os.path.join(self.workspace_path, self.ConfigFile)
+        configure_file = os.path.join(workspace_path, self.ConfigFile)
         indent(root_element)
         ET.ElementTree(root_element).write(configure_file)
 
@@ -202,15 +217,22 @@ class WorkSpace(object):
                         result_element.text = run.pretty_result
                         status_element = ET.SubElement(run_element, "Status")
                         status_element.text = run.status
-                        log_element = ET.SubElement(run_element, "Log")
-                        log_element.text = run.log_location
 
-                testsuite_path = os.path.join(self.workspace_path, self.TestResultFolder, dut.ip, testsuite.name)
+                testsuite_path = os.path.join(workspace_path, self.TestResultFolder, dut.ip, testsuite.name)
                 testsuite_dir = os.path.dirname(testsuite_path)
                 if not os.path.isdir(testsuite_dir):
                     os.makedirs(testsuite_dir)
                 indent(root_element)
                 ET.ElementTree(root_element).write(testsuite_path)
+                
+        #copy logs to target workspace
+        if need_copy_logs:
+            original_logs_path = os.path.join(self.workspace_path, self.TestLogFolder)
+            target_logs_path = os.path.join(workspace_path, self.TestLogFolder)
+            shutil.copytree(original_logs_path, target_logs_path)
+            
+        #change workspace path to target
+        self.workspace_path = workspace_path
 
     def is_current_default(self):
         default_workspace_path = os.path.join(self.settings["WorkspaceLocation"], self.settings["DefaultWorkspace"])
@@ -254,7 +276,7 @@ class WorkSpace(object):
         return (ip in self._duts)
 
     def add_dut(self, ip, name):
-        dut = DUT(os.path.join(self.workspace_path, self.TestLogFolder), ip, name)
+        dut = DUT(self, ip, name)
         self._duts[ip] = dut
         return dut
 
