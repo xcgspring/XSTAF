@@ -145,7 +145,7 @@
       <item row="1" column="1">
        <widget class="QCheckBox" name="csvCheckBox">
         <property name="text">
-         <string>CSV (Not support yet)</string>
+         <string>CSV </string>
         </property>
        </widget>
       </item>

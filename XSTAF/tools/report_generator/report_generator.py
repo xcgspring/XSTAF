@@ -43,17 +43,11 @@ class _DataRun(object):
         
     @property
     def result(self):
-        if self.run.result & 0b00000001:
-            return False
-        if not self.run.result:
-            return True
+        return self.run.result
         
     @property
     def pretty_result(self):
-        if self.result:
-            return "Pass"
-        if not self.result:
-            return "Fail"
+        return self.run.Results[self.result]
         
     @property
     def dut_info(self):
@@ -108,10 +102,16 @@ class _DataTestCase(object):
             
             if len(results) == 0:
                 self._results_for_all_duts[dut_ip] = "NotRun"
-            elif not False in results:
-                self._results_for_all_duts[dut_ip] = "Pass"
-            elif not True in results:
-                self._results_for_all_duts[dut_ip] = "Fail"
+            elif not 0x00000001 in results:
+                if 0x00000000 in results:
+                    self._results_for_all_duts[dut_ip] = "Pass"
+                else:
+                    self._results_for_all_duts[dut_ip] = "NotRun"
+            elif not 0x00000000 in results:
+                if 0x00000000 in results:
+                    self._results_for_all_duts[dut_ip] = "Fail"
+                else:
+                    self._results_for_all_duts[dut_ip] = "NotRun"
             else:
                 self._results_for_all_duts[dut_ip] = "Mixed"
                 
@@ -139,15 +139,19 @@ class _DataTestCase(object):
                 break
                 
             if self.passFirstSameDUT:
-                if True in results:
+                if 0x00000000 in results:
                     results_for_all_duts.append("Pass")
-                else:
+                elif 0x00000001 in results:
                     results_for_all_duts.append("Fail")
+                else:
+                    results_for_all_duts.append("NotRun")
             else:
-                if False in results:
+                if 0x00000001 in results:
                     results_for_all_duts.append("Fail")
-                else:
+                elif 0x00000000 in results:
                     results_for_all_duts.append("Pass")
+                else:
+                    results_for_all_duts.append("NotRun")
         
         #check final result
         #the result will be affected by passFirstDifferentDUT
@@ -312,9 +316,10 @@ class ReportGenerator(QtGui.QDialog, Ui_TestReportDialog):
         self.passFirstRadioButton1.toggle()
         self.passFirstRadioButton2.toggle()
         self.htmlCheckBox.toggle()
+        self.csvCheckBox.toggle()
         
         #current not support excel report generate
-        self.csvCheckBox.setDisabled(True)
+        #self.csvCheckBox.setDisabled(True)
         self.excelCheckBox.setDisabled(True)
         
         self.connect(self.searchToolButton, QtCore.SIGNAL("clicked(bool)"), self.get_report_location)

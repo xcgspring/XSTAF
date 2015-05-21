@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'reportGenerator.ui'
 #
-# Created: Fri May 15 16:15:54 2015
+# Created: Thu May 21 16:37:15 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -123,6 +123,6 @@ class Ui_TestReportDialog(object):
         self.formatSettingsGroupBox.setTitle(_translate("TestReportDialog", "Format setting:", None))
         self.excelCheckBox.setText(_translate("TestReportDialog", "Excel (Not support yet)", None))
         self.htmlCheckBox.setText(_translate("TestReportDialog", "HTML (use jinja2 template library)", None))
-        self.csvCheckBox.setText(_translate("TestReportDialog", "CSV (Not support yet)", None))
+        self.csvCheckBox.setText(_translate("TestReportDialog", "CSV ", None))
 
 import resources_rc
