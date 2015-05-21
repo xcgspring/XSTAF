@@ -95,7 +95,7 @@ class _DataTestCase(object):
     @property
     def runs(self):
         for data_id, data_runs in self.data_runs.items():
-            for run_start, run in data_runs:
+            for run_start, run in data_runs.items():
                 yield run
     
     @property
