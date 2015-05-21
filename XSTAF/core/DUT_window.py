@@ -64,9 +64,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             #check if runner running
             self.task_runner_running = self.dut.is_runner_running()
             #connect runner signals to DUT view slots
-            self.connect(task_runner, task_runner.test_result_change, self.handle_test_result_change)
-            self.connect(task_runner, task_runner.runner_busy, self.handle_runner_busy)
-            self.connect(task_runner, task_runner.runner_idle, self.handle_runner_idle)
+            LOGGER.debug("Connect DUT runner signals to DUT view slots")
+            self.connect(task_runner, task_runner.test_result_change, self.handle_test_result_change, QtCore.Qt.UniqueConnection)
+            self.connect(task_runner, task_runner.runner_busy, self.handle_runner_busy, QtCore.Qt.UniqueConnection)
+            self.connect(task_runner, task_runner.runner_idle, self.handle_runner_idle, QtCore.Qt.UniqueConnection)
         else:
             self.dut.remove_runner()
             self.task_runner_running = False
@@ -74,6 +75,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
     def handle_test_result_change(self, auto, run):
         if not auto:
+            LOGGER.debug("Launch result editor")
             result_editor_dialog = ResultEditorDialog(self, run)
             result_editor_dialog.exec_()
         
@@ -398,3 +400,14 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def closeEvent(self, event):
         #need update parent's DUTWindow list when one DUTWindow close
         del self.parent.DUTWindows[self.ip]
+        
+        #disconnect all signals of task runner
+        task_runner = self.dut.get_runner()
+        if task_runner is not None:
+            self.disconnect(task_runner, task_runner.test_result_change, self.handle_test_result_change)
+            self.disconnect(task_runner, task_runner.runner_busy, self.handle_runner_busy)
+            self.disconnect(task_runner, task_runner.runner_idle, self.handle_runner_idle)
+        
+        #trigger a garbage collection
+        import gc
+        gc.collect()
