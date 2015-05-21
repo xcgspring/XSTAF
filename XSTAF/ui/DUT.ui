@@ -231,6 +231,16 @@
     <string>removeResult</string>
    </property>
   </action>
+  <action name="actionCancelRunningTask">
+   <property name="text">
+    <string>cancelRunningTask</string>
+   </property>
+  </action>
+  <action name="actionChangeResult">
+   <property name="text">
+    <string>changeResult</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>

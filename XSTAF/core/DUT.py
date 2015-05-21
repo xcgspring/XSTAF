@@ -94,7 +94,7 @@ class DUTTaskRunner(QtCore.QThread):
         assert(self.staf_handle.configure())
         
         #task cancel flag
-        self.cancel_task = False
+        self._cancel_task = False
         
     def start(self):
         LOGGER.info("DUT task runner thread for IP %s start" % self.DUT_instance.ip)
@@ -105,7 +105,7 @@ class DUTTaskRunner(QtCore.QThread):
         QtCore.QThread.terminate(self)
         
     def cancel_task(self):
-        self.cancel_task = True
+        self._cancel_task = True
         
     def run_task(self, work, run):
         #lock DUT
@@ -136,7 +136,7 @@ class DUTTaskRunner(QtCore.QThread):
                 break
             
             #check if user manually cancel the test
-            if self.cancel_task:
+            if self._cancel_task:
                 #stop the process
                 self.staf_handle.stop_process(self.DUT_instance.ip)
                 LOGGER.info("User manually cancel task")
@@ -183,7 +183,7 @@ class DUTTaskRunner(QtCore.QThread):
             run.start = "%.3f" % time.time()
             work.add_run(run)
             #set cancel task to false
-            self.cancel_task = False
+            self._cancel_task = False
             
             try:
                 self.run_task(work, run)

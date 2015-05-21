@@ -38,7 +38,9 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.actionStartRunner, QtCore.SIGNAL("triggered(bool)"), self.start_task_runner)
         self.connect(self.actionPauseRunner, QtCore.SIGNAL("triggered(bool)"), self.pause_task_runner)
         self.connect(self.actionRemoveResult, QtCore.SIGNAL("triggered(bool)"), self.remove_test_result)
-
+        self.connect(self.actionCancelRunningTask, QtCore.SIGNAL("triggered(bool)"), self.cancel_running_task)
+        self.connect(self.actionChangeResult, QtCore.SIGNAL("triggered(bool)"), self.change_result)
+        
         #for test tree view and task queue view
         self.connect(self.TestsTreeView, QtCore.SIGNAL("clicked(QModelIndex)"), self.test_view_clicked)
         self.connect(self.TestsTreeView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.test_view_right_clicked)
@@ -201,6 +203,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         else:
             #run level
             context_menu.addAction(self.actionRemoveResult)
+            context_menu.addAction(self.actionChangeResult)
             context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
             return
 
@@ -212,6 +215,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         context_menu.addAction(self.actionClearTaskQueue)
         if not item is None:
             context_menu.addAction(self.actionRemoveFromTaskQueue)
+            task_key = item.data().toPyObject()
+            if task_key == 0:
+                #add cancel action for running task
+                context_menu.addAction(self.actionCancelRunningTask)
+                
         context_menu.exec_(self.taskQueueListView.mapToGlobal(point))
 
     def add_test_to_task_queue(self):
@@ -244,6 +252,25 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
 
     def clear_task_queue(self):
         self.dut.clean_task_queue()
+        self.refresh_ui()
+        
+    def cancel_running_task(self):
+        self.dut.cancel_task()
+        self.refresh_ui()
+        
+    def change_result(self):
+        for selected_index in self.TestsTreeView.selectedIndexes():
+            item = self.testsModel.itemFromIndex(selected_index)
+            LOGGER.debug("Change test result: %s", item.text())
+            testsuite_name = str(item.parent().parent().text())
+            testcase_id = item.parent().data().toPyObject()
+            run_id = str(item.data().toPyObject())
+            
+            run = self.dut.get_testsuite(testsuite_name).get_testcase(testcase_id).get_run(run_id)
+            
+            result_editor_dialog = ResultEditorDialog(self, run)
+            result_editor_dialog.exec_()
+        
         self.refresh_ui()
 
     def start_task_runner(self):
@@ -351,6 +378,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         last_task = self.dut.last_task_in_queue()
         if not last_task is None and self.task_runner_busy:
             task_item = QtGui.QStandardItem(under_process_icon, QtCore.QString("Name: %0").arg(last_task.name))
+            #set data to identify the running task
+            task_item.setData(QtCore.QVariant(0))
             self.taskQueueModel.appendRow(task_item)
         #waiting tasks
         tasks = self.dut.list_all_tasks_in_task_queue()

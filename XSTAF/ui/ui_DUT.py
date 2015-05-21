@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Mon Mar 23 13:42:56 2015
+# Created: Thu May 21 15:54:01 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -125,6 +125,10 @@ class Ui_DUTWindow(object):
         self.actionClearTaskQueue.setObjectName(_fromUtf8("actionClearTaskQueue"))
         self.actionRemoveResult = QtGui.QAction(DUTWindow)
         self.actionRemoveResult.setObjectName(_fromUtf8("actionRemoveResult"))
+        self.actionCancelRunningTask = QtGui.QAction(DUTWindow)
+        self.actionCancelRunningTask.setObjectName(_fromUtf8("actionCancelRunningTask"))
+        self.actionChangeResult = QtGui.QAction(DUTWindow)
+        self.actionChangeResult.setObjectName(_fromUtf8("actionChangeResult"))
         self.menuTestSuite.addAction(self.actionAddTestSuite)
         self.menuTestSuite.addAction(self.actionRemoveTestSuite)
         self.menuRun.addAction(self.actionStartRunner)
@@ -168,5 +172,7 @@ class Ui_DUTWindow(object):
         self.actionClearTaskQueue.setToolTip(_translate("DUTWindow", "clearTaskQueue", None))
         self.actionRemoveResult.setText(_translate("DUTWindow", "removeResult", None))
         self.actionRemoveResult.setToolTip(_translate("DUTWindow", "removeResult", None))
+        self.actionCancelRunningTask.setText(_translate("DUTWindow", "cancelRunningTask", None))
+        self.actionChangeResult.setText(_translate("DUTWindow", "changeResult", None))
 
 import resources_rc
