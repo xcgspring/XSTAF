@@ -274,13 +274,14 @@ class STAFHandle(object):
         #copy
         location = '%s' % DUT
         service = 'FS'
-        request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s' % (remote_log_directory, local_location, server_ip)
+        request = 'COPY DIRECTORY %s TODIRECTORY  %s TOMACHINE %s RECURSE KEEPEMPTYDIRECTORIES' % (remote_log_directory, local_location, server_ip)
         self._staf_handle_submit(location, service, request)
         #delete remote log
         location = '%s' % DUT
         service = 'FS'
         request = 'DELETE ENTRY %s CHILDREN RECURSE CONFIRM ' % remote_log_directory
         self._staf_handle_submit(location, service, request)
+        
     
     ########################################
     #
