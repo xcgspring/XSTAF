@@ -69,7 +69,13 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         self.setupUi(self)
         self.parent = main_window
         self.server = main_window.server
+        
+        #connect custom signal and slot
+        self.connect(self.restoreButton, QtCore.SIGNAL("clicked(bool)"), self.restore_default)
 
+        self.refresh()
+        
+    def refresh(self):
         #init the settings
         self.STAFDirEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("STAFDir")))
         self.loggingFileEdit.setText(QtCore.QString("%0").arg(self.server.get_settings("LogLocation")))
@@ -89,6 +95,10 @@ class SettingsDialog(QtGui.QDialog, Ui_Settings):
         indexs = {"CRITICAL" : 0, "ERROR": 1, "WARNING": 2, "INFO": 3, "DEBUG": 4}
         self.loggingFileLevel.setCurrentIndex(indexs[logging_level_file])
         self.loggingStreamLevel.setCurrentIndex(indexs[logging_level_stream])
+        
+    def restore_default(self):
+        self.server.load_default_settings()
+        self.refresh()
 
     def accept(self):
         logging_file = str(self.loggingFileEdit.text())

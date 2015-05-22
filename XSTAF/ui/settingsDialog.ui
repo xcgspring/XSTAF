@@ -18,81 +18,57 @@
     <normaloff>:/icons/icons/settings.png</normaloff>:/icons/icons/settings.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0" colspan="3">
-    <widget class="Line" name="line_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="3">
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBox_4">
+   <item row="5" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBox_5">
      <property name="title">
-      <string>Tool settings</string>
+      <string>DUT settings</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="toolLocationEdit"/>
-      </item>
+     <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="label_8">
         <property name="text">
-         <string>Tool location</string>
+         <string>DUT log location</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2" rowspan="3">
-       <widget class="QLineEdit" name="toolConfigureFileEdit"/>
-      </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer_8">
+      <item row="0" column="1" rowspan="2">
+       <spacer name="horizontalSpacer_10">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>150</width>
+          <width>194</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
-      <item row="2" column="1">
-       <spacer name="horizontalSpacer_9">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>150</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+      <item row="1" column="2" rowspan="2">
+       <widget class="QLineEdit" name="dutTmpFilesLocationEdit"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Tool configure file</string>
+         <string>DUT tmp files location</string>
         </property>
        </widget>
+      </item>
+      <item row="2" column="1">
+       <spacer name="horizontalSpacer_11">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>194</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="dutLogLocationEdit"/>
       </item>
      </layout>
     </widget>
@@ -202,6 +178,38 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Workspace settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>199</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="WorkspaceLocation"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Workspace location</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>STAF settings</string>
@@ -237,91 +245,76 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBox_3">
+   <item row="4" column="0" colspan="3">
+    <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
-      <string>Workspace settings</string>
+      <string>Tool settings</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="2">
+       <widget class="QLineEdit" name="toolLocationEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Tool location</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" rowspan="3">
+       <widget class="QLineEdit" name="toolConfigureFileEdit"/>
+      </item>
       <item row="0" column="1">
-       <spacer name="horizontalSpacer_5">
+       <spacer name="horizontalSpacer_8">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>199</width>
+          <width>150</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="WorkspaceLocation"/>
+      <item row="2" column="1">
+       <spacer name="horizontalSpacer_9">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>150</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Workspace location</string>
+         <string>Tool configure file</string>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="7" column="0" colspan="3">
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="title">
-      <string>DUT settings</string>
+   <item row="7" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>DUT log location</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" rowspan="2">
-       <spacer name="horizontalSpacer_10">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>194</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="dutLogLocationEdit"/>
-      </item>
-      <item row="1" column="2" rowspan="2">
-       <widget class="QLineEdit" name="dutTmpFilesLocationEdit"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>DUT tmp files location</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <spacer name="horizontalSpacer_11">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>194</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="restoreButton">
+     <property name="text">
+      <string>Restore default settings</string>
+     </property>
     </widget>
    </item>
   </layout>

@@ -1,4 +1,6 @@
 
+import os
+import pickle
 from PyQt4 import QtCore
 
 from XSTAF.core.logger import LOGGER
@@ -18,8 +20,9 @@ class Server(QtCore.QObject):
     
     def __init__(self):
         QtCore.QObject.__init__(self)
+        
         #settings
-        self.settings = {
+        self.default_settings = {
             #logger
             "LogLocation" : r"c:\XSTAF\XSTAF.log",
             "LoggerLevelFile" : "DEBUG",
@@ -35,6 +38,11 @@ class Server(QtCore.QObject):
             "remote_log_location" : r"c:\XSTAF",
             "remote_tmp_files_location" : r"c:\XSTAF\tmpfiles",
         }
+        
+        #settings save file
+        self._settings_save_file = r"c:\XSTAF\XSTAF_settings.pickle"
+        #try load saved setting
+        self.load_saved_settings()
 
         self._workspace = None
         self.tool_manager = ToolManager()
@@ -50,12 +58,31 @@ class Server(QtCore.QObject):
         else:
             return None
     
+    def load_saved_settings(self):
+        if not os.path.isfile(self._settings_save_file):
+            self.settings = self.default_settings
+        else:
+            with open(self._settings_save_file, 'r') as f:
+                self.settings = pickle.load(f)
+        
+    def save_settings(self):
+        path = os.path.dirname(self._settings_save_file)
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            
+        with open(self._settings_save_file, 'w') as f:
+            pickle.dump(self.settings, f)
+            
+    def load_default_settings(self):
+        self.settings = self.default_settings
+    
     def config(self):
         self.config_logger()
         self.config_staf()
         self.config_workspace()
         self.config_tool()
         self.config_dut()
+        self.save_settings()
         
     ############################################
     #logger related methods
@@ -153,3 +180,7 @@ class Server(QtCore.QObject):
     ############################################
     def config_dut(self):
         DUT.config(remote_log_location=self.settings["remote_log_location"], remote_tmp_files_location=self.settings["remote_tmp_files_location"])
+        
+    ############################################
+    #Setting save file
+    ############################################

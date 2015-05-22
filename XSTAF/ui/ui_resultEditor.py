@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'resultEditor.ui'
 #
-# Created: Thu May 21 15:54:02 2015
+# Created: Fri May 22 14:35:04 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
