@@ -38,7 +38,7 @@ setup(
                     "XSTAF.tools.testsuite_generator.ui" : ["icons/*"],
                     "XSTAF.tools.workspace_merger.ui" : ["icons/*"],
                     "XSTAF.tools.workspace_spliter.ui" : ["icons/*"],},
-    version = "0.0.1",
+    version = "0.1.0",
     description = "distribute auto execution framework basing on STAF",
     author = "xcgspring",
     author_email = "xcgspring@163.com",
