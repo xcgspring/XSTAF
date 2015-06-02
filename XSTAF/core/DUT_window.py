@@ -337,20 +337,24 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             
             for testcase in testsuite.testcases():
                 if self.dut.is_in_queue(testcase):
-                    icon = wait_process_icon
+                    testcase_icon = wait_process_icon
                 elif testcase is self.dut.last_task_in_queue() and self.task_runner_busy:
-                    icon = under_process_icon
+                    testcase_icon = under_process_icon
                 else:
-                    icon = not_run_icon
-                testcase_item = QtGui.QStandardItem(icon, QtCore.QString(testcase.name))
+                    testcase_icon = not_run_icon
+                testcase_item = QtGui.QStandardItem(testcase_icon, QtCore.QString(testcase.name))
                 
+                run_results = []
                 for run in testcase.runs():
                     if run.result & 0b10000000:
                         icon = not_run_icon
+                        run_results.append("not_run")
                     elif run.result & 0b00000001:
                         icon = fail_icon
+                        run_results.append("fail")
                     elif not run.result:
                         icon = pass_icon
+                        run_results.append("pass")
                     else:
                         LOGGER.warn("Encounter unexpected test result: %s", run.result)
                         icon = QtGui.QIcon()
@@ -359,6 +363,17 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     run_id = run.start
                     run_item.setData(QtCore.QVariant(run_id))
                     testcase_item.appendRow(run_item)
+                    
+                #change testcase result following pass first rule
+                if testcase_icon == not_run_icon:
+                    if "pass" in run_results:
+                        testcase_icon = pass_icon
+                    elif "fail" in run_results:
+                        testcase_icon = fail_icon
+                    else:
+                        testcase_icon = not_run_icon
+                    testcase_item.setIcon(testcase_icon)
+                    
                 #store test id in test case item
                 testcase_id = testcase.ID
                 testcase_item.setData(QtCore.QVariant(testcase_id))
