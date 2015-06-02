@@ -41,6 +41,10 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.actionCancelRunningTask, QtCore.SIGNAL("triggered(bool)"), self.cancel_running_task)
         self.connect(self.actionChangeResult, QtCore.SIGNAL("triggered(bool)"), self.change_result)
         
+        self.connect(self.actionShowPassCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_pass_case_settings)
+        self.connect(self.actionShowFailCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_fail_case_settings)
+        self.connect(self.actionShowNoRunCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_norun_case_settings)
+        
         #for test tree view and task queue view
         self.connect(self.TestsTreeView, QtCore.SIGNAL("clicked(QModelIndex)"), self.test_view_clicked)
         self.connect(self.TestsTreeView, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.test_view_right_clicked)
@@ -55,6 +59,11 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         #runner status
         self.task_runner_running = False
         self.task_runner_busy = False
+        
+        #show case settings
+        self.show_pass_case = True
+        self.show_fail_case = True
+        self.show_norun_case = True
 
         #refresh ui
         self.handle_dut_status_change()
@@ -188,7 +197,26 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         context_menu = QtGui.QMenu()
         index = self.TestsTreeView.indexAt(point)
         item = self.testsModel.itemFromIndex(index)
+        
+        context_menu.addAction(self.actionShowPassCase)
+        context_menu.addAction(self.actionShowFailCase)
+        context_menu.addAction(self.actionShowNoRunCase)
+        
+        if self.show_pass_case:
+            self.actionShowPassCase.setChecked(True)
+        else:
+            self.actionShowPassCase.setChecked(False)
+        if self.show_fail_case:
+            self.actionShowFailCase.setChecked(True)
+        else:
+            self.actionShowFailCase.setChecked(False)
+        if self.show_norun_case:
+            self.actionShowNoRunCase.setChecked(True)
+        else:
+            self.actionShowNoRunCase.setChecked(False)
+
         if item is None:
+            context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
             return
 
         if item.parent() is None:
@@ -205,7 +233,6 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
             context_menu.addAction(self.actionRemoveResult)
             context_menu.addAction(self.actionChangeResult)
             context_menu.exec_(self.TestsTreeView.mapToGlobal(point))
-            return
 
     def task_queue_view_right_clicked(self, point):
         context_menu = QtGui.QMenu()
@@ -290,6 +317,18 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
 
         self.task_runner_running = False
         LOGGER.debug("Stop task runner")
+        
+    def set_show_pass_case_settings(self, enabled):
+        self.show_pass_case = enabled
+        self._refresh_test_view()
+        
+    def set_show_fail_case_settings(self, enabled):
+        self.show_fail_case = enabled
+        self._refresh_test_view()
+        
+    def set_show_norun_case_settings(self, enabled):
+        self.show_norun_case = enabled
+        self._refresh_test_view()
 
     def refresh(self):
         refresh_dialog = RefreshDUTDialog(self)
@@ -364,23 +403,31 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                     run_item.setData(QtCore.QVariant(run_id))
                     testcase_item.appendRow(run_item)
                     
+                show = True
                 #change testcase result following pass first rule
                 if testcase_icon == not_run_icon:
                     if "pass" in run_results:
                         testcase_icon = pass_icon
+                        if not self.show_pass_case:
+                            show = False
                     elif "fail" in run_results:
                         testcase_icon = fail_icon
+                        if not self.show_fail_case:
+                            show = False
                     else:
                         testcase_icon = not_run_icon
+                        if not self.show_norun_case:
+                            show = False
                     testcase_item.setIcon(testcase_icon)
                     
-                #store test id in test case item
-                testcase_id = testcase.ID
-                testcase_item.setData(QtCore.QVariant(testcase_id))
-                testsuite_item.appendRow(testcase_item)
-                if testcase_id in expanded_testcases:
-                    testcase_index = self.testsModel.indexFromItem(testcase_item)
-                    self.TestsTreeView.expand(testcase_index)
+                if show:
+                    #store test id in test case item
+                    testcase_id = testcase.ID
+                    testcase_item.setData(QtCore.QVariant(testcase_id))
+                    testsuite_item.appendRow(testcase_item)
+                    if testcase_id in expanded_testcases:
+                        testcase_index = self.testsModel.indexFromItem(testcase_item)
+                        self.TestsTreeView.expand(testcase_index)
 
     def _refresh_task_queue_view(self):
         under_process_icon = QtGui.QIcon()

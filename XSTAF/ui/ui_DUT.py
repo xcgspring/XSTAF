@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Fri May 22 14:35:03 2015
+# Created: Tue Jun 02 10:40:50 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -129,6 +129,15 @@ class Ui_DUTWindow(object):
         self.actionCancelRunningTask.setObjectName(_fromUtf8("actionCancelRunningTask"))
         self.actionChangeResult = QtGui.QAction(DUTWindow)
         self.actionChangeResult.setObjectName(_fromUtf8("actionChangeResult"))
+        self.actionShowPassCase = QtGui.QAction(DUTWindow)
+        self.actionShowPassCase.setCheckable(True)
+        self.actionShowPassCase.setObjectName(_fromUtf8("actionShowPassCase"))
+        self.actionShowFailCase = QtGui.QAction(DUTWindow)
+        self.actionShowFailCase.setCheckable(True)
+        self.actionShowFailCase.setObjectName(_fromUtf8("actionShowFailCase"))
+        self.actionShowNoRunCase = QtGui.QAction(DUTWindow)
+        self.actionShowNoRunCase.setCheckable(True)
+        self.actionShowNoRunCase.setObjectName(_fromUtf8("actionShowNoRunCase"))
         self.menuTestSuite.addAction(self.actionAddTestSuite)
         self.menuTestSuite.addAction(self.actionRemoveTestSuite)
         self.menuRun.addAction(self.actionStartRunner)
@@ -174,5 +183,11 @@ class Ui_DUTWindow(object):
         self.actionRemoveResult.setToolTip(_translate("DUTWindow", "removeResult", None))
         self.actionCancelRunningTask.setText(_translate("DUTWindow", "cancelRunningTask", None))
         self.actionChangeResult.setText(_translate("DUTWindow", "changeResult", None))
+        self.actionShowPassCase.setText(_translate("DUTWindow", "showPassCase", None))
+        self.actionShowPassCase.setToolTip(_translate("DUTWindow", "showPassCase", None))
+        self.actionShowFailCase.setText(_translate("DUTWindow", "showFailCase", None))
+        self.actionShowFailCase.setToolTip(_translate("DUTWindow", "showFailCase", None))
+        self.actionShowNoRunCase.setText(_translate("DUTWindow", "showNoRunCase", None))
+        self.actionShowNoRunCase.setToolTip(_translate("DUTWindow", "showNoRunCase", None))
 
 import resources_rc

@@ -241,6 +241,39 @@
     <string>changeResult</string>
    </property>
   </action>
+  <action name="actionShowPassCase">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>showPassCase</string>
+   </property>
+   <property name="toolTip">
+    <string>showPassCase</string>
+   </property>
+  </action>
+  <action name="actionShowFailCase">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>showFailCase</string>
+   </property>
+   <property name="toolTip">
+    <string>showFailCase</string>
+   </property>
+  </action>
+  <action name="actionShowNoRunCase">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>showNoRunCase</string>
+   </property>
+   <property name="toolTip">
+    <string>showNoRunCase</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
