@@ -320,21 +320,21 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         
     def set_show_pass_case_settings(self, enabled):
         self.show_pass_case = enabled
-        self._refresh_test_view()
+        self._refresh_test_view(keep_scroll_bar_location = False)
         
     def set_show_fail_case_settings(self, enabled):
         self.show_fail_case = enabled
-        self._refresh_test_view()
+        self._refresh_test_view(keep_scroll_bar_location = False)
         
     def set_show_norun_case_settings(self, enabled):
         self.show_norun_case = enabled
-        self._refresh_test_view()
+        self._refresh_test_view(keep_scroll_bar_location = False)
 
     def refresh(self):
         refresh_dialog = RefreshDUTDialog(self)
         refresh_dialog.exec_()
 
-    def _refresh_test_view(self):
+    def _refresh_test_view(self, keep_scroll_bar_location = True):
         not_run_icon = QtGui.QIcon()
         not_run_icon.addPixmap(QtGui.QPixmap(":icons/icons/not-run.png"))
         fail_icon = QtGui.QIcon()
@@ -365,6 +365,14 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                 
         #LOGGER.debug("expanded test suite: %s" % repr(expanded_testsuites))
         #LOGGER.debug("expanded test case: %s" % repr(expanded_testcases))
+        
+        #keep the scroll bar position
+        #after refresh, should restore the scroll bar position
+        if keep_scroll_bar_location:
+            horizontal_value = self.TestsTreeView.horizontalScrollBar().value()
+            vertical_value = self.TestsTreeView.verticalScrollBar().value()
+            #LOGGER.warning("Get horizontal_value %s", horizontal_value)
+            #LOGGER.warning("Get vertical_value %s", vertical_value)
         
         self.testsModel.clear()
         for testsuite in self.dut.testsuites():
@@ -429,6 +437,19 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
                         testcase_index = self.testsModel.indexFromItem(testcase_item)
                         self.TestsTreeView.expand(testcase_index)
 
+        if keep_scroll_bar_location:
+            self.TestsTreeView.horizontalScrollBar().setRange(0, horizontal_value)
+            self.TestsTreeView.verticalScrollBar().setRange(0, vertical_value)
+            self.TestsTreeView.horizontalScrollBar().setValue(horizontal_value)
+            self.TestsTreeView.verticalScrollBar().setValue(vertical_value)
+            #LOGGER.warning("Set horizontal_value %s", horizontal_value)
+            #LOGGER.warning("Set vertical_value %s", vertical_value)
+            horizontal_value = self.TestsTreeView.horizontalScrollBar().value()
+            vertical_value = self.TestsTreeView.verticalScrollBar().value()
+            #LOGGER.warning("Get horizontal_value %s", horizontal_value)
+            #LOGGER.warning("Get vertical_value %s", vertical_value)
+                        
+                        
     def _refresh_task_queue_view(self):
         under_process_icon = QtGui.QIcon()
         under_process_icon.addPixmap(QtGui.QPixmap(":icons/icons/under_process.png"))
