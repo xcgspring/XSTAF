@@ -4,7 +4,7 @@ import time
 from PyQt4 import QtCore, QtGui
 
 from XSTAF.core.logger import LOGGER
-from XSTAF.core.dialogs import RefreshDUTDialog, ResultEditorDialog
+from XSTAF.core.dialogs import RefreshDUTDialog, ResultEditorDialog, ConfirmDialog
 from XSTAF.ui.ui_DUT import Ui_DUTWindow, _translate, _fromUtf8
 
 class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
@@ -44,6 +44,8 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         self.connect(self.actionShowPassCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_pass_case_settings)
         self.connect(self.actionShowFailCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_fail_case_settings)
         self.connect(self.actionShowNoRunCase, QtCore.SIGNAL("triggered(bool)"), self.set_show_norun_case_settings)
+        
+        self.connect(self.actionClearAllResults, QtCore.SIGNAL("triggered(bool)"), self.clear_all_results)
         
         #for test tree view and task queue view
         self.connect(self.TestsTreeView, QtCore.SIGNAL("clicked(QModelIndex)"), self.test_view_clicked)
@@ -201,6 +203,7 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
         context_menu.addAction(self.actionShowPassCase)
         context_menu.addAction(self.actionShowFailCase)
         context_menu.addAction(self.actionShowNoRunCase)
+        context_menu.addAction(self.actionClearAllResults)
         
         if self.show_pass_case:
             self.actionShowPassCase.setChecked(True)
@@ -329,6 +332,12 @@ class DUTWindow(QtGui.QMainWindow, Ui_DUTWindow):
     def set_show_norun_case_settings(self, enabled):
         self.show_norun_case = enabled
         self._refresh_test_view(keep_scroll_bar_location = False)
+        
+    def clear_all_results(self):
+        confirmed = ConfirmDialog.confirm(self, message="You really sure to remove all test results for this dut?")
+        if confirmed:
+            self.dut.clear_all_results()
+            self._refresh_test_view(keep_scroll_bar_location = False)
 
     def refresh(self):
         refresh_dialog = RefreshDUTDialog(self)

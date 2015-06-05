@@ -81,6 +81,9 @@ class TestCase(object):
     def remove_run(self, id):
         del self._runs[id]
         
+    def remove_all_runs(self):
+        self._runs = {}
+        
     @property
     def ID(self):
         return self._ID

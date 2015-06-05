@@ -274,6 +274,14 @@
     <string>showNoRunCase</string>
    </property>
   </action>
+  <action name="actionClearAllResults">
+   <property name="text">
+    <string>clearAllResults</string>
+   </property>
+   <property name="toolTip">
+    <string>clearAllResults</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>

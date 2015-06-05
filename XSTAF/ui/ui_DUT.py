@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DUT.ui'
 #
-# Created: Tue Jun 02 10:40:50 2015
+# Created: Fri Jun 05 09:54:07 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -138,6 +138,8 @@ class Ui_DUTWindow(object):
         self.actionShowNoRunCase = QtGui.QAction(DUTWindow)
         self.actionShowNoRunCase.setCheckable(True)
         self.actionShowNoRunCase.setObjectName(_fromUtf8("actionShowNoRunCase"))
+        self.actionClearAllResults = QtGui.QAction(DUTWindow)
+        self.actionClearAllResults.setObjectName(_fromUtf8("actionClearAllResults"))
         self.menuTestSuite.addAction(self.actionAddTestSuite)
         self.menuTestSuite.addAction(self.actionRemoveTestSuite)
         self.menuRun.addAction(self.actionStartRunner)
@@ -189,5 +191,7 @@ class Ui_DUTWindow(object):
         self.actionShowFailCase.setToolTip(_translate("DUTWindow", "showFailCase", None))
         self.actionShowNoRunCase.setText(_translate("DUTWindow", "showNoRunCase", None))
         self.actionShowNoRunCase.setToolTip(_translate("DUTWindow", "showNoRunCase", None))
+        self.actionClearAllResults.setText(_translate("DUTWindow", "clearAllResults", None))
+        self.actionClearAllResults.setToolTip(_translate("DUTWindow", "clearAllResults", None))
 
 import resources_rc

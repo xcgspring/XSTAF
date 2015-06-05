@@ -352,6 +352,11 @@ class DUT(QtCore.QObject):
     def cancel_task(self):
         if not self.task_runner is None:
             self.task_runner.cancel_task()
+            
+    def clear_all_results(self):
+        for testsuite in self.testsuites():
+            for testcase in testsuite.testcases():
+                testcase.remove_all_runs()
 
     ############################################
     #task suite management methods
